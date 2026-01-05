@@ -1,0 +1,15 @@
+{
+  "name": "netlify-hello-world",
+  "version": "1.0.0",
+  "description": "Simple static hello world site for Netlify deployment",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -o"
+  },
+  "keywords": [
+    "netlify",
+    "static",
+    "hello-world"
+  ],
+  "author": "",
+  "license": "MIT"
+}
