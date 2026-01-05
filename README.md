@@ -133,9 +133,7 @@ template.netlify/
 
 ### netlify.toml
 
-Configures Netlify build and deployment settings. The current configuration:
-- Publishes the current directory
-- Sets up URL redirects to work as a single-page application
+Configures Netlify build and deployment settings. The current configuration specifies that the current directory should be published as-is with no build step required.
 
 ### .github/workflows/netlify-deploy.yml
 
