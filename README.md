@@ -7,6 +7,8 @@ A simple "Hello World" static website with automated Netlify deployment and feat
 - 🌐 Simple static "Hello World" website
 - 🚀 Automated deployment to Netlify via GitHub Actions
 - 🔄 Feature branch preview deployments for PRs
+- 📸 Automated before/after screenshot comparison on PRs
+- 🔗 Direct preview links in PR comments
 - 💻 Local development server
 
 ## Quick Start
@@ -108,13 +110,49 @@ git push origin feature/my-new-feature
 3. Create a Pull Request on GitHub
 
 4. GitHub Actions will automatically:
-   - Deploy a preview version of your site
-   - Add a comment to the PR with the preview URL
-   - Each new commit to the PR will update the preview
+   - Capture a "before" screenshot of the current main branch
+   - Capture an "after" screenshot of your PR changes
+   - Deploy a preview version of your site to Netlify
+   - Add a comment to the PR with:
+     - The preview URL for live testing
+     - Side-by-side before/after screenshots for visual comparison
+     - Screenshot artifacts available for download
+   - Each new commit to the PR will update the preview and screenshots
 
 5. Review the preview deployment before merging
+   - Click the preview URL to interact with the live site
+   - Compare the before/after screenshots to see visual changes
+   - Download screenshot artifacts from the workflow run for detailed inspection
 
 6. Once merged to `main`, the changes will be deployed to production
+
+## Automated Development Lifecycle
+
+This repository includes an automated development lifecycle that ensures quality and visibility for all changes:
+
+### For Pull Requests
+
+When you create or update a pull request, the workflow automatically:
+
+1. **Captures "Before" State**: Takes a screenshot of the current production site (main branch)
+2. **Captures "After" State**: Takes a screenshot of your changes (PR branch)
+3. **Deploys Preview**: Creates a Netlify preview deployment of your changes
+4. **Comments on PR**: Adds/updates a comment with:
+   - 🔗 Direct link to the Netlify preview site
+   - 📸 Before and after screenshots for visual comparison
+   - 📦 Screenshot artifacts for download
+
+This automated process ensures that:
+- Visual changes are immediately visible without manual testing
+- Reviewers can quickly assess the impact of changes
+- Preview environments are always available for testing
+- There's a clear visual history of what changed
+
+### For Production Deploys
+
+When changes are merged to `main`, the workflow:
+- Deploys directly to production
+- Adds a commit comment with the deployment URL
 
 ## Project Structure
 
