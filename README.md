@@ -2,6 +2,8 @@
 
 A simple "Hello World" static website with automated Netlify deployment and feature branch preview support.
 
+The live site is at [https://griff-template.netlify.app/](https://griff-template.netlify.app/).
+
 ## Features
 
 - 🌐 Simple static "Hello World" website
