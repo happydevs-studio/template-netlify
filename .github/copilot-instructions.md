@@ -11,6 +11,7 @@ This is a minimal static site template demonstrating Netlify deployment with Git
 **Deployment Pipeline**: 
 - Production: Pushes to `main` trigger production deployment via [.github/workflows/netlify-deploy.yml](workflows/netlify-deploy.yml)
 - Preview: PRs to `main` create preview deployments at `https://pr-{number}--{site-name}.netlify.app`
+- Cleanup: PRs closed/merged trigger automatic preview deletion via [.github/workflows/netlify-cleanup.yml](workflows/netlify-cleanup.yml)
 
 **Configuration**: [netlify.toml](../netlify.toml) publishes the root directory `.` as-is with no build command.
 
@@ -25,14 +26,21 @@ Alternative: Open [index.html](../index.html) directly in browser or use `python
 ### Deployment
 - **Production**: Push/merge to `main` → Auto-deploys → Commit comment with URL
 - **Preview**: Open PR → Auto-deploys preview → PR comment with preview URL
+- **Cleanup**: Close/merge PR → Auto-deletes preview deployment (frees Netlify resources)
 - **Secrets Required**: `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` in GitHub repo secrets
 
-### GitHub Actions Workflow
-The [netlify-deploy.yml](workflows/netlify-deploy.yml) workflow:
+### GitHub Actions Workflows
+**Deploy** ([netlify-deploy.yml](workflows/netlify-deploy.yml)):
 - Uses `nwtgck/actions-netlify@v2.1` action
 - Runs on `ubuntu-latest` with `pull-requests: write` permission
 - Has separate steps for production (main branch) and preview (PRs) with different comment settings
 - Times out after 5 minutes
+
+**Cleanup** ([netlify-cleanup.yml](workflows/netlify-cleanup.yml)):
+- Triggers on `pull_request: [closed]` events
+- Queries Netlify API for deployment matching `pr-{number}` alias
+- Deletes the preview deployment via Netlify API
+- Handles gracefully if no deployment exists
 
 ## Project Conventions
 
@@ -66,12 +74,15 @@ This is a **template** repository—here's how to customize it:
 
 **Netlify**: Direct deployment via GitHub Actions (not Netlify's automatic git integration).
 
-**GitHub Actions**: Workflow requires repo secrets (`NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID`) and uses `secrets.GITHUB_TOKEN` for PR commenting.
+**GitHub Actions**: Workflows require repo secrets (`NETLIFY_AUTH_TOKEN`, `NETLIFY_SITE_ID`) and use `secrets.GITHUB_TOKEN` for PR commenting.
+
+**Netlify API**: Cleanup workflow uses `https://api.netlify.com/api/v1/sites/{site_id}/deploys` endpoint to query and delete preview deployments.
 
 ## When Making Changes
 
 - Content/style edits: Modify [index.html](../index.html) directly
 - Deployment behavior: Edit [.github/workflows/netlify-deploy.yml](workflows/netlify-deploy.yml)
+- Cleanup behavior: Edit [.github/workflows/netlify-cleanup.yml](workflows/netlify-cleanup.yml)
 - Netlify settings: Update [netlify.toml](../netlify.toml) (though current config is minimal)
 - No need to run builds or install dependencies—changes are deployed as-is
 
@@ -80,5 +91,6 @@ This is a **template** repository—here's how to customize it:
 This project demonstrates:
 - GitHub Actions workflows with conditional steps (`if: github.event_name == 'push'`)
 - PR preview deployments using dynamic aliases (`alias: pr-${{ github.event.number }}`)
+- Automatic resource cleanup on PR close using Netlify API
 - Zero-build static site deployment pattern
 - Single-file web applications with embedded styles
