@@ -64,6 +64,11 @@
             opacity: 0.9;
             font-weight: normal;
         }
+        .stat-value {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
         #counter {
             margin: 0;
             font-size: 2.5rem;
@@ -137,15 +142,15 @@
             container.innerHTML = `
                 <div class="stat-card">
                     <h3>Total Exercises</h3>
-                    <div id="counter">${totalExercises}</div>
+                    <div class="stat-value">${totalExercises}</div>
                 </div>
                 <div class="stat-card">
                     <h3>Total Time</h3>
-                    <div id="counter">${totalMinutes} min</div>
+                    <div class="stat-value">${totalMinutes} min</div>
                 </div>
                 <div class="stat-card">
                     <h3>Most Common Type</h3>
-                    <div id="counter">${mostCommonType}</div>
+                    <div class="stat-value">${mostCommonType}</div>
                 </div>
             `;
         }

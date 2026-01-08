@@ -144,7 +144,7 @@ test.describe('Exercise Logger Tests', () => {
     
     // Check statistics
     await expect(page.locator('text=Total Exercises')).toBeVisible();
-    await expect(page.locator('#counter').first()).toContainText('2');
+    await expect(page.locator('.stat-value').first()).toContainText('2');
     await expect(page.locator('text=75 min')).toBeVisible();
   });
 });
