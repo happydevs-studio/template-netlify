@@ -115,7 +115,7 @@ test.describe('Exercise Logger Tests', () => {
     await expect(page.locator('text=Swimming')).toBeVisible();
     
     // Delete the exercise
-    await page.click('#submit-btn');
+    await page.locator('button:has-text("Delete")').first().click();
     
     // Verify exercise is removed
     await expect(page.locator('text=Swimming')).not.toBeVisible();
