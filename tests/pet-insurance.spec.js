@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Pet Insurance Form Tests', () => {
   test('should display pet insurance form with initial step', async ({ page }) => {
-    await page.goto('/pet-insurance.html');
+    await page.goto('/');
     await expect(page).toHaveTitle('Pet Insurance - Get Covered');
     
     // Check progress bar shows step 1
@@ -18,7 +18,7 @@ test.describe('Pet Insurance Form Tests', () => {
   });
 
   test('should navigate through entire form flow', async ({ page }) => {
-    await page.goto('/pet-insurance.html');
+    await page.goto('/');
     
     // Step 1: Select pet type
     await page.click('#pet-type-dog');
@@ -66,7 +66,7 @@ test.describe('Pet Insurance Form Tests', () => {
   });
 
   test('should validate required fields on step 2', async ({ page }) => {
-    await page.goto('/pet-insurance.html');
+    await page.goto('/');
     
     // Navigate to step 2
     await page.click('#pet-type-cat');
@@ -85,7 +85,7 @@ test.describe('Pet Insurance Form Tests', () => {
   });
 
   test('should validate required fields on step 4', async ({ page }) => {
-    await page.goto('/pet-insurance.html');
+    await page.goto('/');
     
     // Navigate through to step 4
     await page.click('#pet-type-dog');
@@ -112,7 +112,7 @@ test.describe('Pet Insurance Form Tests', () => {
   });
 
   test('should allow navigation back through steps', async ({ page }) => {
-    await page.goto('/pet-insurance.html');
+    await page.goto('/');
     
     // Navigate forward to step 3
     await page.click('#pet-type-cat');
@@ -136,7 +136,7 @@ test.describe('Pet Insurance Form Tests', () => {
   });
 
   test('should show selected coverage with visual feedback', async ({ page }) => {
-    await page.goto('/pet-insurance.html');
+    await page.goto('/');
     
     // Navigate to coverage step
     await page.click('#pet-type-dog');
@@ -156,13 +156,5 @@ test.describe('Pet Insurance Form Tests', () => {
     // Verify others don't have selected class
     await expect(page.locator('#coverage-basic')).not.toHaveClass(/selected/);
     await expect(page.locator('#coverage-standard')).not.toHaveClass(/selected/);
-  });
-
-  test('should navigate to pet insurance from other pages', async ({ page }) => {
-    // Test from home page
-    await page.goto('/');
-    await page.click('#nav-pet-insurance');
-    await expect(page).toHaveURL(/.*pet-insurance.html/);
-    await expect(page).toHaveTitle('Pet Insurance - Get Covered');
   });
 });

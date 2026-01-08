@@ -3,89 +3,662 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>Pet Insurance - Get Covered</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            height: 100vh;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #FF006E 0%, #FB5607 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%);
+            padding: 20px;
         }
-        .container {
-            text-align: center;
-            color: white;
-        }
-        h1 {
-            font-size: 4rem;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        p {
-            font-size: 1.5rem;
-            margin-top: 1rem;
-            opacity: 0.9;
-        }
-        nav {
-            margin-top: 2rem;
-        }
-        nav a {
-            color: white;
-            text-decoration: none;
-            margin: 0 1rem;
-            padding: 0.5rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            transition: background 0.3s;
-            display: inline-block;
-        }
-        nav a:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-        .interactive {
-            margin-top: 2rem;
-        }
-        button {
-            padding: 0.7rem 2rem;
-            font-size: 1rem;
+
+        .form-container {
             background: white;
-            color: #ff6347;
-            border: none;
-            border-radius: 5px;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .progress-bar::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #f0f0f0;
+            z-index: 0;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            height: 3px;
+            background: #FF006E;
+            z-index: 1;
+            transition: width 0.5s ease;
+        }
+
+        .progress-bar[data-step="1"]::after { width: 0%; }
+        .progress-bar[data-step="2"]::after { width: 25%; }
+        .progress-bar[data-step="3"]::after { width: 50%; }
+        .progress-bar[data-step="4"]::after { width: 75%; }
+        .progress-bar[data-step="5"]::after { width: 100%; }
+
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #999;
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s;
+        }
+
+        .progress-step.active {
+            background: #FF006E;
+            color: white;
+            transform: scale(1.2);
+        }
+
+        .progress-step.completed {
+            background: #FF006E;
+            color: white;
+        }
+
+        .step {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #FF006E;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .pet-type-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .pet-type-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            background: white;
         }
-        button:hover {
-            transform: scale(1.05);
+
+        .pet-type-card:hover {
+            border-color: #FF006E;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(255, 0, 110, 0.1);
         }
-        #message {
-            margin-top: 1rem;
+
+        .pet-type-card.selected {
+            border-color: #FF006E;
+            background: #fff0f6;
+        }
+
+        .pet-type-card .emoji {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pet-type-card .label {
             font-size: 1.2rem;
-            min-height: 1.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="email"]:focus,
+        input[type="tel"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #FF006E;
+        }
+
+        .coverage-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .coverage-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .coverage-card:hover {
+            border-color: #FF006E;
+            transform: translateX(5px);
+        }
+
+        .coverage-card.selected {
+            border-color: #FF006E;
+            background: #fff0f6;
+        }
+
+        .coverage-card h3 {
+            color: #FF006E;
+            margin-bottom: 0.5rem;
+        }
+
+        .coverage-card .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 0.5rem;
+        }
+
+        .coverage-card .description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            flex: 1;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #FF006E;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #e0005f;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 0, 110, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #FF006E;
+        }
+
+        .summary-label {
+            color: #666;
+        }
+
+        .summary-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .success-icon {
+            text-align: center;
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounceIn 0.6s;
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+            }
+            50% {
+                transform: scale(1.2);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        input.invalid,
+        select.invalid {
+            border-color: #dc3545;
+        }
+
+        input.invalid + .error,
+        select.invalid + .error {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Hello World</h1>
-        <p>Welcome to your Netlify static site!</p>
-        <nav>
-            <a href="index.html" id="nav-home">Home</a>
-            <a href="page2.html" id="nav-page2">Page 2</a>
-            <a href="page3.html" id="nav-page3">Page 3</a>
-            <a href="pet-insurance.html" id="nav-pet-insurance">Pet Insurance</a>
-        </nav>
-        <div class="interactive">
-            <button id="interactive-btn" onclick="showMessage()">Click Me!</button>
-            <div id="message"></div>
+
+
+    <div class="form-container">
+        <div class="progress-bar" id="progress-bar" data-step="1">
+            <div class="progress-step active" data-step="1">1</div>
+            <div class="progress-step" data-step="2">2</div>
+            <div class="progress-step" data-step="3">3</div>
+            <div class="progress-step" data-step="4">4</div>
+            <div class="progress-step" data-step="5">5</div>
+        </div>
+
+        <!-- Step 1: Pet Type -->
+        <div class="step active" id="step-1">
+            <h1>What type of pet do you have?</h1>
+            <p class="subtitle">Let's start by getting to know your furry friend</p>
+            <div class="pet-type-grid">
+                <div class="pet-type-card" onclick="selectPetType('dog')" id="pet-type-dog">
+                    <div class="emoji">🐕</div>
+                    <div class="label">Dog</div>
+                </div>
+                <div class="pet-type-card" onclick="selectPetType('cat')" id="pet-type-cat">
+                    <div class="emoji">🐈</div>
+                    <div class="label">Cat</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-primary" onclick="nextStep()" id="step1-next">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 2: Pet Details -->
+        <div class="step" id="step-2">
+            <h1>Tell us about your pet</h1>
+            <p class="subtitle">Just a few details to personalize your coverage</p>
+            <form id="pet-details-form">
+                <div class="form-group">
+                    <label for="pet-name">Pet's Name</label>
+                    <input type="text" id="pet-name" placeholder="e.g., Buddy" required>
+                    <div class="error">Please enter your pet's name</div>
+                </div>
+                <div class="form-group">
+                    <label for="pet-age">Pet's Age</label>
+                    <select id="pet-age" required>
+                        <option value="">Select age</option>
+                        <option value="puppy">Puppy/Kitten (0-1 year)</option>
+                        <option value="young">Young (1-3 years)</option>
+                        <option value="adult">Adult (3-7 years)</option>
+                        <option value="senior">Senior (7+ years)</option>
+                    </select>
+                    <div class="error">Please select your pet's age</div>
+                </div>
+                <div class="form-group">
+                    <label for="pet-breed">Breed</label>
+                    <input type="text" id="pet-breed" placeholder="e.g., Golden Retriever" required>
+                    <div class="error">Please enter your pet's breed</div>
+                </div>
+            </form>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="previousStep()">Back</button>
+                <button class="btn-primary" onclick="nextStep()" id="step2-next">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Coverage Options -->
+        <div class="step" id="step-3">
+            <h1>Choose your coverage</h1>
+            <p class="subtitle">Select the plan that works best for you</p>
+            <div class="coverage-options">
+                <div class="coverage-card" onclick="selectCoverage('basic')" id="coverage-basic">
+                    <h3>Basic</h3>
+                    <div class="price">$25/month</div>
+                    <div class="description">Essential accident coverage for unexpected injuries</div>
+                </div>
+                <div class="coverage-card" onclick="selectCoverage('standard')" id="coverage-standard">
+                    <h3>Standard</h3>
+                    <div class="price">$45/month</div>
+                    <div class="description">Accidents + illness coverage for comprehensive protection</div>
+                </div>
+                <div class="coverage-card" onclick="selectCoverage('premium')" id="coverage-premium">
+                    <h3>Premium</h3>
+                    <div class="price">$75/month</div>
+                    <div class="description">Full coverage including wellness, dental, and preventive care</div>
+                </div>
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="previousStep()">Back</button>
+                <button class="btn-primary" onclick="nextStep()" id="step3-next">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Contact Information -->
+        <div class="step" id="step-4">
+            <h1>Your contact information</h1>
+            <p class="subtitle">We'll send your policy details here</p>
+            <form id="contact-form">
+                <div class="form-group">
+                    <label for="owner-name">Your Name</label>
+                    <input type="text" id="owner-name" placeholder="John Doe" required>
+                    <div class="error">Please enter your name</div>
+                </div>
+                <div class="form-group">
+                    <label for="owner-email">Email Address</label>
+                    <input type="email" id="owner-email" placeholder="john@example.com" required>
+                    <div class="error">Please enter a valid email address</div>
+                </div>
+                <div class="form-group">
+                    <label for="owner-phone">Phone Number</label>
+                    <input type="tel" id="owner-phone" placeholder="(555) 123-4567" required>
+                    <div class="error">Please enter your phone number</div>
+                </div>
+            </form>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="previousStep()">Back</button>
+                <button class="btn-primary" onclick="nextStep()" id="step4-next">Next</button>
+            </div>
+        </div>
+
+        <!-- Step 5: Summary -->
+        <div class="step" id="step-5">
+            <div class="success-icon">🎉</div>
+            <h1>Review your coverage</h1>
+            <p class="subtitle">Everything look good?</p>
+            <div id="summary-content">
+                <!-- Summary will be dynamically populated -->
+            </div>
+            <div class="button-group">
+                <button class="btn-secondary" onclick="previousStep()">Back</button>
+                <button class="btn-primary" onclick="submitForm()" id="submit-btn">Get Covered!</button>
+            </div>
         </div>
     </div>
+
     <script>
-        function showMessage() {
-            document.getElementById('message').textContent = 'Hello from Page 1!';
+        let currentStep = 1;
+        let formData = {
+            petType: '',
+            petName: '',
+            petAge: '',
+            petBreed: '',
+            coverage: '',
+            ownerName: '',
+            ownerEmail: '',
+            ownerPhone: ''
+        };
+
+        function selectPetType(type) {
+            formData.petType = type;
+            document.querySelectorAll('.pet-type-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById(`pet-type-${type}`).classList.add('selected');
+        }
+
+        function selectCoverage(coverage) {
+            formData.coverage = coverage;
+            document.querySelectorAll('.coverage-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            document.getElementById(`coverage-${coverage}`).classList.add('selected');
+        }
+
+        function validateStep(step) {
+            if (step === 1) {
+                return formData.petType !== '';
+            } else if (step === 2) {
+                const name = document.getElementById('pet-name');
+                const age = document.getElementById('pet-age');
+                const breed = document.getElementById('pet-breed');
+                
+                let isValid = true;
+                
+                if (!name.value.trim()) {
+                    name.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    name.classList.remove('invalid');
+                    formData.petName = name.value;
+                }
+                
+                if (!age.value) {
+                    age.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    age.classList.remove('invalid');
+                    formData.petAge = age.value;
+                }
+                
+                if (!breed.value.trim()) {
+                    breed.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    breed.classList.remove('invalid');
+                    formData.petBreed = breed.value;
+                }
+                
+                return isValid;
+            } else if (step === 3) {
+                return formData.coverage !== '';
+            } else if (step === 4) {
+                const name = document.getElementById('owner-name');
+                const email = document.getElementById('owner-email');
+                const phone = document.getElementById('owner-phone');
+                
+                let isValid = true;
+                
+                if (!name.value.trim()) {
+                    name.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    name.classList.remove('invalid');
+                    formData.ownerName = name.value;
+                }
+                
+                if (!email.value.trim() || !email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                    email.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    email.classList.remove('invalid');
+                    formData.ownerEmail = email.value;
+                }
+                
+                if (!phone.value.trim()) {
+                    phone.classList.add('invalid');
+                    isValid = false;
+                } else {
+                    phone.classList.remove('invalid');
+                    formData.ownerPhone = phone.value;
+                }
+                
+                return isValid;
+            }
+            return true;
+        }
+
+        function nextStep() {
+            if (!validateStep(currentStep)) {
+                return;
+            }
+
+            if (currentStep === 4) {
+                populateSummary();
+            }
+
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.add('completed');
+            
+            currentStep++;
+            
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.add('active');
+            document.getElementById('progress-bar').setAttribute('data-step', currentStep);
+        }
+
+        function previousStep() {
+            document.getElementById(`step-${currentStep}`).classList.remove('active');
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.remove('active');
+            
+            currentStep--;
+            
+            document.getElementById(`step-${currentStep}`).classList.add('active');
+            document.querySelector(`.progress-step[data-step="${currentStep}"]`).classList.remove('completed');
+            document.getElementById('progress-bar').setAttribute('data-step', currentStep);
+        }
+
+        function populateSummary() {
+            const coveragePrices = {
+                basic: '$25/month',
+                standard: '$45/month',
+                premium: '$75/month'
+            };
+
+            const ageLabels = {
+                puppy: 'Puppy/Kitten (0-1 year)',
+                young: 'Young (1-3 years)',
+                adult: 'Adult (3-7 years)',
+                senior: 'Senior (7+ years)'
+            };
+
+            const summaryHTML = `
+                <div class="summary-item">
+                    <span class="summary-label">Pet Type:</span>
+                    <span class="summary-value">${formData.petType.charAt(0).toUpperCase() + formData.petType.slice(1)}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Pet Name:</span>
+                    <span class="summary-value">${formData.petName}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Age:</span>
+                    <span class="summary-value">${ageLabels[formData.petAge]}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Breed:</span>
+                    <span class="summary-value">${formData.petBreed}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Coverage Plan:</span>
+                    <span class="summary-value">${formData.coverage.charAt(0).toUpperCase() + formData.coverage.slice(1)}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Owner:</span>
+                    <span class="summary-value">${formData.ownerName}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Email:</span>
+                    <span class="summary-value">${formData.ownerEmail}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Phone:</span>
+                    <span class="summary-value">${formData.ownerPhone}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">Monthly Premium:</span>
+                    <span class="summary-value">${coveragePrices[formData.coverage]}</span>
+                </div>
+            `;
+
+            document.getElementById('summary-content').innerHTML = summaryHTML;
+        }
+
+        function submitForm() {
+            // In a real application, this would submit to a server
+            alert(`Thank you ${formData.ownerName}! Your pet insurance application for ${formData.petName} has been submitted. We'll contact you at ${formData.ownerEmail} shortly.`);
+            // Reset form
+            location.reload();
         }
     </script>
 </body>
