@@ -3,60 +3,60 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation Tests', () => {
   test('should navigate from home to page 2', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('The X-Files');
     
     // Click on Page 2 link
     await page.click('#nav-page2');
     await expect(page).toHaveURL(/.*page2.html/);
-    await expect(page).toHaveTitle('Page 2');
+    await expect(page).toHaveTitle('X-Files Agents');
   });
 
   test('should navigate from home to page 3', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('The X-Files');
     
     // Click on Page 3 link
     await page.click('#nav-page3');
     await expect(page).toHaveURL(/.*page3.html/);
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('X-Files Cases');
   });
 
   test('should navigate from page 2 to page 3', async ({ page }) => {
     await page.goto('/page2.html');
-    await expect(page).toHaveTitle('Page 2');
+    await expect(page).toHaveTitle('X-Files Agents');
     
     // Click on Page 3 link
     await page.click('#nav-page3');
     await expect(page).toHaveURL(/.*page3.html/);
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('X-Files Cases');
   });
 
   test('should navigate from page 3 to home', async ({ page }) => {
     await page.goto('/page3.html');
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('X-Files Cases');
     
     // Click on Home link
     await page.click('#nav-home');
     await expect(page).toHaveURL(/.*index.html/);
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('The X-Files');
   });
 
   test('should navigate through all pages in sequence', async ({ page }) => {
     // Start at home
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('The X-Files');
     
     // Navigate to Page 2
     await page.click('#nav-page2');
-    await expect(page).toHaveTitle('Page 2');
+    await expect(page).toHaveTitle('X-Files Agents');
     
     // Navigate to Page 3
     await page.click('#nav-page3');
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('X-Files Cases');
     
     // Navigate back to Home
     await page.click('#nav-home');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('The X-Files');
   });
 });
 
@@ -69,7 +69,7 @@ test.describe('Interactive Elements Tests', () => {
     
     // Check if message is displayed
     const message = await page.locator('#message').textContent();
-    expect(message).toBe('Hello from Page 1!');
+    expect(message).toBe('I Want To Believe');
   });
 
   test('page 2 input should greet user', async ({ page }) => {
@@ -81,7 +81,7 @@ test.describe('Interactive Elements Tests', () => {
     
     // Check if greeting is displayed
     const output = await page.locator('#output').textContent();
-    expect(output).toBe('Hello, Alice! Welcome to Page 2!');
+    expect(output).toBe('Welcome, Agent Alice. Access granted.');
   });
 
   test('page 3 counter should increment and decrement', async ({ page }) => {
