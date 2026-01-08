@@ -61,10 +61,12 @@ jobs:
           for i in {1..10}; do
             if curl -s http://localhost:8080 > /dev/null; then
               echo "Server is ready"
-              break
+              exit 0
             fi
             sleep 1
           done
+          echo "Server failed to start"
+          exit 1
 
       - name: Take "Before" screenshot (main branch)
         if: github.event_name == 'pull_request'
@@ -91,10 +93,12 @@ jobs:
           for i in {1..10}; do
             if curl -s http://localhost:8081 > /dev/null; then
               echo "Server is ready"
-              break
+              exit 0
             fi
             sleep 1
           done
+          echo "Server failed to start"
+          exit 1
 
       - name: Take "After" screenshot (PR branch)
         if: github.event_name == 'pull_request'
@@ -143,6 +147,14 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
+
+            // Check if screenshot files exist
+            if (!fs.existsSync('before-screenshot.png') || !fs.existsSync('after-screenshot.png')) {
+              console.error('Screenshot files not found. before-screenshot.png:', fs.existsSync('before-screenshot.png'), 'after-screenshot.png:', fs.existsSync('after-screenshot.png'));
+              core.setFailed('Screenshot files were not created successfully');
+              return;
+            }
+
             const beforeImage = fs.readFileSync('before-screenshot.png').toString('base64');
             const afterImage = fs.readFileSync('after-screenshot.png').toString('base64');
 
