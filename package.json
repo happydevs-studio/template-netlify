@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "Simple static hello world site for Netlify deployment",
   "scripts": {
-    "start": "npx http-server . -p 8080 -o"
+    "start": "npx http-server . -p 8080 -o",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed"
   },
   "keywords": [
     "netlify",
@@ -11,5 +13,8 @@
     "hello-world"
   ],
   "author": "",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
 }
