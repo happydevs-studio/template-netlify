@@ -129,38 +129,38 @@ jobs:
             const fs = require('fs');
             const beforeImage = fs.readFileSync('before-screenshot.png').toString('base64');
             const afterImage = fs.readFileSync('after-screenshot.png').toString('base64');
-            
+
             const comment = `## 🚀 Netlify Preview Deployment
-            
+
             ### 🔗 Preview URL
             **${{ steps.netlify-preview.outputs.deploy-url }}**
-            
+
             ---
-            
+
             ### 📸 Visual Comparison
-            
+
             #### Before (main branch)
             ![Before Screenshot](data:image/png;base64,${beforeImage})
-            
+
             #### After (this PR)
             ![After Screenshot](data:image/png;base64,${afterImage})
-            
+
             ---
-            
+
             *Deployed from commit ${{ github.event.pull_request.head.sha }}*`;
-            
+
             // Find existing comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
-            const existingComment = comments.find(comment => 
-              comment.user.login === 'github-actions[bot]' && 
+
+            const existingComment = comments.find(comment =>
+              comment.user.login === 'github-actions[bot]' &&
               comment.body.includes('🚀 Netlify Preview Deployment')
             );
-            
+
             if (existingComment) {
               // Update existing comment
               await github.rest.issues.updateComment({
