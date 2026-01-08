@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation Tests', () => {
   test('should navigate from home to page 2', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Pet Insurance Application');
     
     // Click on Page 2 link
     await page.click('#nav-page2');
@@ -13,7 +13,7 @@ test.describe('Navigation Tests', () => {
 
   test('should navigate from home to page 3', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Pet Insurance Application');
     
     // Click on Page 3 link
     await page.click('#nav-page3');
@@ -38,13 +38,13 @@ test.describe('Navigation Tests', () => {
     // Click on Home link
     await page.click('#nav-home');
     await expect(page).toHaveURL(/.*index.html/);
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Pet Insurance Application');
   });
 
   test('should navigate through all pages in sequence', async ({ page }) => {
     // Start at home
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Pet Insurance Application');
     
     // Navigate to Page 2
     await page.click('#nav-page2');
@@ -56,20 +56,31 @@ test.describe('Navigation Tests', () => {
     
     // Navigate back to Home
     await page.click('#nav-home');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Pet Insurance Application');
   });
 });
 
 test.describe('Interactive Elements Tests', () => {
-  test('home page button should display message', async ({ page }) => {
+  test('home page form should submit successfully', async ({ page }) => {
     await page.goto('/');
     
-    // Click the button
+    // Fill in the form
+    await page.fill('#pet-name', 'Fluffy');
+    await page.selectOption('#pet-type', 'cat');
+    await page.fill('#pet-age', '3');
+    await page.fill('#pet-breed', 'Persian');
+    await page.fill('#owner-name', 'John Doe');
+    await page.fill('#owner-email', 'john@example.com');
+    await page.fill('#owner-phone', '555-1234');
+    await page.selectOption('#coverage-level', 'standard');
+    
+    // Submit the form
     await page.click('#interactive-btn');
     
-    // Check if message is displayed
+    // Check if success message is displayed
     const message = await page.locator('#message').textContent();
-    expect(message).toBe('Hello from Page 1!');
+    expect(message).toContain('Thank you! Application submitted for Fluffy');
+    expect(message).toContain('john@example.com');
   });
 
   test('page 2 input should greet user', async ({ page }) => {
