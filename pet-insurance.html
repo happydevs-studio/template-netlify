@@ -582,7 +582,7 @@
                     formData.ownerName = name.value;
                 }
                 
-                if (!email.value.trim() || !email.value.includes('@')) {
+                if (!email.value.trim() || !email.value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
                     email.classList.add('invalid');
                     isValid = false;
                 } else {
