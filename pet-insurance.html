@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Insurance - Get Your Quote</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+            min-height: 100vh;
+            color: #1E293B;
+            padding: 2rem 1rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3B82F6;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: #64748B;
+            font-weight: 400;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.1);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .form-section h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #3B82F6;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        label .required {
+            color: #F97316;
+            margin-left: 0.25rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            background: #F8FAFC;
+            color: #1E293B;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input:hover,
+        select:hover {
+            border-color: #60A5FA;
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .radio-option {
+            position: relative;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem 1rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            background: #F8FAFC;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 100px;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            border-color: #3B82F6;
+            background: #EFF6FF;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .radio-option label:hover {
+            border-color: #60A5FA;
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .radio-option .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .radio-option .label-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin: 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .checkbox-option {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            accent-color: #3B82F6;
+        }
+
+        .checkbox-option label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .info-text {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-top: 0.5rem;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: white;
+            background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: #ECFDF5;
+            border: 2px solid #10B981;
+            border-radius: 12px;
+            color: #065F46;
+            margin-top: 1rem;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-message .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-message h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #065F46;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .nav-footer a {
+            color: #3B82F6;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            display: inline-block;
+        }
+
+        .nav-footer a:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🐾</div>
+            <h1>Pet Insurance</h1>
+            <p>Protect your furry friend in minutes</p>
+        </div>
+
+        <div class="form-card">
+            <form id="petInsuranceForm">
+                <!-- Section 1: Pet Information -->
+                <div class="form-section">
+                    <h2><span class="step-indicator">1</span> Tell us about your pet</h2>
+                    
+                    <div class="form-group">
+                        <label for="petName">Pet's Name <span class="required">*</span></label>
+                        <input type="text" id="petName" name="petName" required placeholder="e.g., Buddy">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pet Type <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="petTypeDog" name="petType" value="dog" required>
+                                <label for="petTypeDog">
+                                    <span class="icon">🐕</span>
+                                    <span class="label-text">Dog</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="petTypeCat" name="petType" value="cat">
+                                <label for="petTypeCat">
+                                    <span class="icon">🐈</span>
+                                    <span class="label-text">Cat</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="petTypeOther" name="petType" value="other">
+                                <label for="petTypeOther">
+                                    <span class="icon">🐰</span>
+                                    <span class="label-text">Other</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="breed">Breed <span class="required">*</span></label>
+                        <input type="text" id="breed" name="breed" required placeholder="e.g., Golden Retriever">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="age">Pet's Age (years) <span class="required">*</span></label>
+                        <input type="number" id="age" name="age" required min="0" max="30" placeholder="e.g., 3">
+                    </div>
+                </div>
+
+                <!-- Section 2: Coverage Options -->
+                <div class="form-section">
+                    <h2><span class="step-indicator">2</span> Choose your coverage</h2>
+                    
+                    <div class="form-group">
+                        <label>Coverage Level <span class="required">*</span></label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="coverageBasic" name="coverage" value="basic" required>
+                                <label for="coverageBasic">
+                                    <span class="icon">🥉</span>
+                                    <span class="label-text">Basic</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="coverageStandard" name="coverage" value="standard">
+                                <label for="coverageStandard">
+                                    <span class="icon">🥈</span>
+                                    <span class="label-text">Standard</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="coveragePremium" name="coverage" value="premium">
+                                <label for="coveragePremium">
+                                    <span class="icon">🥇</span>
+                                    <span class="label-text">Premium</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Additional Coverage (Optional)</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="dentalCoverage" name="additionalCoverage" value="dental">
+                                <label for="dentalCoverage">Dental Coverage 🦷</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="wellnessCoverage" name="additionalCoverage" value="wellness">
+                                <label for="wellnessCoverage">Wellness & Prevention 💊</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="emergencyCoverage" name="additionalCoverage" value="emergency">
+                                <label for="emergencyCoverage">24/7 Emergency Care 🚑</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Contact Information -->
+                <div class="form-section">
+                    <h2><span class="step-indicator">3</span> Your contact details</h2>
+                    
+                    <div class="form-group">
+                        <label for="ownerName">Your Name <span class="required">*</span></label>
+                        <input type="text" id="ownerName" name="ownerName" required placeholder="John Smith">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required placeholder="john@example.com">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="zipCode">ZIP Code <span class="required">*</span></label>
+                        <input type="text" id="zipCode" name="zipCode" required placeholder="12345" pattern="[0-9]{5}">
+                        <div class="info-text">Coverage availability varies by location</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button" id="submitButton">
+                    Get My Free Quote
+                </button>
+
+                <div class="success-message" id="successMessage">
+                    <div class="icon">✅</div>
+                    <h3>Quote Requested!</h3>
+                    <p>We'll send your personalized pet insurance quote to your email within 24 hours.</p>
+                </div>
+            </form>
+        </div>
+
+        <div class="nav-footer">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('petInsuranceForm');
+        const submitButton = document.getElementById('submitButton');
+        const successMessage = document.getElementById('successMessage');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            // Simulate form submission
+            setTimeout(() => {
+                // Hide form
+                form.style.display = 'none';
+                
+                // Show success message
+                successMessage.classList.add('show');
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 1500);
+        });
+
+        // Add animation on radio/checkbox selection
+        const radioInputs = document.querySelectorAll('input[type="radio"]');
+        radioInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const label = this.nextElementSibling;
+                label.style.animation = 'none';
+                setTimeout(() => {
+                    label.style.animation = 'fadeInUp 0.3s ease-out';
+                }, 10);
+            });
+        });
+    </script>
+</body>
+</html>
