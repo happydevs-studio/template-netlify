@@ -97,14 +97,21 @@
             margin-bottom: 2rem;
         }
 
-        .form-section h2 {
-            font-size: 1.25rem;
+        .question {
+            display: none;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .question h2 {
+            font-size: 1.5rem;
             font-weight: 600;
             color: #1E293B;
             margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
         }
 
         .step-indicator {
@@ -122,6 +129,21 @@
 
         .form-group {
             margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #E2E8F0;
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);
+            transition: width 0.5s ease;
+            width: 0%;
         }
 
         label {
@@ -255,34 +277,59 @@
             margin-top: 0.5rem;
         }
 
-        .submit-button {
-            width: 100%;
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .next-button, .back-button, .submit-button {
             padding: 1rem 2rem;
             font-size: 1.125rem;
             font-weight: 600;
             font-family: 'Plus Jakarta Sans', sans-serif;
-            color: white;
-            background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
             border: none;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.3s ease;
+        }
+
+        .next-button, .submit-button {
+            flex: 1;
+            color: white;
+            background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
             box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
         }
 
-        .submit-button:hover {
+        .next-button:hover, .submit-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
         }
 
-        .submit-button:active {
+        .next-button:active, .submit-button:active {
             transform: translateY(0);
         }
 
-        .submit-button:disabled {
+        .next-button:disabled, .submit-button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .back-button {
+            background: #F8FAFC;
+            color: #64748B;
+            border: 2px solid #E2E8F0;
+            padding: 1rem 1.5rem;
+        }
+
+        .back-button:hover {
+            background: #E2E8F0;
+            color: #1E293B;
+        }
+
+        .submit-button {
+            width: 100%;
         }
 
         .success-message {
@@ -360,18 +407,26 @@
         </div>
 
         <div class="form-card">
-            <form id="petInsuranceForm">
-                <!-- Section 1: Pet Information -->
-                <div class="form-section">
-                    <h2><span class="step-indicator">1</span> Tell us about your pet</h2>
-                    
-                    <div class="form-group">
-                        <label for="petName">Pet's Name <span class="required">*</span></label>
-                        <input type="text" id="petName" name="petName" required placeholder="e.g., Buddy">
-                    </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
 
+            <form id="petInsuranceForm">
+                <!-- Question 1: Pet's Name -->
+                <div class="question active" data-question="1">
+                    <h2>What's your pet's name? 🐾</h2>
                     <div class="form-group">
-                        <label>Pet Type <span class="required">*</span></label>
+                        <input type="text" id="petName" name="petName" required placeholder="e.g., Buddy" autofocus>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="next-button" onclick="nextQuestion(1)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 2: Pet Type -->
+                <div class="question" data-question="2">
+                    <h2>What type of pet is <span id="petNameDisplay"></span>? 🐶</h2>
+                    <div class="form-group">
                         <div class="radio-group">
                             <div class="radio-option">
                                 <input type="radio" id="petTypeDog" name="petType" value="dog" required>
@@ -396,24 +451,40 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="breed">Breed <span class="required">*</span></label>
-                        <input type="text" id="breed" name="breed" required placeholder="e.g., Golden Retriever">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="age">Pet's Age (years) <span class="required">*</span></label>
-                        <input type="number" id="age" name="age" required min="0" max="30" placeholder="e.g., 3">
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(2)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(2)">Continue</button>
                     </div>
                 </div>
 
-                <!-- Section 2: Coverage Options -->
-                <div class="form-section">
-                    <h2><span class="step-indicator">2</span> Choose your coverage</h2>
-                    
+                <!-- Question 3: Breed -->
+                <div class="question" data-question="3">
+                    <h2>What breed is <span id="petNameDisplay2"></span>? 📝</h2>
                     <div class="form-group">
-                        <label>Coverage Level <span class="required">*</span></label>
+                        <input type="text" id="breed" name="breed" required placeholder="e.g., Golden Retriever">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(3)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(3)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 4: Age -->
+                <div class="question" data-question="4">
+                    <h2>How old is <span id="petNameDisplay3"></span>? 🎂</h2>
+                    <div class="form-group">
+                        <input type="number" id="age" name="age" required min="0" max="30" placeholder="Age in years">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(4)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(4)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 5: Coverage Level -->
+                <div class="question" data-question="5">
+                    <h2>Choose your coverage level 🛡️</h2>
+                    <div class="form-group">
                         <div class="radio-group">
                             <div class="radio-option">
                                 <input type="radio" id="coverageBasic" name="coverage" value="basic" required>
@@ -438,9 +509,16 @@
                             </div>
                         </div>
                     </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(5)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(5)">Continue</button>
+                    </div>
+                </div>
 
+                <!-- Question 6: Additional Coverage -->
+                <div class="question" data-question="6">
+                    <h2>Any additional coverage? (Optional) ✨</h2>
                     <div class="form-group">
-                        <label>Additional Coverage (Optional)</label>
                         <div class="checkbox-group">
                             <div class="checkbox-option">
                                 <input type="checkbox" id="dentalCoverage" name="additionalCoverage" value="dental">
@@ -456,37 +534,60 @@
                             </div>
                         </div>
                     </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(6)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(6)">Continue</button>
+                    </div>
                 </div>
 
-                <!-- Section 3: Contact Information -->
-                <div class="form-section">
-                    <h2><span class="step-indicator">3</span> Your contact details</h2>
-                    
+                <!-- Question 7: Your Name -->
+                <div class="question" data-question="7">
+                    <h2>What's your name? 👋</h2>
                     <div class="form-group">
-                        <label for="ownerName">Your Name <span class="required">*</span></label>
                         <input type="text" id="ownerName" name="ownerName" required placeholder="John Smith">
                     </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(7)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(7)">Continue</button>
+                    </div>
+                </div>
 
+                <!-- Question 8: Email -->
+                <div class="question" data-question="8">
+                    <h2>Where can we reach you? 📧</h2>
                     <div class="form-group">
-                        <label for="email">Email <span class="required">*</span></label>
                         <input type="email" id="email" name="email" required placeholder="john@example.com">
                     </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(8)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(8)">Continue</button>
+                    </div>
+                </div>
 
+                <!-- Question 9: Phone -->
+                <div class="question" data-question="9">
+                    <h2>What's your phone number? 📱</h2>
                     <div class="form-group">
-                        <label for="phone">Phone Number <span class="required">*</span></label>
                         <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567">
                     </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(9)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(9)">Continue</button>
+                    </div>
+                </div>
 
+                <!-- Question 10: ZIP Code -->
+                <div class="question" data-question="10">
+                    <h2>Finally, what's your ZIP code? 📍</h2>
                     <div class="form-group">
-                        <label for="zipCode">ZIP Code <span class="required">*</span></label>
                         <input type="text" id="zipCode" name="zipCode" required placeholder="12345" pattern="[0-9]{5}">
                         <div class="info-text">Coverage availability varies by location</div>
                     </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(10)">Back</button>
+                        <button type="submit" class="submit-button" id="submitButton">Get My Free Quote</button>
+                    </div>
                 </div>
-
-                <button type="submit" class="submit-button" id="submitButton">
-                    Get My Free Quote
-                </button>
 
                 <div class="success-message" id="successMessage">
                     <div class="icon">✅</div>
@@ -505,18 +606,141 @@
         const form = document.getElementById('petInsuranceForm');
         const submitButton = document.getElementById('submitButton');
         const successMessage = document.getElementById('successMessage');
+        const progressFill = document.getElementById('progressFill');
+        const totalQuestions = 10;
+        let currentQuestion = 1;
 
+        // Update progress bar
+        function updateProgress() {
+            const progress = (currentQuestion / totalQuestions) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        // Validate current question
+        function validateQuestion(questionNum) {
+            const question = document.querySelector(`.question[data-question="${questionNum}"]`);
+            const inputs = question.querySelectorAll('input[required]');
+            
+            for (let input of inputs) {
+                if (input.type === 'radio') {
+                    const radioGroup = question.querySelectorAll(`input[name="${input.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!isChecked) return false;
+                } else {
+                    if (!input.value.trim()) return false;
+                    if (input.validity && !input.validity.valid) return false;
+                }
+            }
+            return true;
+        }
+
+        // Show next question
+        function nextQuestion(current) {
+            if (!validateQuestion(current)) {
+                alert('Please complete this question before continuing.');
+                return;
+            }
+
+            // Update pet name displays
+            if (current === 1) {
+                const petName = document.getElementById('petName').value;
+                document.getElementById('petNameDisplay').textContent = petName;
+                document.getElementById('petNameDisplay2').textContent = petName;
+                document.getElementById('petNameDisplay3').textContent = petName;
+            }
+
+            const currentQ = document.querySelector(`.question[data-question="${current}"]`);
+            const nextQ = document.querySelector(`.question[data-question="${current + 1}"]`);
+            
+            if (currentQ && nextQ) {
+                currentQ.classList.remove('active');
+                setTimeout(() => {
+                    currentQ.style.display = 'none';
+                    nextQ.style.display = 'block';
+                    setTimeout(() => {
+                        nextQ.classList.add('active');
+                        // Focus on first input in next question
+                        const firstInput = nextQ.querySelector('input');
+                        if (firstInput && firstInput.type !== 'radio' && firstInput.type !== 'checkbox') {
+                            firstInput.focus();
+                        }
+                    }, 50);
+                }, 300);
+                
+                currentQuestion = current + 1;
+                updateProgress();
+            }
+        }
+
+        // Show previous question
+        function prevQuestion(current) {
+            const currentQ = document.querySelector(`.question[data-question="${current}"]`);
+            const prevQ = document.querySelector(`.question[data-question="${current - 1}"]`);
+            
+            if (currentQ && prevQ) {
+                currentQ.classList.remove('active');
+                setTimeout(() => {
+                    currentQ.style.display = 'none';
+                    prevQ.style.display = 'block';
+                    setTimeout(() => {
+                        prevQ.classList.add('active');
+                    }, 50);
+                }, 300);
+                
+                currentQuestion = current - 1;
+                updateProgress();
+            }
+        }
+
+        // Handle Enter key to advance
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeQuestion = document.querySelector('.question.active');
+                if (activeQuestion) {
+                    const questionNum = parseInt(activeQuestion.getAttribute('data-question'));
+                    const nextButton = activeQuestion.querySelector('.next-button');
+                    if (nextButton && questionNum < totalQuestions) {
+                        e.preventDefault();
+                        nextQuestion(questionNum);
+                    }
+                }
+            }
+        });
+
+        // Auto-advance for radio buttons
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const question = this.closest('.question');
+                const questionNum = parseInt(question.getAttribute('data-question'));
+                // Small delay for UX feedback
+                setTimeout(() => {
+                    if (validateQuestion(questionNum)) {
+                        nextQuestion(questionNum);
+                    }
+                }, 400);
+            });
+        });
+
+        // Form submission
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
+            if (!validateQuestion(10)) {
+                alert('Please complete all required fields.');
+                return;
+            }
+
             // Disable submit button
             submitButton.disabled = true;
             submitButton.textContent = 'Processing...';
 
             // Simulate form submission
             setTimeout(() => {
-                // Hide form
-                form.style.display = 'none';
+                // Hide all questions
+                document.querySelectorAll('.question').forEach(q => q.style.display = 'none');
+                
+                // Hide progress bar
+                document.querySelector('.progress-bar').style.display = 'none';
                 
                 // Show success message
                 successMessage.classList.add('show');
@@ -526,17 +750,8 @@
             }, 1500);
         });
 
-        // Add animation on radio/checkbox selection
-        const radioInputs = document.querySelectorAll('input[type="radio"]');
-        radioInputs.forEach(input => {
-            input.addEventListener('change', function() {
-                const label = this.nextElementSibling;
-                label.style.animation = 'none';
-                setTimeout(() => {
-                    label.style.animation = 'fadeInUp 0.3s ease-out';
-                }, 10);
-            });
-        });
+        // Initialize progress
+        updateProgress();
     </script>
 </body>
 </html>
