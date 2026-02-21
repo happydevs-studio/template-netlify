@@ -145,6 +145,11 @@ tasks:
         fi
     silent: false
 
+  drift-detect:
+    desc: Run git commit drift detection tests
+    cmds:
+      - npx playwright test tests/drift-detection.spec.js {{.CLI_ARGS}}
+
   test:
     desc: Run Playwright tests
     cmds:

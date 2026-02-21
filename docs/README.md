@@ -82,6 +82,19 @@ The same analysis runs in CI/CD on pull requests and pushes to `main`.
 **For customizing complexity thresholds or configuration:**
 See [COMPLEXITY_CONFIG.md](COMPLEXITY_CONFIG.md) for detailed setup instructions, threshold customization, and troubleshooting.
 
+### Git Commit Drift Detection
+
+Verify that a deployed environment is running the exact expected code version:
+
+```bash
+task drift-detect
+```
+
+This runs a Playwright test that reads the `git-commit` meta tag baked into `index.html` at deploy time and compares it to the expected commit SHA.
+
+**For full details on how it works and how to apply the pattern to APIs and databases:**
+See [DRIFT_DETECTION.md](DRIFT_DETECTION.md).
+
 ## Netlify Setup
 
 ### Prerequisites
