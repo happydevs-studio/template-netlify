@@ -3,41 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page 3</title>
+    <title>Testing &amp; Docs</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 2rem 1rem;
+            min-height: 100vh;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        }
-        .container {
-            text-align: center;
+            background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
             color: white;
         }
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            text-align: center;
+        }
         h1 {
-            font-size: 4rem;
-            margin: 0;
+            font-size: 3rem;
+            margin: 0 0 0.5rem 0;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
         }
-        p {
-            font-size: 1.5rem;
-            margin-top: 1rem;
-            opacity: 0.9;
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.85;
+            margin-bottom: 1.5rem;
         }
         nav {
-            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
         nav a {
             color: white;
             text-decoration: none;
-            margin: 0 1rem;
+            margin: 0 0.5rem;
             padding: 0.5rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 5px;
             transition: background 0.3s;
             display: inline-block;
@@ -45,25 +47,54 @@
         nav a:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+        .section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            text-align: left;
+        }
+        .section h2 {
+            margin: 0 0 0.75rem 0;
+            font-size: 1.3rem;
+        }
+        .section ul {
+            margin: 0;
+            padding-left: 1.3rem;
+            line-height: 1.7;
+            opacity: 0.9;
+        }
+        code {
+            background: rgba(255,255,255,0.15);
+            padding: 0.1em 0.4em;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
         .interactive {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
         button {
             padding: 0.7rem 2rem;
             font-size: 1rem;
             background: white;
-            color: #f5576c;
+            color: #134e5e;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
             transition: transform 0.2s;
             margin: 0.5rem;
         }
         button:hover {
             transform: scale(1.05);
         }
+        #counter-label {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
         #counter {
-            margin-top: 1rem;
+            margin-top: 0.5rem;
             font-size: 2rem;
             min-height: 1.5rem;
             font-weight: bold;
@@ -72,14 +103,35 @@
 </head>
 <body>
     <div class="container">
-        <h1>Page 3</h1>
-        <p>This is the third page with a counter!</p>
+        <h1>🧪 Testing &amp; Docs</h1>
+        <p class="tagline">Smoke tests and documentation hygiene</p>
         <nav>
             <a href="index.html" id="nav-home">Home</a>
-            <a href="page2.html" id="nav-page2">Page 2</a>
-            <a href="page3.html" id="nav-page3">Page 3</a>
+            <a href="page2.html" id="nav-page2">Code Quality</a>
+            <a href="page3.html" id="nav-page3">Testing &amp; Docs</a>
         </nav>
+        <div class="section">
+            <h2>🧪 Minimum Smoke Tests</h2>
+            <ul>
+                <li>Write tests for critical user paths first, not every function</li>
+                <li>Prefer end-to-end smoke tests over exhaustive AI-generated unit tests</li>
+                <li>Each test must have a clear failure message explaining what broke</li>
+                <li>Run <code>npm test</code> on every PR; no merges without a green build</li>
+                <li>Delete tests that never fail and add no diagnostic value</li>
+            </ul>
+        </div>
+        <div class="section">
+            <h2>📄 Excessive Documentation</h2>
+            <ul>
+                <li>Avoid auto-generated JSDoc/docstrings for obvious functions</li>
+                <li>Prefer self-documenting names: <code>getUserById</code> over <code>getU</code></li>
+                <li>Comments should explain <em>why</em>, not <em>what</em></li>
+                <li>Delete commented-out code immediately – use git history instead</li>
+                <li>READMEs should stay under 200 lines unless the project truly needs more</li>
+            </ul>
+        </div>
         <div class="interactive">
+            <div id="counter-label">Slop issues resolved today:</div>
             <button id="increment-btn" onclick="increment()">+</button>
             <button id="decrement-btn" onclick="decrement()">-</button>
             <button id="reset-btn" onclick="reset()">Reset</button>

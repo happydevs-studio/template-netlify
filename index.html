@@ -3,41 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World</title>
+    <title>Slop Protector</title>
     <style>
+        * {
+            box-sizing: border-box;
+        }
         body {
             margin: 0;
-            padding: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            padding: 2rem 1rem;
+            min-height: 100vh;
             font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #ff8c00 0%, #ff6347 100%);
-        }
-        .container {
-            text-align: center;
+            background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
             color: white;
         }
-        h1 {
-            font-size: 4rem;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            text-align: center;
         }
-        p {
-            font-size: 1.5rem;
-            margin-top: 1rem;
-            opacity: 0.9;
+        h1 {
+            font-size: 3.5rem;
+            margin: 0 0 0.5rem 0;
+            text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+        }
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.85;
+            margin-bottom: 1.5rem;
         }
         nav {
-            margin-top: 2rem;
+            margin-bottom: 2rem;
         }
         nav a {
             color: white;
             text-decoration: none;
-            margin: 0 1rem;
+            margin: 0 0.5rem;
             padding: 0.5rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.15);
             border-radius: 5px;
             transition: background 0.3s;
             display: inline-block;
@@ -45,17 +47,40 @@
         nav a:hover {
             background: rgba(255, 255, 255, 0.3);
         }
+        .pillars {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.2rem;
+            margin: 1.5rem 0;
+        }
+        .pillar {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 1.2rem 1rem;
+            text-align: left;
+        }
+        .pillar h2 {
+            font-size: 1.1rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .pillar p {
+            font-size: 0.9rem;
+            margin: 0;
+            opacity: 0.85;
+            line-height: 1.5;
+        }
         .interactive {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
         }
         button {
             padding: 0.7rem 2rem;
             font-size: 1rem;
-            background: white;
-            color: #ff6347;
+            background: #00c9a7;
+            color: #0f2027;
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
             transition: transform 0.2s;
         }
         button:hover {
@@ -70,21 +95,39 @@
 </head>
 <body>
     <div class="container">
-        <h1>Hello World</h1>
-        <p>Welcome to your Netlify static site!</p>
+        <h1>🛡️ Slop Protector</h1>
+        <p class="tagline">Deterministic practices to protect your codebase from AI slop</p>
         <nav>
             <a href="index.html" id="nav-home">Home</a>
-            <a href="page2.html" id="nav-page2">Page 2</a>
-            <a href="page3.html" id="nav-page3">Page 3</a>
+            <a href="page2.html" id="nav-page2">Code Quality</a>
+            <a href="page3.html" id="nav-page3">Testing &amp; Docs</a>
         </nav>
+        <div class="pillars">
+            <div class="pillar">
+                <h2>📐 Complexity</h2>
+                <p>Keep cyclomatic complexity (CCN) ≤ 10. Run <code>task complexity</code> locally to catch bloated functions before they land in main.</p>
+            </div>
+            <div class="pillar">
+                <h2>📦 Dependencies</h2>
+                <p>Audit your <code>package.json</code> regularly. Remove unused packages and pin versions to prevent silent breakage.</p>
+            </div>
+            <div class="pillar">
+                <h2>📄 Documentation</h2>
+                <p>Prefer clear naming and short inline comments over long generated docs. If the code needs a novel to explain it, refactor instead.</p>
+            </div>
+            <div class="pillar">
+                <h2>🧪 Smoke Tests</h2>
+                <p>A minimal set of end-to-end tests is worth more than hundreds of vague AI-generated unit tests. Cover critical paths, not every line.</p>
+            </div>
+        </div>
         <div class="interactive">
-            <button id="interactive-btn" onclick="showMessage()">Click Me!</button>
+            <button id="interactive-btn" onclick="showMessage()">Activate Slop Shield</button>
             <div id="message"></div>
         </div>
     </div>
     <script>
         function showMessage() {
-            document.getElementById('message').textContent = 'Hello from Page 1!';
+            document.getElementById('message').textContent = 'Slop shield active! Your codebase is protected.';
         }
     </script>
 </body>
