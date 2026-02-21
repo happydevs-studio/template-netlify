@@ -145,6 +145,157 @@ tasks:
         fi
     silent: false
 
+  trivy:
+    desc: Run security scan using Trivy
+    summary: |
+      Performs security vulnerability scanning on the codebase using Trivy.
+      Scans for vulnerabilities in dependencies, secrets, and misconfigurations.
+      
+      Usage:
+        task trivy           # Run scan
+        task trivy -- -v     # Verbose output
+    cmds:
+      - task: trivy:check-tool
+      - task: trivy:scan
+      - task: trivy:report
+    silent: false
+
+  trivy:check-tool:
+    desc: Check if Trivy is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v trivy &> /dev/null; then
+          echo "📦 Installing Trivy..."
+          
+          INSTALL_SUCCESS=0
+          
+          if command -v curl &> /dev/null; then
+            echo "Installing via install script..."
+            if curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin; then
+              INSTALL_SUCCESS=1
+            fi
+          elif command -v brew &> /dev/null; then
+            echo "Trying brew..."
+            if brew install trivy; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Trivy with any available package manager"
+            echo "Please install Trivy manually:"
+            echo "  - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh"
+            echo "  - brew install trivy"
+            echo "  - https://aquasecurity.github.io/trivy/latest/getting-started/installation/"
+            exit 1
+          fi
+        fi
+        
+        # Verify installation succeeded
+        if ! command -v trivy &> /dev/null; then
+          echo "❌ Trivy installed but not found in PATH"
+          exit 1
+        fi
+        
+        TRIVY_VERSION=$(trivy --version 2>&1 | head -1)
+        echo "✅ $TRIVY_VERSION"
+    silent: false
+
+  trivy:scan:
+    desc: Run Trivy scan and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔍 Scanning for security vulnerabilities..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        # Create reports directory
+        mkdir -p .trivy-reports
+        
+        # Run trivy filesystem scan (text output for human-readable)
+        trivy fs . \
+          --exit-code 0 \
+          --severity HIGH,CRITICAL,MEDIUM,LOW \
+          --scanners vuln,secret,misconfig \
+          --skip-dirs node_modules \
+          --skip-dirs .git \
+          --format table \
+          --output ".trivy-reports/trivy-report.txt" \
+          || true
+        
+        # Run trivy filesystem scan (JSON output for machine-readable)
+        trivy fs . \
+          --exit-code 0 \
+          --severity HIGH,CRITICAL,MEDIUM,LOW \
+          --scanners vuln,secret,misconfig \
+          --skip-dirs node_modules \
+          --skip-dirs .git \
+          --format json \
+          --output ".trivy-reports/trivy-report.json" \
+          || true
+        
+        # Convert to markdown using Python
+        python3 .scripts/generate-trivy-md.py
+        
+        echo "✅ Scan complete"
+    silent: false
+
+  trivy:report:
+    desc: Display formatted Trivy scan report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🔒 SECURITY SCAN REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .trivy-reports/trivy-report.md ]; then
+          echo "❌ Trivy report not generated!"
+          echo "This indicates an error in the scan step. Check the logs above."
+          exit 1
+        fi
+        
+        cat .trivy-reports/trivy-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .trivy-reports/"
+        echo "   • trivy-report.md (human-readable)"
+        echo "   • trivy-report.json (machine-readable)"
+        echo ""
+        
+        # Check for high/critical vulnerabilities
+        if [ -f .trivy-reports/trivy-report.json ]; then
+          HIGH_CRITICAL=$(python3 -c "
+import json, sys
+try:
+    with open('.trivy-reports/trivy-report.json') as f:
+        data = json.load(f)
+    count = 0
+    for result in data.get('Results', []):
+        for vuln in result.get('Vulnerabilities') or []:
+            if vuln.get('Severity') in ('HIGH', 'CRITICAL'):
+                count += 1
+    print(count)
+except Exception:
+    print(0)
+")
+          if [ "$HIGH_CRITICAL" -gt 0 ]; then
+            echo "⚠️  Found $HIGH_CRITICAL HIGH/CRITICAL vulnerability/ies"
+            echo ""
+          else
+            echo "✅ No HIGH/CRITICAL vulnerabilities found"
+            echo ""
+          fi
+        fi
+    silent: false
+
   test:
     desc: Run Playwright tests
     cmds:
@@ -159,6 +310,11 @@ tasks:
     desc: Run complexity report generation tests
     cmds:
       - python3 tests/generate_complexity_report.test.py
+
+  test:trivy:
+    desc: Run Trivy report generation tests
+    cmds:
+      - python3 tests/generate_trivy_report.test.py
 
   start:
     desc: Start local development server
