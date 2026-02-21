@@ -1,4 +1,4 @@
-"""Tests for the OWASP report generation script."""
+"""Tests for the dependency check report generation script."""
 
 import os
 import sys
@@ -10,14 +10,14 @@ from pathlib import Path
 
 # Resolve the path to the script relative to this test file
 REPO_ROOT = Path(__file__).parent.parent
-SCRIPT_PATH = str(REPO_ROOT / ".scripts" / "generate-owasp-md.py")
+SCRIPT_PATH = str(REPO_ROOT / ".scripts" / "generate-dependency-check-md.py")
 
 
 def setup_test_env():
     """Create a temporary directory for test files."""
     tmpdir = tempfile.mkdtemp()
     os.chdir(tmpdir)
-    os.makedirs(".owasp-reports", exist_ok=True)
+    os.makedirs(".dependency-check-reports", exist_ok=True)
     return tmpdir
 
 
@@ -28,7 +28,7 @@ def teardown_test_env(tmpdir):
 
 
 def make_json_report(dependencies=None):
-    """Create a minimal valid OWASP JSON report structure."""
+    """Create a minimal valid dependency check JSON report structure."""
     return {
         "reportSchema": "1.1",
         "scanInfo": {"engineVersion": "9.0.9"},
@@ -39,7 +39,7 @@ def make_json_report(dependencies=None):
 
 def write_json_report(tmpdir, data):
     """Write JSON report to the expected path."""
-    path = os.path.join(tmpdir, ".owasp-reports", "dependency-check-report.json")
+    path = os.path.join(tmpdir, ".dependency-check-reports", "dependency-check-report.json")
     with open(path, "w") as f:
         json.dump(data, f)
 
@@ -57,7 +57,7 @@ def test_missing_json_fails():
 
         assert result.returncode != 0, "Script should fail when JSON is missing"
         assert "JSON report not found" in result.stderr, "Should report missing JSON"
-        assert not os.path.exists(".owasp-reports/owasp-report.md"), \
+        assert not os.path.exists(".dependency-check-reports/dependency-check-report.md"), \
             "Should not generate report on error"
 
         print("✅ test_missing_json_fails passed")
@@ -81,13 +81,13 @@ def test_generates_report_with_no_vulnerabilities():
         )
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
-        assert os.path.exists(".owasp-reports/owasp-report.md"), \
+        assert os.path.exists(".dependency-check-reports/dependency-check-report.md"), \
             "Should generate markdown report"
 
-        with open(".owasp-reports/owasp-report.md", "r") as f:
+        with open(".dependency-check-reports/dependency-check-report.md", "r") as f:
             content = f.read()
 
-        assert "OWASP Dependency Check Report" in content, "Should have title"
+        assert "Dependency Check Report" in content, "Should have title"
         assert "✅ Vulnerability Status" in content, "Should show clean status"
         assert "No vulnerabilities found" in content, "Should indicate no vulnerabilities"
 
@@ -140,7 +140,7 @@ def test_identifies_critical_high_vulnerabilities():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".owasp-reports/owasp-report.md", "r") as f:
+        with open(".dependency-check-reports/dependency-check-report.md", "r") as f:
             content = f.read()
 
         assert "CRITICAL Vulnerabilities" in content, "Should identify CRITICAL section"
@@ -179,7 +179,7 @@ def test_summary_counts_are_correct():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".owasp-reports/owasp-report.md", "r") as f:
+        with open(".dependency-check-reports/dependency-check-report.md", "r") as f:
             content = f.read()
 
         assert "Total vulnerabilities**: 4" in content, "Should count 4 total vulnerabilities"
@@ -208,7 +208,7 @@ def test_report_includes_guidelines():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".owasp-reports/owasp-report.md", "r") as f:
+        with open(".dependency-check-reports/dependency-check-report.md", "r") as f:
             content = f.read()
 
         assert "Guidelines" in content, "Should include guidelines"
@@ -222,7 +222,7 @@ def test_report_includes_guidelines():
 
 
 if __name__ == "__main__":
-    print("\n🧪 Running OWASP script tests...\n")
+    print("\n🧪 Running dependency check script tests...\n")
 
     try:
         test_missing_json_fails()

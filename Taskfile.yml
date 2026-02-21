@@ -145,21 +145,21 @@ tasks:
         fi
     silent: false
 
-  owasp:
-    desc: Run OWASP dependency check
+  dependency-check:
+    desc: Check dependencies for vulnerabilities
     summary: |
-      Performs OWASP dependency vulnerability analysis using Dependency-Check.
+      Performs dependency vulnerability analysis using OWASP Dependency-Check.
       Downloads Dependency-Check CLI if not already installed.
       
       Usage:
-        task owasp           # Run analysis
+        task dependency-check           # Run analysis
     cmds:
-      - task: owasp:check-tool
-      - task: owasp:analyze
-      - task: owasp:report
+      - task: dependency-check:check-tool
+      - task: dependency-check:analyze
+      - task: dependency-check:report
     silent: false
 
-  owasp:check-tool:
+  dependency-check:check-tool:
     desc: Check if OWASP Dependency-Check is installed, install if necessary
     internal: true
     cmds:
@@ -169,8 +169,8 @@ tasks:
           exit 0
         fi
         
-        if [ -f ".owasp-tool/dependency-check/bin/dependency-check.sh" ]; then
-          echo "✅ dependency-check found in .owasp-tool/"
+        if [ -f ".dependency-check-tool/dependency-check/bin/dependency-check.sh" ]; then
+          echo "✅ dependency-check found in .dependency-check-tool/"
           exit 0
         fi
         
@@ -180,21 +180,21 @@ tasks:
           exit 1
         fi
         
-        OWASP_VERSION="9.0.9"
-        echo "📦 Installing OWASP Dependency-Check ${OWASP_VERSION}..."
+        DC_VERSION="9.0.9"
+        echo "📦 Installing OWASP Dependency-Check ${DC_VERSION}..."
         
-        mkdir -p .owasp-tool
+        mkdir -p .dependency-check-tool
         
-        DOWNLOAD_URL="https://github.com/jeremylong/DependencyCheck/releases/download/v${OWASP_VERSION}/dependency-check-${OWASP_VERSION}-release.zip"
+        DOWNLOAD_URL="https://github.com/jeremylong/DependencyCheck/releases/download/v${DC_VERSION}/dependency-check-${DC_VERSION}-release.zip"
         
         INSTALL_SUCCESS=0
         
         if command -v curl &> /dev/null; then
-          if curl -sL "$DOWNLOAD_URL" -o .owasp-tool/dc.zip; then
+          if curl -sL "$DOWNLOAD_URL" -o .dependency-check-tool/dc.zip; then
             INSTALL_SUCCESS=1
           fi
         elif command -v wget &> /dev/null; then
-          if wget -q "$DOWNLOAD_URL" -O .owasp-tool/dc.zip; then
+          if wget -q "$DOWNLOAD_URL" -O .dependency-check-tool/dc.zip; then
             INSTALL_SUCCESS=1
           fi
         fi
@@ -205,15 +205,15 @@ tasks:
           exit 1
         fi
         
-        unzip -q .owasp-tool/dc.zip -d .owasp-tool
-        rm .owasp-tool/dc.zip
-        chmod +x .owasp-tool/dependency-check/bin/dependency-check.sh
+        unzip -q .dependency-check-tool/dc.zip -d .dependency-check-tool
+        rm .dependency-check-tool/dc.zip
+        chmod +x .dependency-check-tool/dependency-check/bin/dependency-check.sh
         
-        echo "✅ OWASP Dependency-Check ${OWASP_VERSION} installed to .owasp-tool/"
+        echo "✅ OWASP Dependency-Check ${DC_VERSION} installed to .dependency-check-tool/"
     silent: false
 
-  owasp:analyze:
-    desc: Run OWASP dependency check analysis
+  dependency-check:analyze:
+    desc: Run OWASP Dependency-Check analysis
     internal: true
     dir: .
     cmds:
@@ -226,63 +226,63 @@ tasks:
         # Find dependency-check command
         if command -v dependency-check &> /dev/null; then
           DC_CMD="dependency-check"
-        elif [ -f ".owasp-tool/dependency-check/bin/dependency-check.sh" ]; then
-          DC_CMD=".owasp-tool/dependency-check/bin/dependency-check.sh"
+        elif [ -f ".dependency-check-tool/dependency-check/bin/dependency-check.sh" ]; then
+          DC_CMD=".dependency-check-tool/dependency-check/bin/dependency-check.sh"
         else
-          echo "❌ dependency-check not found. Run 'task owasp' to install."
+          echo "❌ dependency-check not found. Run 'task dependency-check' to install."
           exit 1
         fi
         
         # Create reports directory
-        mkdir -p .owasp-reports
+        mkdir -p .dependency-check-reports
         
         # Run dependency-check
         "$DC_CMD" \
           --project "template-netlify" \
           --scan . \
           --exclude ".git/**" \
-          --exclude ".owasp-tool/**" \
+          --exclude ".dependency-check-tool/**" \
           --exclude "node_modules/**" \
-          --exclude ".owasp-reports/**" \
+          --exclude ".dependency-check-reports/**" \
           --format JSON \
-          --out ".owasp-reports" \
+          --out ".dependency-check-reports" \
           || true
         
         # Convert to markdown
-        python3 .scripts/generate-owasp-md.py
+        python3 .scripts/generate-dependency-check-md.py
         
-        echo "✅ OWASP analysis complete"
+        echo "✅ Dependency check analysis complete"
     silent: false
 
-  owasp:report:
-    desc: Display formatted OWASP report
+  dependency-check:report:
+    desc: Display formatted dependency check report
     internal: true
     cmds:
       - |
         echo ""
-        echo "🔒 OWASP DEPENDENCY CHECK REPORT"
+        echo "🔒 DEPENDENCY CHECK REPORT"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
         
-        if [ ! -f .owasp-reports/owasp-report.md ]; then
-          echo "❌ OWASP report not generated!"
+        if [ ! -f .dependency-check-reports/dependency-check-report.md ]; then
+          echo "❌ Dependency check report not generated!"
           echo "This indicates an error in the analysis step. Check the logs above."
           exit 1
         fi
         
-        cat .owasp-reports/owasp-report.md
+        cat .dependency-check-reports/dependency-check-report.md
         
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
-        echo "📁 Reports saved to: .owasp-reports/"
-        echo "   • owasp-report.md (human-readable)"
+        echo "📁 Reports saved to: .dependency-check-reports/"
+        echo "   • dependency-check-report.md (human-readable)"
         echo "   • dependency-check-report.json (machine-readable)"
         echo ""
         
         # Check for CRITICAL/HIGH vulnerabilities
-        if [ -f .owasp-reports/dependency-check-report.json ]; then
-          HIGH_COUNT=$(python3 -c "import json; data=json.load(open('.owasp-reports/dependency-check-report.json')); print(sum(1 for dep in data.get('dependencies',[]) for v in dep.get('vulnerabilities',[]) if v.get('severity','').upper() in ('CRITICAL','HIGH')))" 2>/dev/null || echo "0")
+        if [ -f .dependency-check-reports/dependency-check-report.json ]; then
+          HIGH_COUNT=$(python3 -c "import json; data=json.load(open('.dependency-check-reports/dependency-check-report.json')); print(sum(1 for dep in data.get('dependencies',[]) for v in dep.get('vulnerabilities',[]) if v.get('severity','').upper() in ('CRITICAL','HIGH')))" 2>/dev/null || echo "0")
           if [ "$HIGH_COUNT" -gt 0 ]; then
             echo "⚠️  Found $HIGH_COUNT CRITICAL/HIGH vulnerability(ies)"
             echo ""
@@ -308,10 +308,10 @@ tasks:
     cmds:
       - python3 tests/generate_complexity_report.test.py
 
-  test:owasp:
-    desc: Run OWASP report generation tests
+  test:dependency-check:
+    desc: Run dependency check report generation tests
     cmds:
-      - python3 tests/generate_owasp_report.test.py
+      - python3 tests/generate_dependency_check_report.test.py
 
   start:
     desc: Start local development server

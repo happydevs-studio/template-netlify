@@ -1,12 +1,12 @@
-# OWASP Dependency Check Workflow Configuration
+# Dependency Check Workflow Configuration
 
-This template includes automated dependency vulnerability scanning using **OWASP Dependency-Check** to help maintain security. This guide explains how to customize and use this feature for your cloned repository.
+This template includes automated dependency vulnerability scanning to help maintain security. This guide explains how to customize and use this feature for your cloned repository.
 
 ## Quick Start
 
 ### Check Dependencies Locally
 ```bash
-task owasp
+task dependency-check
 ```
 
 ### What You Get Automatically
@@ -18,9 +18,9 @@ task owasp
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/owasp-check.yml` |
-| Need different threshold? | Update severity check in `.github/workflows/owasp-check.yml` and `Taskfile.yml` |
-| Don't want OWASP checks? | Delete `.github/workflows/owasp-check.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/dependency-check.yml` |
+| Need different threshold? | Update severity check in `.github/workflows/dependency-check.yml` and `Taskfile.yml` |
+| Don't want dependency checks? | Delete `.github/workflows/dependency-check.yml` |
 | NVD rate limiting? | Add `NVD_API_KEY` repository secret (see below) |
 
 ### Severity Reference
@@ -36,7 +36,7 @@ task owasp
 
 ## Overview
 
-The OWASP workflow:
+The dependency check workflow:
 - ✅ Runs automatically on every PR to `main` and push to `main`
 - ✅ Scans all project dependencies for known CVEs
 - ✅ Posts vulnerability reports as PR comments
@@ -47,10 +47,10 @@ The OWASP workflow:
 
 | File | Purpose | Customization |
 |------|---------|---------------|
-| [`.github/workflows/owasp-check.yml`](.github/workflows/owasp-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
+| [`.github/workflows/dependency-check.yml`](.github/workflows/dependency-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
 | [`Taskfile.yml`](Taskfile.yml) | Local task runner config | Tool installation, scan exclusions |
-| [`.scripts/generate-owasp-md.py`](.scripts/generate-owasp-md.py) | Report generator | Markdown formatting, severity handling |
-| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.owasp-reports/` and `.owasp-tool/` |
+| [`.scripts/generate-dependency-check-md.py`](.scripts/generate-dependency-check-md.py) | Report generator | Markdown formatting, severity handling |
+| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.dependency-check-reports/` and `.dependency-check-tool/` |
 
 ## Key Configuration Points
 
@@ -58,7 +58,7 @@ The OWASP workflow:
 
 The workflow blocks merges on CRITICAL and HIGH vulnerabilities. To change this:
 
-In `.github/workflows/owasp-check.yml`, update the Python snippet in the `Check for CRITICAL/HIGH vulnerabilities` step:
+In `.github/workflows/dependency-check.yml`, update the Python snippet in the `Check for CRITICAL/HIGH vulnerabilities` step:
 
 ```python
 # Change which severities trigger a failure
@@ -66,22 +66,22 @@ if v.get('severity', '').upper() in ('CRITICAL', 'HIGH'):  # ← Add/remove seve
     count += 1
 ```
 
-Also update the same check in `Taskfile.yml` (`owasp:report` task).
+Also update the same check in `Taskfile.yml` (`dependency-check:report` task).
 
 ### 2. **File/Directory Exclusions**
 
-Edit the `owasp:analyze` task in `Taskfile.yml`:
+Edit the `dependency-check:analyze` task in `Taskfile.yml`:
 
 ```yaml
 "$DC_CMD" \
   --project "template-netlify" \
   --scan . \
   --exclude ".git/**" \
-  --exclude ".owasp-tool/**" \
+  --exclude ".dependency-check-tool/**" \
   --exclude "node_modules/**" \    # ← Add/remove exclusions
-  --exclude ".owasp-reports/**" \
+  --exclude ".dependency-check-reports/**" \
   --format JSON \
-  --out ".owasp-reports"
+  --out ".dependency-check-reports"
 ```
 
 ### 3. **NVD API Key (Optional)**
@@ -90,14 +90,14 @@ OWASP Dependency-Check downloads the NVD (National Vulnerability Database) for u
 
 1. Get a free API key at https://nvd.nist.gov/developers/request-an-api-key
 2. Add it as a GitHub repository secret named `NVD_API_KEY`
-3. Update the workflow step in `.github/workflows/owasp-check.yml`:
+3. Update the workflow step in `.github/workflows/dependency-check.yml`:
 
 ```yaml
-- name: Run OWASP analysis
+- name: Run dependency check analysis
   env:
     NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
   run: |
-    task owasp
+    task dependency-check
 ```
 
 And in `Taskfile.yml`, pass it to dependency-check:
@@ -108,12 +108,12 @@ And in `Taskfile.yml`, pass it to dependency-check:
   ...
 ```
 
-### 4. **OWASP Dependency-Check Version**
+### 4. **Dependency-Check Version**
 
-The version is pinned in `Taskfile.yml` and `.github/workflows/owasp-check.yml`:
+The version is pinned in `Taskfile.yml` and `.github/workflows/dependency-check.yml`:
 
 ```bash
-OWASP_VERSION="9.0.9"  # ← Update to use a newer release
+DC_VERSION="9.0.9"  # ← Update to use a newer release
 ```
 
 Check releases at: https://github.com/jeremylong/DependencyCheck/releases
@@ -126,7 +126,7 @@ Check releases at: https://github.com/jeremylong/DependencyCheck/releases
 | **Push to main** | Posts report, creates GitHub issue if vulnerabilities found |
 | **Workflow Dispatch** | Manual run for verification |
 
-To disable PR failures (warnings only), edit `.github/workflows/owasp-check.yml`:
+To disable PR failures (warnings only), edit `.github/workflows/dependency-check.yml`:
 
 ```yaml
 # Remove or comment out the last step:
@@ -134,17 +134,17 @@ To disable PR failures (warnings only), edit `.github/workflows/owasp-check.yml`
 #   if: steps.check-vulns.outputs.high_vulns_found == '1'
 ```
 
-### 6. **Disable OWASP Checking**
+### 6. **Disable Dependency Checking**
 
 **Option A:** Disable the workflow in GitHub UI
-- Go to Actions → OWASP Dependency Check → Disable workflow
+- Go to Actions → Dependency Check → Disable workflow
 
 **Option B:** Delete the workflow file
 ```bash
-rm .github/workflows/owasp-check.yml
+rm .github/workflows/dependency-check.yml
 ```
 
-## Running OWASP Analysis Locally
+## Running Dependency Check Locally
 
 Before pushing code, analyze dependencies locally:
 
@@ -152,13 +152,13 @@ Before pushing code, analyze dependencies locally:
 # Install Task (one-time setup)
 curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
 
-# Run analysis (downloads Dependency-Check on first run)
-task owasp
+# Run analysis (downloads dependency-check tool on first run)
+task dependency-check
 ```
 
 This generates:
-- `.owasp-reports/owasp-report.md` — Human-readable vulnerability report
-- `.owasp-reports/dependency-check-report.json` — Machine-readable report
+- `.dependency-check-reports/dependency-check-report.md` — Human-readable vulnerability report
+- `.dependency-check-reports/dependency-check-report.json` — Machine-readable report
 
 > **Note:** The first run downloads the NVD database (several hundred MB) and may take several minutes. Subsequent runs use a cached database.
 
@@ -166,14 +166,14 @@ This generates:
 
 When CRITICAL/HIGH vulnerabilities are detected on pushes to `main`:
 
-1. A GitHub issue is created automatically with label `owasp-vulnerability`
+1. A GitHub issue is created automatically with label `dependency-vulnerability`
 2. Contains link to workflow run and vulnerability report
 3. Includes reproduction steps and guidelines
 4. Future detections comment on the same issue
 
 **To resolve:**
 1. Update the vulnerable dependency to a patched version
-2. Run `task owasp` locally to verify the vulnerability is resolved
+2. Run `task dependency-check` locally to verify the vulnerability is resolved
 3. Open a PR with the updated dependency
 4. CI will verify no CRITICAL/HIGH vulnerabilities remain
 5. After merge, close the GitHub issue
@@ -196,10 +196,10 @@ If the database download fails:
 
 ### Reports Not Generated
 
-If `.owasp-reports/` directory is empty:
+If `.dependency-check-reports/` directory is empty:
 1. Check workflow logs for errors
 2. Verify Java is available: `java -version`
-3. Check that `.owasp-reports/` is not excluded by `.gitignore` (it shouldn't be tracked, just excluded)
+3. Check that `.dependency-check-reports/` is not excluded by `.gitignore` (it shouldn't be tracked, just excluded)
 
 ## For More Information
 
