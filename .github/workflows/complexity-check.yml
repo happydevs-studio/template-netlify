@@ -94,12 +94,16 @@ jobs:
           fi
       
       - name: Upload complexity reports
-        if: success()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: complexity-reports
-          path: .complexity-reports/
+          path: |
+            .complexity-reports/complexity-report.md
+            .complexity-reports/complexity-report.csv
+            .complexity-reports/complexity-report-raw.txt
           retention-days: 30
+          if-no-files-found: warn
       
       - name: Comment on PR with complexity report
         if: github.event_name == 'pull_request'
