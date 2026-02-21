@@ -145,6 +145,129 @@ tasks:
         fi
     silent: false
 
+  gitleaks:
+    desc: Scan repository for secrets using Gitleaks
+    summary: |
+      Scans the git repository for hardcoded secrets, API keys, and credentials.
+      Generates a JSON report and a human-readable Markdown report.
+
+      Usage:
+        task gitleaks           # Run scan
+    cmds:
+      - task: gitleaks:check-tool
+      - task: gitleaks:scan
+      - task: gitleaks:report
+    silent: false
+
+  gitleaks:check-tool:
+    desc: Check if Gitleaks is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v gitleaks &> /dev/null; then
+          echo "📦 Installing Gitleaks..."
+
+          INSTALL_SUCCESS=0
+
+          if command -v brew &> /dev/null; then
+            echo "Trying brew..."
+            if brew install gitleaks; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "Trying GitHub releases..."
+            OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+            ARCH=$(uname -m)
+            if [ "$ARCH" = "x86_64" ]; then ARCH="x64"; fi
+            if [ "$ARCH" = "aarch64" ]; then ARCH="arm64"; fi
+            LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
+            VERSION=${LATEST#v}
+            URL="https://github.com/gitleaks/gitleaks/releases/download/${LATEST}/gitleaks_${VERSION}_${OS}_${ARCH}.tar.gz"
+            echo "Downloading $URL..."
+            if curl -sL "$URL" -o /tmp/gitleaks.tar.gz && \
+               tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks && \
+               sudo mv /tmp/gitleaks /usr/local/bin/gitleaks; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Gitleaks"
+            echo "Please install Gitleaks manually:"
+            echo "  - brew install gitleaks"
+            echo "  - https://github.com/gitleaks/gitleaks/releases"
+            exit 1
+          fi
+        fi
+
+        GITLEAKS_VERSION=$(gitleaks version 2>&1)
+        echo "✅ Gitleaks $GITLEAKS_VERSION"
+    silent: false
+
+  gitleaks:scan:
+    desc: Run Gitleaks scan and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔍 Scanning for secrets..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+
+        mkdir -p .gitleaks-reports
+
+        # Run gitleaks and output JSON report (exit code 1 if leaks found, 0 if clean)
+        set +e
+        gitleaks detect \
+          --source . \
+          --report-format json \
+          --report-path .gitleaks-reports/gitleaks-report.json \
+          --exit-code 1
+        GITLEAKS_EXIT=$?
+        set -e
+
+        # Ensure the JSON report exists even when no leaks are found
+        if [ ! -f .gitleaks-reports/gitleaks-report.json ]; then
+          echo "[]" > .gitleaks-reports/gitleaks-report.json
+        fi
+
+        # Convert to markdown using Python
+        python3 .scripts/generate-gitleaks-report.py
+
+        echo "✅ Scan complete (exit code: $GITLEAKS_EXIT)"
+        exit $GITLEAKS_EXIT
+    silent: false
+
+  gitleaks:report:
+    desc: Display formatted secrets scan report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🔐 SECRETS SCAN REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+
+        if [ ! -f .gitleaks-reports/gitleaks-report.md ]; then
+          echo "❌ Secrets report not generated!"
+          echo "This indicates an error in the scan step. Check the logs above."
+          exit 1
+        fi
+
+        cat .gitleaks-reports/gitleaks-report.md
+
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .gitleaks-reports/"
+        echo "   • gitleaks-report.md (human-readable)"
+        echo "   • gitleaks-report.json (machine-readable)"
+        echo ""
+    silent: false
+
   test:
     desc: Run Playwright tests
     cmds:
@@ -154,6 +277,11 @@ tasks:
     desc: Run Playwright tests with headed browser
     cmds:
       - npx playwright test --headed {{.CLI_ARGS}}
+
+  test:gitleaks:
+    desc: Run gitleaks report generation tests
+    cmds:
+      - python3 tests/generate_gitleaks_report.test.py
 
   test:complexity:
     desc: Run complexity report generation tests

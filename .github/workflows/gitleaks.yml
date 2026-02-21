@@ -1,0 +1,167 @@
+name: Secrets Scan
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  gitleaks:
+    name: Scan for Secrets with Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Gitleaks
+        run: |
+          set -e
+          LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep '"tag_name"' | cut -d '"' -f 4)
+          VERSION=${LATEST#v}
+          URL="https://github.com/gitleaks/gitleaks/releases/download/${LATEST}/gitleaks_${VERSION}_linux_x64.tar.gz"
+          echo "Downloading Gitleaks $LATEST from $URL"
+          curl -sL "$URL" -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          sudo mv /tmp/gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+        shell: bash
+
+      - name: Install Task
+        run: |
+          curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
+          task --version
+
+      - name: Run secrets scan
+        id: gitleaks
+        run: |
+          set +e
+          task gitleaks
+          echo "leaks_found=$?" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Check report generated
+        run: |
+          if [ ! -f .gitleaks-reports/gitleaks-report.md ]; then
+            echo "❌ Failed to generate secrets report"
+            exit 1
+          fi
+
+          echo "✅ Secrets report generated successfully"
+
+      - name: Upload secrets reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gitleaks-reports
+          path: |
+            .gitleaks-reports/gitleaks-report.md
+            .gitleaks-reports/gitleaks-report.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Comment on PR with secrets report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let reportContent = '## 🔐 Secrets Scan Results\n\n';
+
+            try {
+              const markdownReport = fs.readFileSync('.gitleaks-reports/gitleaks-report.md', 'utf8');
+              reportContent += markdownReport + '\n\n';
+            } catch (e) {
+              reportContent += '**Could not read secrets report.** See workflow artifacts for details.\n\n';
+            }
+
+            reportContent += '### 🔍 How to Check Locally\n\n';
+            reportContent += '```bash\n';
+            reportContent += 'task gitleaks\n';
+            reportContent += '```\n\n';
+            reportContent += '[Full reports available in workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (`.gitleaks-reports/` directory)\n';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: reportContent
+            });
+
+      - name: Create/Update issue on main branch when secrets found
+        if: steps.gitleaks.outputs.leaks_found != '0' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const title = '🔴 Secrets Detected in Main Branch';
+            let body = '## Secrets Scan Failed\n\n';
+            body += `**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\n`;
+            body += `**Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n`;
+
+            try {
+              const markdownReport = fs.readFileSync('.gitleaks-reports/gitleaks-report.md', 'utf8');
+              body += '## Report\n\n' + markdownReport + '\n\n';
+            } catch (e) {
+              body += 'See workflow artifacts for detailed reports.\n\n';
+            }
+
+            body += '## Reproduction Steps\n\n';
+            body += '```bash\n';
+            body += '# Install Task (one-time)\n';
+            body += 'curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin\n\n';
+            body += '# Run scan locally\n';
+            body += 'task gitleaks\n';
+            body += '```\n\n';
+            body += '## Guidelines\n\n';
+            body += '- **Immediately rotate** any exposed secrets—removal from git history is not enough\n';
+            body += '- Use environment variables or a secret manager instead of hardcoding credentials\n';
+            body += '- Add a `.gitleaksignore` file to suppress known false positives\n';
+
+            // Check for existing open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['secrets-detected']
+            });
+
+            if (issues.data.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['secrets-detected', 'security']
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `## New Report\n\n${new Date().toISOString()}\n\n${body}`
+              });
+            }
+
+      - name: Fail job if secrets found
+        if: steps.gitleaks.outputs.leaks_found != '0'
+        run: |
+          echo "❌ Secrets detected in repository"
+          echo "Please review the report above, remove the secrets, and rotate any exposed credentials"
+          exit 1
