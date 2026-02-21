@@ -2,4 +2,6 @@ node_modules/
 playwright-report/
 test-results/
 .complexity-reports/
-.security-reports/
+.sast-reports/
+.dependencies-reports/
+.dast-reports/

@@ -1,4 +1,4 @@
-name: Security Analysis
+name: Dependency Vulnerability Scan
 
 on:
   pull_request:
@@ -13,8 +13,8 @@ permissions:
   issues: write
 
 jobs:
-  security:
-    name: Check Code Security with Semgrep
+  dependencies:
+    name: Scan Dependencies with Trivy
     runs-on: ubuntu-latest
 
     steps:
@@ -26,12 +26,11 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install Semgrep
+      - name: Install Trivy
         run: |
           set -e
-          pip install --upgrade pip
-          pip install semgrep
-          semgrep --version
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          trivy --version
         shell: bash
 
       - name: Install Task
@@ -39,42 +38,46 @@ jobs:
           curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
           task --version
 
-      - name: Run security analysis
-        id: security
+      - name: Run dependency scan
+        id: dependencies
         run: |
-          task security
+          task dependencies
 
       - name: Check reports generated
         run: |
-          if [ ! -f .security-reports/security-report.md ]; then
-            echo "❌ Failed to generate security report"
+          if [ ! -f .dependencies-reports/dependencies-report.md ]; then
+            echo "❌ Failed to generate dependencies report"
             exit 1
           fi
 
-          echo "✅ Security reports generated successfully"
+          echo "✅ Dependency reports generated successfully"
 
-      - name: Check for error-severity findings
-        id: check-security
+      - name: Check for critical/high vulnerabilities
+        id: check-dependencies
         run: |
           set +e
-          ERRORS_FOUND=0
+          VULNS_FOUND=0
 
-          if [ -f .security-reports/security-report.json ]; then
-            ERROR_COUNT=$(python3 -c "
+          if [ -f .dependencies-reports/dependencies-report.json ]; then
+            VULN_COUNT=$(python3 -c "
           import json, sys
-          with open('.security-reports/security-report.json') as f:
+          with open('.dependencies-reports/dependencies-report.json') as f:
             data = json.load(f)
-          errors = [r for r in data.get('results', []) if r.get('extra', {}).get('severity', '').upper() == 'ERROR']
-          print(len(errors))
+          count = 0
+          for result in data.get('Results', []):
+            for v in result.get('Vulnerabilities', []):
+              if v.get('Severity', '').upper() in ('CRITICAL', 'HIGH'):
+                count += 1
+          print(count)
           " 2>/dev/null || echo "0")
-            if [ "$ERROR_COUNT" -gt 0 ]; then
-              ERRORS_FOUND=1
-              echo "⚠️  Found $ERROR_COUNT error-severity finding(s)"
+            if [ "$VULN_COUNT" -gt 0 ]; then
+              VULNS_FOUND=1
+              echo "⚠️  Found $VULN_COUNT CRITICAL/HIGH vulnerability(ies)"
             fi
           fi
 
           set -e
-          echo "errors_found=$ERRORS_FOUND" >> $GITHUB_OUTPUT
+          echo "vulns_found=$VULNS_FOUND" >> $GITHUB_OUTPUT
 
       - name: Debug - Check directory contents before upload
         if: always()
@@ -84,49 +87,49 @@ jobs:
           echo "📍 Current working directory:"
           pwd
           echo ""
-          echo "📂 Checking .security-reports/:"
-          if [ -d .security-reports ]; then
+          echo "📂 Checking .dependencies-reports/:"
+          if [ -d .dependencies-reports ]; then
             echo "✅ Directory exists"
-            ls -la .security-reports/
+            ls -la .dependencies-reports/
             echo ""
-            echo "Content of security-report.md (first 10 lines):"
-            cat .security-reports/security-report.md | head -10 || echo "File not readable"
+            echo "Content of dependencies-report.md (first 10 lines):"
+            cat .dependencies-reports/dependencies-report.md | head -10 || echo "File not readable"
           else
-            echo "❌ Directory .security-reports does not exist"
+            echo "❌ Directory .dependencies-reports does not exist"
           fi
 
-      - name: Upload security reports
+      - name: Upload dependency reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-reports
+          name: dependencies-reports
           path: |
-            .security-reports/security-report.md
-            .security-reports/security-report.json
+            .dependencies-reports/dependencies-report.md
+            .dependencies-reports/dependencies-report.json
           retention-days: 30
           if-no-files-found: warn
 
-      - name: Comment on PR with security report
+      - name: Comment on PR with dependency report
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
 
-            let reportContent = '## 🔒 Security Analysis\n\n';
+            let reportContent = '## 📦 Dependency Vulnerability Scan\n\n';
 
             try {
-              const markdownReport = fs.readFileSync('.security-reports/security-report.md', 'utf8');
+              const markdownReport = fs.readFileSync('.dependencies-reports/dependencies-report.md', 'utf8');
               reportContent += markdownReport + '\n\n';
             } catch (e) {
-              reportContent += '**Could not read security report.** See workflow artifacts for details.\n\n';
+              reportContent += '**Could not read dependency report.** See workflow artifacts for details.\n\n';
             }
 
             reportContent += '### 🔍 How to Check Locally\n\n';
             reportContent += '```bash\n';
-            reportContent += 'task security\n';
+            reportContent += 'task dependencies\n';
             reportContent += '```\n\n';
-            reportContent += '[Full reports available in workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (`.security-reports/` directory)\n';
+            reportContent += '[Full reports available in workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (`.dependencies-reports/` directory)\n';
 
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -135,20 +138,20 @@ jobs:
               body: reportContent
             });
 
-      - name: Create/Update issue on main branch with error findings
-        if: steps.check-security.outputs.errors_found == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Create/Update issue on main branch with critical/high vulnerabilities
+        if: steps.check-dependencies.outputs.vulns_found == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
 
-            const title = '⚠️ Security Issues in Main Branch';
-            let body = '## Security Analysis Found Issues\n\n';
+            const title = '⚠️ Dependency Vulnerabilities in Main Branch';
+            let body = '## Dependency Scan Found Vulnerabilities\n\n';
             body += `**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\n`;
             body += `**Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n`;
 
             try {
-              const markdownReport = fs.readFileSync('.security-reports/security-report.md', 'utf8');
+              const markdownReport = fs.readFileSync('.dependencies-reports/dependencies-report.md', 'utf8');
               body += '## Report\n\n' + markdownReport + '\n\n';
             } catch (e) {
               body += 'See workflow artifacts for detailed reports.\n\n';
@@ -158,32 +161,30 @@ jobs:
             body += '```bash\n';
             body += '# Install Task (one-time)\n';
             body += 'curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin\n\n';
-            body += '# Run analysis locally\n';
-            body += 'task security\n';
+            body += '# Run dependency scan locally\n';
+            body += 'task dependencies\n';
             body += '```\n\n';
             body += '## Guidelines\n\n';
-            body += '- **Error severity**: Must be reviewed and addressed\n';
-            body += '- **Warning severity**: Should be reviewed; may indicate potential issues\n';
+            body += '- **CRITICAL/HIGH**: Update or replace the vulnerable package\n';
+            body += '- **MEDIUM/LOW**: Review and plan remediation\n';
 
             // Check for existing open issue
             const issues = await github.rest.issues.listForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open',
-              labels: ['security']
+              labels: ['dependencies']
             });
 
             if (issues.data.length === 0) {
-              // Create new issue
               await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: title,
                 body: body,
-                labels: ['security', 'technical-debt']
+                labels: ['dependencies', 'security']
               });
             } else {
-              // Update existing issue
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
@@ -192,9 +193,9 @@ jobs:
               });
             }
 
-      - name: Fail job if error-severity findings found
-        if: steps.check-security.outputs.errors_found == '1'
+      - name: Fail job if critical/high vulnerabilities found
+        if: steps.check-dependencies.outputs.vulns_found == '1'
         run: |
-          echo "❌ Security error-severity findings detected"
-          echo "Please review the security report above and address error-severity findings"
+          echo "❌ CRITICAL/HIGH dependency vulnerabilities detected"
+          echo "Please review the dependency report above and update vulnerable packages"
           exit 1
