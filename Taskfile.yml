@@ -76,7 +76,7 @@ tasks:
           || true
         
         # Convert to markdown using Python
-        python3 .github/scripts/generate-complexity-md.py
+        python3 .scripts/generate-complexity-md.py
         
         echo "✅ Analysis complete"
     silent: false
@@ -91,12 +91,13 @@ tasks:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
         
-        if [ -f .complexity-reports/complexity-report.md ]; then
-          cat .complexity-reports/complexity-report.md
-        else
-          echo "❌ No report generated"
+        if [ ! -f .complexity-reports/complexity-report.md ]; then
+          echo "❌ Complexity report not generated!"
+          echo "This indicates an error in the analysis step. Check the logs above."
           exit 1
         fi
+        
+        cat .complexity-reports/complexity-report.md
         
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -128,6 +129,11 @@ tasks:
     desc: Run Playwright tests with headed browser
     cmds:
       - npx playwright test --headed {{.CLI_ARGS}}
+
+  test:complexity:
+    desc: Run complexity report generation tests
+    cmds:
+      - python3 tests/generate_complexity_report.test.py
 
   start:
     desc: Start local development server

@@ -59,7 +59,7 @@ jobs:
           echo "high_complexity_found=$HIGH_COMPLEXITY_FOUND" >> $GITHUB_OUTPUT
       
       - name: Upload complexity reports
-        if: always()
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: complexity-reports
