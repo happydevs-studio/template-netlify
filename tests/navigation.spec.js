@@ -1,67 +1,67 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Navigation Tests', () => {
-  test('should navigate from home to page 2', async ({ page }) => {
+  test('should navigate from home to Code Quality page', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Slop Stopper');
     
-    // Click on Page 2 link
+    // Click on Code Quality link
     await page.click('#nav-page2');
     await expect(page).toHaveURL(/.*page2.html/);
-    await expect(page).toHaveTitle('Page 2');
+    await expect(page).toHaveTitle('Code Quality');
   });
 
-  test('should navigate from home to page 3', async ({ page }) => {
+  test('should navigate from home to Testing & Docs page', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Slop Stopper');
     
-    // Click on Page 3 link
+    // Click on Testing & Docs link
     await page.click('#nav-page3');
     await expect(page).toHaveURL(/.*page3.html/);
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('Testing & Docs');
   });
 
-  test('should navigate from page 2 to page 3', async ({ page }) => {
+  test('should navigate from Code Quality to Testing & Docs', async ({ page }) => {
     await page.goto('/page2.html');
-    await expect(page).toHaveTitle('Page 2');
+    await expect(page).toHaveTitle('Code Quality');
     
-    // Click on Page 3 link
+    // Click on Testing & Docs link
     await page.click('#nav-page3');
     await expect(page).toHaveURL(/.*page3.html/);
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('Testing & Docs');
   });
 
-  test('should navigate from page 3 to home', async ({ page }) => {
+  test('should navigate from Testing & Docs to home', async ({ page }) => {
     await page.goto('/page3.html');
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('Testing & Docs');
     
     // Click on Home link
     await page.click('#nav-home');
     await expect(page).toHaveURL(/.*index.html/);
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Slop Stopper');
   });
 
   test('should navigate through all pages in sequence', async ({ page }) => {
     // Start at home
     await page.goto('/');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Slop Stopper');
     
-    // Navigate to Page 2
+    // Navigate to Code Quality
     await page.click('#nav-page2');
-    await expect(page).toHaveTitle('Page 2');
+    await expect(page).toHaveTitle('Code Quality');
     
-    // Navigate to Page 3
+    // Navigate to Testing & Docs
     await page.click('#nav-page3');
-    await expect(page).toHaveTitle('Page 3');
+    await expect(page).toHaveTitle('Testing & Docs');
     
     // Navigate back to Home
     await page.click('#nav-home');
-    await expect(page).toHaveTitle('Hello World');
+    await expect(page).toHaveTitle('Slop Stopper');
   });
 });
 
 test.describe('Interactive Elements Tests', () => {
-  test('home page button should display message', async ({ page }) => {
+  test('home page button should activate slop stopper', async ({ page }) => {
     await page.goto('/');
     
     // Click the button
@@ -69,22 +69,22 @@ test.describe('Interactive Elements Tests', () => {
     
     // Check if message is displayed
     const message = await page.locator('#message').textContent();
-    expect(message).toBe('Hello from Page 1!');
+    expect(message).toBe('Slop stopper activated! Your codebase is defended.');
   });
 
-  test('page 2 input should greet user', async ({ page }) => {
+  test('Code Quality page input should audit package', async ({ page }) => {
     await page.goto('/page2.html');
     
     // Fill in the input
-    await page.fill('#text-input', 'Alice');
+    await page.fill('#text-input', 'lodash');
     await page.click('#submit-btn');
     
-    // Check if greeting is displayed
+    // Check if audit message is displayed
     const output = await page.locator('#output').textContent();
-    expect(output).toBe('Hello, Alice! Welcome to Page 2!');
+    expect(output).toBe('Auditing lodash... run npm audit for real results!');
   });
 
-  test('page 3 counter should increment and decrement', async ({ page }) => {
+  test('Testing & Docs counter should increment and decrement', async ({ page }) => {
     await page.goto('/page3.html');
     
     // Check initial counter value
@@ -112,3 +112,4 @@ test.describe('Interactive Elements Tests', () => {
     expect(counter).toBe('0');
   });
 });
+

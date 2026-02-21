@@ -3,102 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page 2</title>
+    <title>Code Quality</title>
     <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
-            height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            min-height: 100vh;
+        }
+
+        .hero {
+            background:
+                radial-gradient(ellipse at 30% 30%, rgba(255,149,0,0.2) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 70%, rgba(255,45,85,0.1) 0%, transparent 60%),
+                #0a0a0f;
+            padding: 3rem 1rem 2.5rem;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff9500, #ffcc02);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 1.75rem;
+        }
+
+        nav {
             display: flex;
             justify-content: center;
-            align-items: center;
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
-        .container {
-            text-align: center;
-            color: white;
-        }
-        h1 {
-            font-size: 4rem;
-            margin: 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        p {
-            font-size: 1.5rem;
-            margin-top: 1rem;
-            opacity: 0.9;
-        }
-        nav {
-            margin-top: 2rem;
-        }
+
         nav a {
             color: white;
             text-decoration: none;
-            margin: 0 1rem;
-            padding: 0.5rem 1.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 5px;
-            transition: background 0.3s;
-            display: inline-block;
+            padding: 0.55rem 1.4rem;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 100px;
+            font-size: 0.95rem;
+            transition: background 0.25s, border-color 0.25s, box-shadow 0.25s;
         }
+
         nav a:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255,149,0,0.2);
+            border-color: #ff9500;
+            box-shadow: 0 0 16px rgba(255,149,0,0.35);
         }
+
+        .main {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 3rem;
+        }
+
+        .card {
+            background: linear-gradient(145deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card:nth-child(1) { border-left: 4px solid #ff9500; }
+        .card:nth-child(2) { border-left: 4px solid #ff2d55; }
+
+        .card h2 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .card:nth-child(1) h2 { color: #ff9500; }
+        .card:nth-child(2) h2 { color: #ff2d55; }
+
+        .badges {
+            display: flex;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.1rem;
+        }
+
+        .badge {
+            padding: 0.3rem 0.85rem;
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .badge-green  { background: rgba(48,209,88,0.18);  color: #30d158; border: 1px solid #30d158; }
+        .badge-yellow { background: rgba(255,204,0,0.18);  color: #ffcc02; border: 1px solid #ffcc02; }
+        .badge-red    { background: rgba(255,45,85,0.18);  color: #ff2d55; border: 1px solid #ff2d55; }
+
+        .card ul {
+            list-style: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.55rem;
+        }
+
+        .card ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.6rem;
+            color: rgba(255,255,255,0.82);
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        .card:nth-child(1) ul li::before { content: '→'; color: #ff9500; font-weight: bold; flex-shrink: 0; }
+        .card:nth-child(2) ul li::before { content: '→'; color: #ff2d55; font-weight: bold; flex-shrink: 0; }
+
+        code {
+            background: rgba(255,255,255,0.12);
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: 'Courier New', monospace;
+        }
+
         .interactive {
+            text-align: center;
             margin-top: 2rem;
         }
+
+        .input-row {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
         input[type="text"] {
-            padding: 0.7rem;
+            padding: 0.75rem 1rem;
             font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            width: 200px;
+            border: 2px solid rgba(255,255,255,0.15);
+            border-radius: 10px;
+            width: 220px;
+            background: rgba(255,255,255,0.07);
+            color: white;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
         }
+
+        input[type="text"]::placeholder { color: rgba(255,255,255,0.38); }
+
+        input[type="text"]:focus {
+            border-color: #ff9500;
+            box-shadow: 0 0 0 3px rgba(255,149,0,0.15);
+        }
+
         button {
-            padding: 0.7rem 2rem;
+            padding: 0.75rem 1.75rem;
             font-size: 1rem;
-            background: white;
-            color: #764ba2;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ff9500, #ffcc02);
+            color: #0a0a0f;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: transform 0.2s;
-            margin-left: 0.5rem;
+            box-shadow: 0 4px 16px rgba(255,149,0,0.38);
+            transition: transform 0.2s, box-shadow 0.2s;
         }
+
         button:hover {
-            transform: scale(1.05);
+            transform: scale(1.06);
+            box-shadow: 0 6px 28px rgba(255,149,0,0.55);
         }
+
         #output {
             margin-top: 1rem;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             min-height: 1.5rem;
+            color: #ff9500;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Page 2</h1>
-        <p>This is the second page with a text input!</p>
+    <div class="hero">
+        <h1>📐 Code Quality</h1>
+        <p class="tagline">Complexity analysis &amp; dependency hygiene</p>
         <nav>
             <a href="index.html" id="nav-home">Home</a>
-            <a href="page2.html" id="nav-page2">Page 2</a>
-            <a href="page3.html" id="nav-page3">Page 3</a>
+            <a href="page2.html" id="nav-page2">Code Quality</a>
+            <a href="page3.html" id="nav-page3">Testing &amp; Docs</a>
         </nav>
+    </div>
+
+    <div class="main">
+        <div class="card">
+            <h2>📐 Cyclomatic Complexity (CCN)</h2>
+            <div class="badges">
+                <span class="badge badge-green">✅ CCN ≤ 10 — Good</span>
+                <span class="badge badge-yellow">⚠️ CCN 11–15 — Refactor</span>
+                <span class="badge badge-red">🔴 CCN &gt; 15 — Critical</span>
+            </div>
+            <ul>
+                <li>Keep cyclomatic complexity ≤ 10 per function</li>
+                <li>Run <code>task complexity</code> before every PR</li>
+                <li>Split long functions: target &lt; 50 lines of code (NLOC)</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>📦 Unused Dependencies</h2>
+            <ul>
+                <li>Run <code>npx depcheck</code> to find unused packages</li>
+                <li>Remove anything not imported in production code</li>
+                <li>Pin exact versions in <code>package-lock.json</code></li>
+                <li>Audit regularly: <code>npm audit</code></li>
+                <li>Prefer zero-dependency solutions for simple tasks</li>
+            </ul>
+        </div>
+
         <div class="interactive">
-            <input type="text" id="text-input" placeholder="Enter your name">
-            <button id="submit-btn" onclick="greetUser()">Submit</button>
+            <div class="input-row">
+                <input type="text" id="text-input" placeholder="Enter package name">
+                <button id="submit-btn" onclick="auditPackage()">Audit</button>
+            </div>
             <div id="output"></div>
         </div>
     </div>
+
     <script>
-        function greetUser() {
+        function auditPackage() {
             const name = document.getElementById('text-input').value;
             const output = document.getElementById('output');
             if (name.trim()) {
-                output.textContent = `Hello, ${name}! Welcome to Page 2!`;
+                output.textContent = `Auditing ${name}... run npm audit for real results!`;
             } else {
-                output.textContent = 'Please enter your name.';
+                output.textContent = 'Please enter a package name.';
             }
         }
     </script>
