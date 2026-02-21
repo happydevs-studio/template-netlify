@@ -71,14 +71,27 @@ jobs:
           set -e
           echo "high_complexity_found=$HIGH_COMPLEXITY_FOUND" >> $GITHUB_OUTPUT
       
-      - name: Debug - Check directory contents
-        if: success()
+      - name: Debug - Check directory contents before upload
+        if: always()
         run: |
-          echo "📂 Contents of .complexity-reports/:"
-          ls -la .complexity-reports/ 2>&1 || echo "Directory does not exist"
+          echo "🔍 Debugging directory structure and paths"
           echo ""
-          echo "📄 Checking for report file:"
-          file .complexity-reports/complexity-report.md 2>&1 || echo "Report file not found"
+          echo "📍 Current working directory:"
+          pwd
+          echo ""
+          echo "📂 Contents of current directory:"
+          ls -la | head -20
+          echo ""
+          echo "📂 Checking .complexity-reports/:"
+          if [ -d .complexity-reports ]; then
+            echo "✅ Directory exists"
+            ls -la .complexity-reports/
+            echo ""
+            echo "Content of complexity-report.md:"
+            cat .complexity-reports/complexity-report.md | head -10 || echo "File not readable"
+          else
+            echo "❌ Directory .complexity-reports does not exist"
+          fi
       
       - name: Upload complexity reports
         if: success()
