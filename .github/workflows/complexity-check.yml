@@ -71,8 +71,17 @@ jobs:
           set -e
           echo "high_complexity_found=$HIGH_COMPLEXITY_FOUND" >> $GITHUB_OUTPUT
       
+      - name: Debug - Check directory contents
+        if: success()
+        run: |
+          echo "📂 Contents of .complexity-reports/:"
+          ls -la .complexity-reports/ 2>&1 || echo "Directory does not exist"
+          echo ""
+          echo "📄 Checking for report file:"
+          file .complexity-reports/complexity-report.md 2>&1 || echo "Report file not found"
+      
       - name: Upload complexity reports
-        if: success() && hashFiles('.complexity-reports/complexity-report.md') != ''
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: complexity-reports
