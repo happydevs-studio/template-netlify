@@ -5,3 +5,4 @@ test-results/
 .sast-reports/
 .dependencies-reports/
 .dast-reports/
+.secrets-reports/

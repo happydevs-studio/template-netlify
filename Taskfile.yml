@@ -146,20 +146,22 @@ tasks:
     silent: false
 
   security:
-    desc: Run all security checks (SAST, dependencies, DAST)
+    desc: Run all security checks (SAST, dependencies, DAST, secrets)
     summary: |
       Runs the full security suite: SAST (Semgrep), dependency scanning (Trivy),
-      and DAST (OWASP ZAP).
+      DAST (OWASP ZAP), and secrets detection (Gitleaks).
 
       Usage:
         task security                           # Run all checks
         task sast                               # SAST only
         task dependencies                       # Dependency scan only
         task dast -- http://localhost:8080      # DAST only
+        task secrets                            # Secrets detection only
     cmds:
       - task: sast
       - task: dependencies
       - task: dast
+      - task: secrets
     silent: false
 
   sast:
@@ -519,6 +521,145 @@ tasks:
         fi
     silent: false
 
+  secrets:
+    desc: Run secrets detection using Gitleaks
+    summary: |
+      Scans the codebase and git history for hardcoded credentials using Gitleaks.
+      Generates both JSON and Markdown reports.
+
+      Usage:
+        task secrets           # Run detection
+    cmds:
+      - task: secrets:check-tool
+      - task: secrets:analyze
+      - task: secrets:report
+    silent: false
+
+  secrets:check-tool:
+    desc: Check if Gitleaks is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v gitleaks &> /dev/null; then
+          echo "📦 Installing Gitleaks..."
+          
+          INSTALL_SUCCESS=0
+          
+          if command -v curl &> /dev/null; then
+            echo "Trying GitHub releases..."
+            
+            # Detect OS and architecture
+            OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+            ARCH=$(uname -m)
+            case "$ARCH" in
+              x86_64) ARCH="x64" ;;
+              aarch64|arm64) ARCH="arm64" ;;
+              *) ARCH="x64" ;;
+            esac
+            case "$OS" in
+              darwin) OS="darwin" ;;
+              linux)  OS="linux" ;;
+              *)      OS="linux" ;;
+            esac
+            
+            LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+            DOWNLOAD_URL="https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_${LATEST}_${OS}_${ARCH}.tar.gz"
+            
+            mkdir -p ~/.local/bin
+            if curl -sSfL "$DOWNLOAD_URL" | tar -xz -C ~/.local/bin gitleaks 2>/dev/null; then
+              export PATH="$PATH:$HOME/.local/bin"
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Gitleaks"
+            echo "Please install Gitleaks manually:"
+            echo "  - https://gitleaks.io/"
+            exit 1
+          fi
+        fi
+        
+        if ! command -v gitleaks &> /dev/null; then
+          echo "❌ Gitleaks installed but not found in PATH"
+          exit 1
+        fi
+        
+        GITLEAKS_VERSION=$(gitleaks version 2>&1)
+        echo "✅ Gitleaks $GITLEAKS_VERSION"
+    silent: false
+
+  secrets:analyze:
+    desc: Run Gitleaks secrets detection and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔑 Running secrets detection..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        mkdir -p .secrets-reports
+        
+        # Run gitleaks against full git history; exit code 1 means secrets found, which is expected
+        gitleaks detect \
+          --source=. \
+          --report-format=json \
+          --report-path=".secrets-reports/secrets-report.json" \
+          || true
+        
+        python3 .scripts/generate-secrets-md.py
+        
+        echo "✅ Detection complete"
+    silent: false
+
+  secrets:report:
+    desc: Display formatted secrets detection report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🔑 SECRETS DETECTION REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .secrets-reports/secrets-report.md ]; then
+          echo "❌ Secrets report not generated!"
+          exit 1
+        fi
+        
+        cat .secrets-reports/secrets-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .secrets-reports/"
+        echo "   • secrets-report.md (human-readable)"
+        echo "   • secrets-report.json (machine-readable)"
+        echo ""
+        
+        if [ -f .secrets-reports/secrets-report.json ]; then
+          SECRET_COUNT=$(python3 -c "
+        import json, sys
+        with open('.secrets-reports/secrets-report.json') as f:
+          content = f.read().strip()
+        if not content or content == 'null':
+          print(0)
+        else:
+          data = json.loads(content)
+          print(len(data) if isinstance(data, list) else 0)
+        " 2>/dev/null || echo "0")
+          if [ "$SECRET_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $SECRET_COUNT secret(s) — revoke and remove immediately"
+            echo ""
+          else
+            echo "✅ No secrets detected"
+            echo ""
+          fi
+        fi
+    silent: false
+
   test:
     desc: Run Playwright tests
     cmds:
@@ -540,6 +681,7 @@ tasks:
       - task: test:sast
       - task: test:dependencies
       - task: test:dast
+      - task: test:secrets
 
   test:sast:
     desc: Run SAST report generation tests
@@ -555,6 +697,11 @@ tasks:
     desc: Run DAST report generation tests
     cmds:
       - python3 tests/generate_dast_report.test.py
+
+  test:secrets:
+    desc: Run secrets detection report generation tests
+    cmds:
+      - python3 tests/generate_secrets_report.test.py
 
   start:
     desc: Start local development server
