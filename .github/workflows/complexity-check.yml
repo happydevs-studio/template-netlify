@@ -21,6 +21,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install Lizard
+        run: |
+          set -e
+          pip install --upgrade pip
+          pip install lizard
+          lizard --version
+        shell: bash
+      
       - name: Install Task
         run: |
           curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
@@ -59,7 +72,7 @@ jobs:
           echo "high_complexity_found=$HIGH_COMPLEXITY_FOUND" >> $GITHUB_OUTPUT
       
       - name: Upload complexity reports
-        if: success()
+        if: success() && hashFiles('.complexity-reports/complexity-report.md') != ''
         uses: actions/upload-artifact@v4
         with:
           name: complexity-reports

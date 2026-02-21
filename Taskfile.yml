@@ -23,22 +23,47 @@ tasks:
       - |
         if ! command -v lizard &> /dev/null; then
           echo "📦 Installing Lizard..."
+          
+          INSTALL_SUCCESS=0
+          
           if command -v pip3 &> /dev/null; then
-            pip3 install --user lizard 2>&1 | grep -E "Successfully|Requirement|Error" || true
+            echo "Trying pip3..."
+            if pip3 install --user lizard; then
+              INSTALL_SUCCESS=1
+            fi
           elif command -v pip &> /dev/null; then
-            pip install --user lizard 2>&1 | grep -E "Successfully|Requirement|Error" || true
+            echo "Trying pip..."
+            if pip install --user lizard; then
+              INSTALL_SUCCESS=1
+            fi
           elif command -v sudo &> /dev/null && command -v apt-get &> /dev/null; then
-            sudo apt-get install -y python3-pip >/dev/null 2>&1 && pip3 install --user lizard 2>&1 | grep -E "Successfully|Requirement|Error" || true
+            echo "Trying apt-get..."
+            if sudo apt-get update && sudo apt-get install -y python3-pip && pip3 install --user lizard; then
+              INSTALL_SUCCESS=1
+            fi
           elif command -v brew &> /dev/null; then
-            brew install lizard
-          else
-            echo "❌ Lizard not found and cannot be installed automatically"
-            echo "   Please install Lizard via pip: pip install lizard"
-            echo "   Or via Homebrew: brew install lizard"
-            echo "   Or visit: https://github.com/terryyin/lizard"
+            echo "Trying brew..."
+            if brew install lizard; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Lizard with any available package manager"
+            echo "Please install Lizard manually:"
+            echo "  - pip install lizard"
+            echo "  - brew install lizard"
+            echo "  - https://github.com/terryyin/lizard"
             exit 1
           fi
         fi
+        
+        # Verify installation succeeded
+        if ! command -v lizard &> /dev/null; then
+          echo "❌ Lizard installed but not found in PATH"
+          exit 1
+        fi
+        
         LIZARD_VERSION=$(lizard --version 2>&1)
         echo "✅ Lizard $LIZARD_VERSION"
     silent: false
