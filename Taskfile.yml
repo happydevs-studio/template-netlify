@@ -1,0 +1,135 @@
+version: '3'
+
+tasks:
+  complexity:
+    desc: Analyze code complexity using Lizard
+    summary: |
+      Performs code complexity analysis on the codebase using Lizard.
+      Generates both text and CSV reports with configurable thresholds.
+      
+      Usage:
+        task complexity           # Run analysis
+        task complexity -- -v     # Verbose output
+    cmds:
+      - task: complexity:check-tool
+      - task: complexity:analyze
+      - task: complexity:report
+    silent: false
+
+  complexity:check-tool:
+    desc: Check if Lizard is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v lizard &> /dev/null; then
+          echo "📦 Installing Lizard..."
+          if command -v pip3 &> /dev/null; then
+            pip3 install --user lizard 2>&1 | grep -E "Successfully|Requirement|Error" || true
+          elif command -v pip &> /dev/null; then
+            pip install --user lizard 2>&1 | grep -E "Successfully|Requirement|Error" || true
+          elif command -v sudo &> /dev/null && command -v apt-get &> /dev/null; then
+            sudo apt-get install -y python3-pip >/dev/null 2>&1 && pip3 install --user lizard 2>&1 | grep -E "Successfully|Requirement|Error" || true
+          elif command -v brew &> /dev/null; then
+            brew install lizard
+          else
+            echo "❌ Lizard not found and cannot be installed automatically"
+            echo "   Please install Lizard via pip: pip install lizard"
+            echo "   Or via Homebrew: brew install lizard"
+            echo "   Or visit: https://github.com/terryyin/lizard"
+            exit 1
+          fi
+        fi
+        LIZARD_VERSION=$(lizard --version 2>&1)
+        echo "✅ Lizard $LIZARD_VERSION"
+    silent: false
+
+  complexity:analyze:
+    desc: Run Lizard analysis and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔍 Analyzing code complexity..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        # Create reports directory
+        mkdir -p .complexity-reports
+        
+        # Run lizard and generate text report (intermediate)
+        lizard . \
+          -x "tests/*" \
+          -x ".github/*" \
+          -x "node_modules/*" \
+          -x ".git/*" \
+          -o ".complexity-reports/complexity-report-raw.txt" \
+          || true
+        
+        # Generate CSV report for structured data
+        lizard . \
+          -x "tests/*" \
+          -x ".github/*" \
+          -x "node_modules/*" \
+          -x ".git/*" \
+          --csv > ".complexity-reports/complexity-report.csv" \
+          || true
+        
+        # Convert to markdown using Python
+        python3 .github/scripts/generate-complexity-md.py
+        
+        echo "✅ Analysis complete"
+    silent: false
+
+  complexity:report:
+    desc: Display formatted complexity report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "📊 COMPLEXITY REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ -f .complexity-reports/complexity-report.md ]; then
+          cat .complexity-reports/complexity-report.md
+        else
+          echo "❌ No report generated"
+          exit 1
+        fi
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .complexity-reports/"
+        echo "   • complexity-report.md (human-readable)"
+        echo "   • complexity-report.csv (machine-readable)"
+        echo ""
+        
+        # Check for high complexity issues (CCN in column 2, indexed as $2)
+        if [ -f .complexity-reports/complexity-report.csv ]; then
+          HIGH_COMPLEXITY=$(awk -F',' '$2 > 10' .complexity-reports/complexity-report.csv | wc -l)
+          if [ "$HIGH_COMPLEXITY" -gt 0 ]; then
+            echo "⚠️  Found $HIGH_COMPLEXITY item(s) with cyclomatic complexity > 10"
+            echo ""
+          else
+            echo "✅ No high-complexity items found (all CCN ≤ 10)"
+            echo ""
+          fi
+        fi
+    silent: false
+
+  test:
+    desc: Run Playwright tests
+    cmds:
+      - npx playwright test {{.CLI_ARGS}}
+
+  test:headed:
+    desc: Run Playwright tests with headed browser
+    cmds:
+      - npx playwright test --headed {{.CLI_ARGS}}
+
+  start:
+    desc: Start local development server
+    cmds:
+      - npx http-server . -p 8080 -o

@@ -37,6 +37,51 @@ python -m http.server 8080
 python -m SimpleHTTPServer 8080
 ```
 
+## Local Development
+
+### Prerequisites
+
+- **Task** (task runner): Install from [taskfile.dev](https://taskfile.dev/)
+  ```bash
+  curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
+  ```
+
+### Available Tasks
+
+All development tasks can be run with the `task` command. View available tasks:
+
+```bash
+task --list
+```
+
+### Code Complexity Analysis
+
+Analyze code complexity locally using Lizard:
+
+```bash
+task complexity
+```
+
+This will:
+- Automatically install Lizard if not already installed
+- Analyze the codebase for cyclomatic complexity
+- Generate both human-readable and CSV reports in `.complexity-reports/`
+- Display a summary with any high-complexity items (CCN > 10)
+
+**Reports location**: `.complexity-reports/`
+- `complexity-report.md` - Human-readable Markdown report
+- `complexity-report.csv` - Machine-readable format for processing
+
+**Complexity guidelines for this template:**
+- Functions with cyclomatic complexity (CCN) > 10 should be simplified
+- Keep functions under 50 lines when possible
+- For this static template, code should remain minimal
+
+The same analysis runs in CI/CD on pull requests and pushes to `main`.
+
+**For customizing complexity thresholds or configuration:**
+See [COMPLEXITY_CONFIG.md](COMPLEXITY_CONFIG.md) for detailed setup instructions, threshold customization, and troubleshooting.
+
 ## Netlify Setup
 
 ### Prerequisites
@@ -157,6 +202,10 @@ GitHub Actions workflow that:
 - **Deployment fails with "Unauthorized"**: Check that your `NETLIFY_AUTH_TOKEN` is correct
 - **Deployment fails with "Site not found"**: Verify your `NETLIFY_SITE_ID` is correct
 - **No preview comment on PR**: Ensure the GitHub Actions workflow has write permissions
+
+## Agent Instructions
+
+For instructions on project conventions, deployment workflows, and best practices intended for AI agents and automation tools, see [AGENTS.md](../AGENTS.md) in the root directory. This is an open standard that applies across all tooling.
 
 ## License
 
