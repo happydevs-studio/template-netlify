@@ -18,6 +18,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Inject git commit SHA
+        run: sed -i 's/__GIT_COMMIT__/${{ github.sha }}/g' index.html
+
       - name: Deploy to Netlify (Production)
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: nwtgck/actions-netlify@v2.1
