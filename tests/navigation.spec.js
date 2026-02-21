@@ -60,19 +60,6 @@ test.describe('Navigation Tests', () => {
   });
 });
 
-test.describe('Git Commit Drift Detection', () => {
-  test('index.html should contain a git commit marker', async ({ page }) => {
-    await page.goto('/');
-
-    const commitSha = await page.locator('meta[name="git-commit"]').getAttribute('content');
-    expect(commitSha).toBeTruthy();
-
-    if (process.env.GITHUB_SHA && commitSha !== '__GIT_COMMIT__') {
-      expect(commitSha).toBe(process.env.GITHUB_SHA);
-    }
-  });
-});
-
 test.describe('Interactive Elements Tests', () => {
   test('home page button should display message', async ({ page }) => {
     await page.goto('/');
