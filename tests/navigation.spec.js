@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.describe('Navigation Tests', () => {
   test('should navigate from home to Code Quality page', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Slop Protector');
+    await expect(page).toHaveTitle('Slop Stopper');
     
     // Click on Code Quality link
     await page.click('#nav-page2');
@@ -13,7 +13,7 @@ test.describe('Navigation Tests', () => {
 
   test('should navigate from home to Testing & Docs page', async ({ page }) => {
     await page.goto('/');
-    await expect(page).toHaveTitle('Slop Protector');
+    await expect(page).toHaveTitle('Slop Stopper');
     
     // Click on Testing & Docs link
     await page.click('#nav-page3');
@@ -38,13 +38,13 @@ test.describe('Navigation Tests', () => {
     // Click on Home link
     await page.click('#nav-home');
     await expect(page).toHaveURL(/.*index.html/);
-    await expect(page).toHaveTitle('Slop Protector');
+    await expect(page).toHaveTitle('Slop Stopper');
   });
 
   test('should navigate through all pages in sequence', async ({ page }) => {
     // Start at home
     await page.goto('/');
-    await expect(page).toHaveTitle('Slop Protector');
+    await expect(page).toHaveTitle('Slop Stopper');
     
     // Navigate to Code Quality
     await page.click('#nav-page2');
@@ -56,12 +56,12 @@ test.describe('Navigation Tests', () => {
     
     // Navigate back to Home
     await page.click('#nav-home');
-    await expect(page).toHaveTitle('Slop Protector');
+    await expect(page).toHaveTitle('Slop Stopper');
   });
 });
 
 test.describe('Interactive Elements Tests', () => {
-  test('home page button should activate slop shield', async ({ page }) => {
+  test('home page button should activate slop stopper', async ({ page }) => {
     await page.goto('/');
     
     // Click the button
@@ -69,7 +69,7 @@ test.describe('Interactive Elements Tests', () => {
     
     // Check if message is displayed
     const message = await page.locator('#message').textContent();
-    expect(message).toBe('Slop shield active! Your codebase is protected.');
+    expect(message).toBe('Slop stopper activated! Your codebase is defended.');
   });
 
   test('Code Quality page input should audit package', async ({ page }) => {
