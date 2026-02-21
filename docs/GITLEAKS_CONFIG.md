@@ -6,7 +6,7 @@ This template includes automated secrets scanning using **Gitleaks** to prevent 
 
 ### Scan Locally
 ```bash
-task gitleaks
+task secrets
 ```
 
 ### What You Get Automatically
@@ -18,9 +18,9 @@ task gitleaks
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/gitleaks.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/secrets-scan.yml` |
 | False positive results? | Add a `.gitleaksignore` file to suppress them |
-| Don't want secrets scanning? | Delete `.github/workflows/gitleaks.yml` |
+| Don't want secrets scanning? | Delete `.github/workflows/secrets-scan.yml` |
 
 ---
 
@@ -37,10 +37,10 @@ The gitleaks workflow:
 
 | File | Purpose |
 |------|---------|
-| [`.github/workflows/gitleaks.yml`](.github/workflows/gitleaks.yml) | GitHub Actions workflow |
-| [`Taskfile.yml`](Taskfile.yml) | Local task runner (`task gitleaks`) |
-| [`.scripts/generate-gitleaks-report.py`](.scripts/generate-gitleaks-report.py) | Markdown report generator |
-| [`.gitignore`](.gitignore) | Excludes `.gitleaks-reports/` from version control |
+| [`.github/workflows/secrets-scan.yml`](.github/workflows/secrets-scan.yml) | GitHub Actions workflow |
+| [`Taskfile.yml`](Taskfile.yml) | Local task runner (`task secrets`) |
+| [`.scripts/generate-secrets-report.py`](.scripts/generate-secrets-report.py) | Markdown report generator |
+| [`.gitignore`](.gitignore) | Excludes `.secrets-reports/` from version control |
 
 ## Suppressing False Positives
 
@@ -75,7 +75,7 @@ const EXAMPLE_KEY = "example-placeholder-not-real"; // gitleaks:allow
 
 **Option B:** Delete the workflow file  
 ```bash
-rm .github/workflows/gitleaks.yml
+rm .github/workflows/secrets-scan.yml
 ```
 
 ## Running the Scan Locally
@@ -85,12 +85,12 @@ rm .github/workflows/gitleaks.yml
 curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
 
 # Run secrets scan
-task gitleaks
+task secrets
 ```
 
 This generates:
-- `.gitleaks-reports/gitleaks-report.md` — Human-readable report
-- `.gitleaks-reports/gitleaks-report.json` — Machine-readable findings
+- `.secrets-reports/secrets-report.md` — Human-readable report
+- `.secrets-reports/secrets-report.json` — Machine-readable findings
 
 ## If Secrets Are Found
 

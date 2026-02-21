@@ -145,21 +145,21 @@ tasks:
         fi
     silent: false
 
-  gitleaks:
+  secrets:
     desc: Scan repository for secrets using Gitleaks
     summary: |
       Scans the git repository for hardcoded secrets, API keys, and credentials.
       Generates a JSON report and a human-readable Markdown report.
 
       Usage:
-        task gitleaks           # Run scan
+        task secrets           # Run scan
     cmds:
-      - task: gitleaks:check-tool
-      - task: gitleaks:scan
-      - task: gitleaks:report
+      - task: secrets:check-tool
+      - task: secrets:scan
+      - task: secrets:report
     silent: false
 
-  gitleaks:check-tool:
+  secrets:check-tool:
     desc: Check if Gitleaks is installed, install if necessary
     internal: true
     cmds:
@@ -206,8 +206,8 @@ tasks:
         echo "✅ Gitleaks $GITLEAKS_VERSION"
     silent: false
 
-  gitleaks:scan:
-    desc: Run Gitleaks scan and generate reports
+  secrets:scan:
+    desc: Run secrets scan and generate reports
     internal: true
     dir: .
     cmds:
@@ -217,31 +217,31 @@ tasks:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
 
-        mkdir -p .gitleaks-reports
+        mkdir -p .secrets-reports
 
         # Run gitleaks and output JSON report (exit code 1 if leaks found, 0 if clean)
         set +e
         gitleaks detect \
           --source . \
           --report-format json \
-          --report-path .gitleaks-reports/gitleaks-report.json \
+          --report-path .secrets-reports/secrets-report.json \
           --exit-code 1
         GITLEAKS_EXIT=$?
         set -e
 
         # Ensure the JSON report exists even when no leaks are found
-        if [ ! -f .gitleaks-reports/gitleaks-report.json ]; then
-          echo "[]" > .gitleaks-reports/gitleaks-report.json
+        if [ ! -f .secrets-reports/secrets-report.json ]; then
+          echo "[]" > .secrets-reports/secrets-report.json
         fi
 
         # Convert to markdown using Python
-        python3 .scripts/generate-gitleaks-report.py
+        python3 .scripts/generate-secrets-report.py
 
         echo "✅ Scan complete (exit code: $GITLEAKS_EXIT)"
         exit $GITLEAKS_EXIT
     silent: false
 
-  gitleaks:report:
+  secrets:report:
     desc: Display formatted secrets scan report
     internal: true
     cmds:
@@ -251,20 +251,20 @@ tasks:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
 
-        if [ ! -f .gitleaks-reports/gitleaks-report.md ]; then
+        if [ ! -f .secrets-reports/secrets-report.md ]; then
           echo "❌ Secrets report not generated!"
           echo "This indicates an error in the scan step. Check the logs above."
           exit 1
         fi
 
-        cat .gitleaks-reports/gitleaks-report.md
+        cat .secrets-reports/secrets-report.md
 
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
-        echo "📁 Reports saved to: .gitleaks-reports/"
-        echo "   • gitleaks-report.md (human-readable)"
-        echo "   • gitleaks-report.json (machine-readable)"
+        echo "📁 Reports saved to: .secrets-reports/"
+        echo "   • secrets-report.md (human-readable)"
+        echo "   • secrets-report.json (machine-readable)"
         echo ""
     silent: false
 
@@ -278,10 +278,10 @@ tasks:
     cmds:
       - npx playwright test --headed {{.CLI_ARGS}}
 
-  test:gitleaks:
-    desc: Run gitleaks report generation tests
+  test:secrets:
+    desc: Run secrets report generation tests
     cmds:
-      - python3 tests/generate_gitleaks_report.test.py
+      - python3 tests/generate_secrets_report.test.py
 
   test:complexity:
     desc: Run complexity report generation tests

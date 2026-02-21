@@ -1,4 +1,4 @@
-"""Tests for the Gitleaks report generation script."""
+"""Tests for the secrets report generation script."""
 
 import json
 import os
@@ -9,14 +9,14 @@ import subprocess
 from pathlib import Path
 
 
-SCRIPT_PATH = str(Path(__file__).parent.parent / ".scripts" / "generate-gitleaks-report.py")
+SCRIPT_PATH = str(Path(__file__).parent.parent / ".scripts" / "generate-secrets-report.py")
 
 
 def setup_test_env():
     """Create a temporary directory for test files."""
     tmpdir = tempfile.mkdtemp()
     os.chdir(tmpdir)
-    os.makedirs(".gitleaks-reports", exist_ok=True)
+    os.makedirs(".secrets-reports", exist_ok=True)
     return tmpdir
 
 
@@ -27,7 +27,7 @@ def teardown_test_env(tmpdir):
 
 
 def run_script(tmpdir):
-    """Run the generate-gitleaks-report.py script in tmpdir."""
+    """Run the generate-secrets-report.py script in tmpdir."""
     return subprocess.run(
         ["python3", SCRIPT_PATH],
         capture_output=True,
@@ -44,7 +44,7 @@ def test_missing_json_fails():
 
         assert result.returncode != 0, "Script should fail when JSON report is missing"
         assert "JSON report not found" in result.stderr, "Should report missing JSON"
-        assert not os.path.exists(".gitleaks-reports/gitleaks-report.md"), \
+        assert not os.path.exists(".secrets-reports/secrets-report.md"), \
             "Should not generate report on error"
 
         print("✅ test_missing_json_fails passed")
@@ -56,16 +56,16 @@ def test_generates_clean_report():
     """Test that script generates a clean report when no findings exist."""
     tmpdir = setup_test_env()
     try:
-        with open(".gitleaks-reports/gitleaks-report.json", "w") as f:
+        with open(".secrets-reports/secrets-report.json", "w") as f:
             json.dump([], f)
 
         result = run_script(tmpdir)
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
-        assert os.path.exists(".gitleaks-reports/gitleaks-report.md"), \
+        assert os.path.exists(".secrets-reports/secrets-report.md"), \
             "Should generate markdown report"
 
-        with open(".gitleaks-reports/gitleaks-report.md", "r") as f:
+        with open(".secrets-reports/secrets-report.md", "r") as f:
             content = f.read()
 
         assert "Secrets Scan Report" in content, "Should have title"
@@ -97,14 +97,14 @@ def test_identifies_findings():
                 "Fingerprint": "abc123:config.py:generic-api-key:5",
             }
         ]
-        with open(".gitleaks-reports/gitleaks-report.json", "w") as f:
+        with open(".secrets-reports/secrets-report.json", "w") as f:
             json.dump(findings, f)
 
         result = run_script(tmpdir)
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".gitleaks-reports/gitleaks-report.md", "r") as f:
+        with open(".secrets-reports/secrets-report.md", "r") as f:
             content = f.read()
 
         assert "Secrets Detected" in content, "Should indicate secrets were found"
@@ -121,14 +121,14 @@ def test_report_includes_guidelines():
     """Test that report includes guidelines."""
     tmpdir = setup_test_env()
     try:
-        with open(".gitleaks-reports/gitleaks-report.json", "w") as f:
+        with open(".secrets-reports/secrets-report.json", "w") as f:
             json.dump([], f)
 
         result = run_script(tmpdir)
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".gitleaks-reports/gitleaks-report.md", "r") as f:
+        with open(".secrets-reports/secrets-report.md", "r") as f:
             content = f.read()
 
         assert "Guidelines" in content, "Should include guidelines"
@@ -144,14 +144,14 @@ def test_empty_json_file_treated_as_clean():
     """Test that an empty JSON file is treated as no findings."""
     tmpdir = setup_test_env()
     try:
-        with open(".gitleaks-reports/gitleaks-report.json", "w") as f:
+        with open(".secrets-reports/secrets-report.json", "w") as f:
             f.write("")
 
         result = run_script(tmpdir)
 
         assert result.returncode == 0, f"Script should succeed on empty file. stderr: {result.stderr}"
 
-        with open(".gitleaks-reports/gitleaks-report.md", "r") as f:
+        with open(".secrets-reports/secrets-report.md", "r") as f:
             content = f.read()
 
         assert "No secrets or credentials detected" in content, \
@@ -163,7 +163,7 @@ def test_empty_json_file_treated_as_clean():
 
 
 if __name__ == "__main__":
-    print("\n🧪 Running gitleaks report script tests...\n")
+    print("\n🧪 Running secrets report script tests...\n")
 
     try:
         test_missing_json_fails()
