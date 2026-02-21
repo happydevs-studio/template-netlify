@@ -1,4 +1,4 @@
-name: Security Scan with Trivy
+name: Security Scan
 
 on:
   pull_request:
@@ -13,8 +13,8 @@ permissions:
   issues: write
 
 jobs:
-  trivy-scan:
-    name: Security Scan with Trivy
+  security-scan:
+    name: Security Scan
     runs-on: ubuntu-latest
     
     steps:
@@ -33,19 +33,19 @@ jobs:
           curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
           task --version
       
-      - name: Run Trivy scan
-        id: trivy
+      - name: Run security scan
+        id: security
         run: |
-          task trivy
+          task security
       
       - name: Check reports generated
         run: |
-          if [ ! -f .trivy-reports/trivy-report.md ]; then
-            echo "❌ Failed to generate Trivy report"
+          if [ ! -f .security-reports/security-report.md ]; then
+            echo "❌ Failed to generate security report"
             exit 1
           fi
           
-          echo "✅ Trivy reports generated successfully"
+          echo "✅ Security reports generated successfully"
       
       - name: Check for HIGH/CRITICAL vulnerabilities
         id: check-vulns
@@ -53,11 +53,11 @@ jobs:
           set +e
           VULNS_FOUND=0
           
-          if [ -f .trivy-reports/trivy-report.json ]; then
+          if [ -f .security-reports/security-report.json ]; then
             HIGH_CRITICAL=$(python3 -c "
 import json, sys
 try:
-    with open('.trivy-reports/trivy-report.json') as f:
+    with open('.security-reports/security-report.json') as f:
         data = json.load(f)
     count = 0
     for result in data.get('Results', []):
@@ -77,39 +77,39 @@ except Exception:
           set -e
           echo "vulns_found=$VULNS_FOUND" >> $GITHUB_OUTPUT
       
-      - name: Upload Trivy reports
+      - name: Upload security reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trivy-reports
+          name: security-reports
           path: |
-            .trivy-reports/trivy-report.md
-            .trivy-reports/trivy-report.json
-            .trivy-reports/trivy-report.txt
+            .security-reports/security-report.md
+            .security-reports/security-report.json
+            .security-reports/security-report.txt
           retention-days: 30
           if-no-files-found: warn
       
-      - name: Comment on PR with Trivy report
+      - name: Comment on PR with security report
         if: github.event_name == 'pull_request'
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             
-            let reportContent = '## 🔒 Security Scan (Trivy)\n\n';
+            let reportContent = '## 🔒 Security Scan\n\n';
             
             try {
-              const markdownReport = fs.readFileSync('.trivy-reports/trivy-report.md', 'utf8');
+              const markdownReport = fs.readFileSync('.security-reports/security-report.md', 'utf8');
               reportContent += markdownReport + '\n\n';
             } catch (e) {
-              reportContent += '**Could not read Trivy report.** See workflow artifacts for details.\n\n';
+              reportContent += '**Could not read security report.** See workflow artifacts for details.\n\n';
             }
             
             reportContent += '### 🔍 How to Check Locally\n\n';
             reportContent += '```bash\n';
-            reportContent += 'task trivy\n';
+            reportContent += 'task security\n';
             reportContent += '```\n\n';
-            reportContent += '[Full reports available in workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (`.trivy-reports/` directory)\n';
+            reportContent += '[Full reports available in workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (`.security-reports/` directory)\n';
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -131,7 +131,7 @@ except Exception:
             body += `**Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n`;
             
             try {
-              const markdownReport = fs.readFileSync('.trivy-reports/trivy-report.md', 'utf8');
+              const markdownReport = fs.readFileSync('.security-reports/security-report.md', 'utf8');
               body += '## Report\n\n' + markdownReport + '\n\n';
             } catch (e) {
               body += 'See workflow artifacts for detailed reports.\n\n';
@@ -142,7 +142,7 @@ except Exception:
             body += '# Install Task (one-time)\n';
             body += 'curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin\n\n';
             body += '# Run security scan locally\n';
-            body += 'task trivy\n';
+            body += 'task security\n';
             body += '```\n\n';
             body += '## Guidelines\n\n';
             body += '- **CRITICAL/HIGH**: Must be fixed before merging\n';
@@ -180,5 +180,5 @@ except Exception:
         if: steps.check-vulns.outputs.vulns_found == '1'
         run: |
           echo "❌ HIGH/CRITICAL security vulnerabilities detected"
-          echo "Please review the Trivy report above and fix the vulnerabilities"
+          echo "Please review the security report above and fix the vulnerabilities"
           exit 1

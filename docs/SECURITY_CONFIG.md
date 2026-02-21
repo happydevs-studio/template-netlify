@@ -1,4 +1,4 @@
-# Security Scanning Workflow Configuration (Trivy)
+# Security Scanning Workflow Configuration
 
 This template includes automated security vulnerability scanning using **Trivy** to help maintain a secure codebase. This guide explains how to customise and use this feature for your cloned repository.
 
@@ -6,7 +6,7 @@ This template includes automated security vulnerability scanning using **Trivy**
 
 ### Run Security Scan Locally
 ```bash
-task trivy
+task security
 ```
 
 ### What You Get Automatically
@@ -18,9 +18,9 @@ task trivy
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/trivy-scan.yml` |
-| Need different severity threshold? | Update `HIGH,CRITICAL` in `Taskfile.yml` and `.github/workflows/trivy-scan.yml` |
-| Don't want security scans? | Delete `.github/workflows/trivy-scan.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/security-scan.yml` |
+| Need different severity threshold? | Update `HIGH,CRITICAL` in `Taskfile.yml` and `.github/workflows/security-scan.yml` |
+| Don't want security scans? | Delete `.github/workflows/security-scan.yml` |
 
 ### Severity Reference
 
@@ -35,7 +35,7 @@ task trivy
 
 ## Overview
 
-The Trivy security scan workflow:
+The security scan workflow:
 - ✅ Runs automatically on every PR to `main` and push to `main`
 - ✅ Scans for vulnerabilities in npm dependencies, secrets, and misconfigurations
 - ✅ Posts security reports as PR comments
@@ -46,10 +46,10 @@ The Trivy security scan workflow:
 
 | File | Purpose | Customisation |
 |------|---------|---------------|
-| [`.github/workflows/trivy-scan.yml`](.github/workflows/trivy-scan.yml) | GitHub Actions workflow | Triggers, failure behaviour, reporting |
+| [`.github/workflows/security-scan.yml`](.github/workflows/security-scan.yml) | GitHub Actions workflow | Triggers, failure behaviour, reporting |
 | [`Taskfile.yml`](Taskfile.yml) | Local task runner config | Severity levels, exclusions |
-| [`.scripts/generate-trivy-md.py`](.scripts/generate-trivy-md.py) | Report generator | Markdown formatting |
-| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.trivy-reports/` from version control |
+| [`.scripts/generate-security-md.py`](.scripts/generate-security-md.py) | Report generator | Markdown formatting |
+| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.security-reports/` from version control |
 
 ## Key Configuration Points
 
@@ -58,12 +58,12 @@ The Trivy security scan workflow:
 By default, the workflow **fails on HIGH and CRITICAL** vulnerabilities.
 
 **Where it's defined:**
-- `Taskfile.yml` – `trivy:scan` task (`--severity HIGH,CRITICAL,MEDIUM,LOW`)
-- `.github/workflows/trivy-scan.yml` – the `check-vulns` step (`if vuln.get('Severity') in ('HIGH', 'CRITICAL')`)
+- `Taskfile.yml` – `security:scan` task (`--severity HIGH,CRITICAL,MEDIUM,LOW`)
+- `.github/workflows/security-scan.yml` – the `check-vulns` step (`if vuln.get('Severity') in ('HIGH', 'CRITICAL')`)
 
 **To change the threshold** (e.g., only fail on CRITICAL):
 
-In `.github/workflows/trivy-scan.yml`, update the check step:
+In `.github/workflows/security-scan.yml`, update the check step:
 ```python
 if vuln.get('Severity') in ('CRITICAL',):  # ← Remove 'HIGH'
 ```
@@ -75,7 +75,7 @@ Also update the `--severity` flag in `Taskfile.yml`:
 
 ### 2. **Scan Targets**
 
-Trivy scans the entire filesystem (`trivy fs .`) excluding:
+The scan covers the entire filesystem (`trivy fs .`) excluding:
 - `node_modules/` – third-party dependencies (flagged via `package-lock.json` instead)
 - `.git/` – git internals
 
@@ -89,7 +89,7 @@ trivy fs . \
 
 ### 3. **Scan Types**
 
-Trivy runs three scanners by default:
+Three scanners run by default:
 - `vuln` – known CVEs in npm dependencies
 - `secret` – hardcoded secrets/credentials in source files
 - `misconfig` – IaC misconfigurations in GitHub Actions workflows etc.
@@ -110,11 +110,11 @@ To disable a scanner:
 ### 5. **Disable Security Scanning**
 
 **Option A:** Disable the workflow in GitHub UI
-- Go to Actions → Security Scan with Trivy → Disable workflow
+- Go to Actions → Security Scan → Disable workflow
 
 **Option B:** Delete/rename the workflow file
 ```bash
-rm .github/workflows/trivy-scan.yml
+rm .github/workflows/security-scan.yml
 ```
 
 ## Running the Security Scan Locally
@@ -124,13 +124,13 @@ rm .github/workflows/trivy-scan.yml
 curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
 
 # Run security scan
-task trivy
+task security
 ```
 
 This generates:
-- `.trivy-reports/trivy-report.md` – Human-readable report
-- `.trivy-reports/trivy-report.json` – Machine-readable results
-- `.trivy-reports/trivy-report.txt` – Plain text table output
+- `.security-reports/security-report.md` – Human-readable report
+- `.security-reports/security-report.json` – Machine-readable results
+- `.security-reports/security-report.txt` – Plain text table output
 
 ## Understanding the Report
 
@@ -164,7 +164,7 @@ When HIGH/CRITICAL vulnerabilities are detected on pushes to `main`:
 
 **To resolve:**
 1. Update the affected package: `npm update <package>`
-2. Run `task trivy` locally to verify the fix
+2. Run `task security` locally to verify the fix
 3. Open PR with the updated `package-lock.json`
 4. CI will verify vulnerabilities are resolved
 5. After merge, close the GitHub issue
@@ -179,10 +179,10 @@ If the workflow fails with "trivy: command not found":
 
 ### Reports Not Generated
 
-If `.trivy-reports/` directory is empty:
+If `.security-reports/` directory is empty:
 1. Check workflow logs for errors in the scan step
 2. Ensure Python 3 is available: `python3 --version`
-3. Verify `.trivy-reports/` is not excluded by `.gitignore` (it should be excluded – reports are uploaded as workflow artifacts instead)
+3. Verify `.security-reports/` is not excluded by `.gitignore` (it should be excluded – reports are uploaded as workflow artifacts instead)
 
 ## For More Information
 

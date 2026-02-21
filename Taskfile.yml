@@ -145,22 +145,22 @@ tasks:
         fi
     silent: false
 
-  trivy:
-    desc: Run security scan using Trivy
+  security:
+    desc: Run security scan
     summary: |
       Performs security vulnerability scanning on the codebase using Trivy.
       Scans for vulnerabilities in dependencies, secrets, and misconfigurations.
       
       Usage:
-        task trivy           # Run scan
-        task trivy -- -v     # Verbose output
+        task security           # Run scan
+        task security -- -v     # Verbose output
     cmds:
-      - task: trivy:check-tool
-      - task: trivy:scan
-      - task: trivy:report
+      - task: security:check-tool
+      - task: security:scan
+      - task: security:report
     silent: false
 
-  trivy:check-tool:
+  security:check-tool:
     desc: Check if Trivy is installed, install if necessary
     internal: true
     cmds:
@@ -202,8 +202,8 @@ tasks:
         echo "✅ $TRIVY_VERSION"
     silent: false
 
-  trivy:scan:
-    desc: Run Trivy scan and generate reports
+  security:scan:
+    desc: Run security scan and generate reports
     internal: true
     dir: .
     cmds:
@@ -214,7 +214,7 @@ tasks:
         echo ""
         
         # Create reports directory
-        mkdir -p .trivy-reports
+        mkdir -p .security-reports
         
         # Run trivy filesystem scan (text output for human-readable)
         trivy fs . \
@@ -224,7 +224,7 @@ tasks:
           --skip-dirs node_modules \
           --skip-dirs .git \
           --format table \
-          --output ".trivy-reports/trivy-report.txt" \
+          --output ".security-reports/security-report.txt" \
           || true
         
         # Run trivy filesystem scan (JSON output for machine-readable)
@@ -235,17 +235,17 @@ tasks:
           --skip-dirs node_modules \
           --skip-dirs .git \
           --format json \
-          --output ".trivy-reports/trivy-report.json" \
+          --output ".security-reports/security-report.json" \
           || true
         
         # Convert to markdown using Python
-        python3 .scripts/generate-trivy-md.py
+        python3 .scripts/generate-security-md.py
         
         echo "✅ Scan complete"
     silent: false
 
-  trivy:report:
-    desc: Display formatted Trivy scan report
+  security:report:
+    desc: Display formatted security scan report
     internal: true
     cmds:
       - |
@@ -254,28 +254,28 @@ tasks:
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
         
-        if [ ! -f .trivy-reports/trivy-report.md ]; then
-          echo "❌ Trivy report not generated!"
+        if [ ! -f .security-reports/security-report.md ]; then
+          echo "❌ Security report not generated!"
           echo "This indicates an error in the scan step. Check the logs above."
           exit 1
         fi
         
-        cat .trivy-reports/trivy-report.md
+        cat .security-reports/security-report.md
         
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
-        echo "📁 Reports saved to: .trivy-reports/"
-        echo "   • trivy-report.md (human-readable)"
-        echo "   • trivy-report.json (machine-readable)"
+        echo "📁 Reports saved to: .security-reports/"
+        echo "   • security-report.md (human-readable)"
+        echo "   • security-report.json (machine-readable)"
         echo ""
         
         # Check for high/critical vulnerabilities
-        if [ -f .trivy-reports/trivy-report.json ]; then
+        if [ -f .security-reports/security-report.json ]; then
           HIGH_CRITICAL=$(python3 -c "
 import json, sys
 try:
-    with open('.trivy-reports/trivy-report.json') as f:
+    with open('.security-reports/security-report.json') as f:
         data = json.load(f)
     count = 0
     for result in data.get('Results', []):
@@ -311,10 +311,10 @@ except Exception:
     cmds:
       - python3 tests/generate_complexity_report.test.py
 
-  test:trivy:
-    desc: Run Trivy report generation tests
+  test:security:
+    desc: Run security scan report generation tests
     cmds:
-      - python3 tests/generate_trivy_report.test.py
+      - python3 tests/generate_security_report.test.py
 
   start:
     desc: Start local development server

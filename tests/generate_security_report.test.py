@@ -1,4 +1,4 @@
-"""Tests for the Trivy report generation script."""
+"""Tests for the security report generation script."""
 
 import os
 import sys
@@ -8,7 +8,7 @@ import shutil
 import subprocess
 from pathlib import Path
 
-SCRIPT_PATH = str(Path(__file__).parent.parent / ".scripts" / "generate-trivy-md.py")
+SCRIPT_PATH = str(Path(__file__).parent.parent / ".scripts" / "generate-security-md.py")
 
 
 def setup_test_env():
@@ -16,7 +16,7 @@ def setup_test_env():
     original_dir = os.getcwd()
     tmpdir = tempfile.mkdtemp()
     os.chdir(tmpdir)
-    os.makedirs(".trivy-reports", exist_ok=True)
+    os.makedirs(".security-reports", exist_ok=True)
     return tmpdir, original_dir
 
 
@@ -27,8 +27,8 @@ def teardown_test_env(tmpdir, original_dir):
 
 
 def write_json_report(data):
-    """Write a Trivy JSON report to the expected path."""
-    with open(".trivy-reports/trivy-report.json", "w") as f:
+    """Write a security scan JSON report to the expected path."""
+    with open(".security-reports/security-report.json", "w") as f:
         json.dump(data, f)
 
 
@@ -49,7 +49,7 @@ def test_missing_json_fails():
 
         assert result.returncode != 0, "Script should fail when JSON is missing"
         assert "JSON report not found" in result.stderr, "Should report missing JSON"
-        assert not os.path.exists(".trivy-reports/trivy-report.md"), \
+        assert not os.path.exists(".security-reports/security-report.md"), \
             "Should not generate report on error"
 
         print("✅ test_missing_json_fails passed")
@@ -66,13 +66,13 @@ def test_generates_report_with_no_vulnerabilities():
         result = run_script(tmpdir)
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
-        assert os.path.exists(".trivy-reports/trivy-report.md"), \
+        assert os.path.exists(".security-reports/security-report.md"), \
             "Should generate markdown report"
 
-        with open(".trivy-reports/trivy-report.md") as f:
+        with open(".security-reports/security-report.md") as f:
             content = f.read()
 
-        assert "Security Scan Report (Trivy)" in content, "Should have title"
+        assert "Security Scan Report" in content, "Should have title"
         assert "✅ Security Status" in content, "Should show clean status"
         assert "No HIGH/CRITICAL" in content, "Should indicate clean status"
 
@@ -125,7 +125,7 @@ def test_identifies_high_critical_vulnerabilities():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".trivy-reports/trivy-report.md") as f:
+        with open(".security-reports/security-report.md") as f:
             content = f.read()
 
         assert "⚠️ Security Status" in content, "Should show warning status"
@@ -166,7 +166,7 @@ def test_detects_secrets():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".trivy-reports/trivy-report.md") as f:
+        with open(".security-reports/security-report.md") as f:
             content = f.read()
 
         assert "Detected Secrets" in content, "Should have secrets section"
@@ -188,7 +188,7 @@ def test_report_includes_guidelines():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(".trivy-reports/trivy-report.md") as f:
+        with open(".security-reports/security-report.md") as f:
             content = f.read()
 
         assert "Guidelines" in content, "Should include guidelines"
@@ -201,7 +201,7 @@ def test_report_includes_guidelines():
 
 
 if __name__ == "__main__":
-    print("\n🧪 Running Trivy report script tests...\n")
+    print("\n🧪 Running security scan report tests...\n")
 
     try:
         test_missing_json_fails()
