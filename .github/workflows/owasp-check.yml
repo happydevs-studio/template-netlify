@@ -1,0 +1,213 @@
+name: OWASP Dependency Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  owasp-check:
+    name: OWASP Dependency Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Cache OWASP Dependency-Check data
+        uses: actions/cache@v4
+        with:
+          path: ~/.dependency-check/data
+          key: owasp-data-${{ runner.os }}
+          restore-keys: owasp-data-
+
+      - name: Install OWASP Dependency-Check
+        run: |
+          set -e
+          OWASP_VERSION="9.0.9"
+          mkdir -p /opt/dependency-check
+          curl -sL "https://github.com/jeremylong/DependencyCheck/releases/download/v${OWASP_VERSION}/dependency-check-${OWASP_VERSION}-release.zip" -o /tmp/dc.zip
+          unzip -q /tmp/dc.zip -d /opt/dependency-check
+          ln -s /opt/dependency-check/dependency-check/bin/dependency-check.sh /usr/local/bin/dependency-check
+          dependency-check --version
+        shell: bash
+
+      - name: Install Task
+        run: |
+          curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
+          task --version
+
+      - name: Run OWASP analysis
+        id: owasp
+        run: |
+          task owasp
+
+      - name: Check reports generated
+        run: |
+          if [ ! -f .owasp-reports/owasp-report.md ]; then
+            echo "❌ Failed to generate OWASP report"
+            exit 1
+          fi
+
+          echo "✅ OWASP reports generated successfully"
+
+      - name: Check for CRITICAL/HIGH vulnerabilities
+        id: check-vulns
+        run: |
+          set +e
+          HIGH_VULNS_FOUND=0
+
+          if [ -f .owasp-reports/dependency-check-report.json ]; then
+            HIGH_COUNT=$(python3 -c "import json; data=json.load(open('.owasp-reports/dependency-check-report.json')); print(sum(1 for dep in data.get('dependencies',[]) for v in dep.get('vulnerabilities',[]) if v.get('severity','').upper() in ('CRITICAL','HIGH')))" 2>/dev/null || echo "0")
+
+            if [ "$HIGH_COUNT" -gt 0 ]; then
+              HIGH_VULNS_FOUND=1
+              echo "⚠️  Found $HIGH_COUNT CRITICAL/HIGH vulnerability(ies)"
+            fi
+          fi
+
+          set -e
+          echo "high_vulns_found=$HIGH_VULNS_FOUND" >> $GITHUB_OUTPUT
+
+      - name: Debug - Check directory contents before upload
+        if: always()
+        run: |
+          echo "🔍 Debugging directory structure and paths"
+          echo ""
+          echo "📍 Current working directory:"
+          pwd
+          echo ""
+          echo "📂 Checking .owasp-reports/:"
+          if [ -d .owasp-reports ]; then
+            echo "✅ Directory exists"
+            ls -la .owasp-reports/
+            echo ""
+            echo "Content of owasp-report.md:"
+            cat .owasp-reports/owasp-report.md | head -20 || echo "File not readable"
+          else
+            echo "❌ Directory .owasp-reports does not exist"
+          fi
+
+      - name: Upload OWASP reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: owasp-reports
+          path: |
+            .owasp-reports/owasp-report.md
+            .owasp-reports/dependency-check-report.json
+          retention-days: 30
+          if-no-files-found: warn
+
+      - name: Comment on PR with OWASP report
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            let reportContent = '## 🔒 OWASP Dependency Check\n\n';
+
+            try {
+              const markdownReport = fs.readFileSync('.owasp-reports/owasp-report.md', 'utf8');
+              reportContent += markdownReport + '\n\n';
+            } catch (e) {
+              reportContent += '**Could not read OWASP report.** See workflow artifacts for details.\n\n';
+            }
+
+            reportContent += '### 🔍 How to Check Locally\n\n';
+            reportContent += '```bash\n';
+            reportContent += 'task owasp\n';
+            reportContent += '```\n\n';
+            reportContent += '[Full reports available in workflow artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (`.owasp-reports/` directory)\n';
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: reportContent
+            });
+
+      - name: Create/Update issue on main branch with vulnerabilities
+        if: steps.check-vulns.outputs.high_vulns_found == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+
+            const title = '⚠️ OWASP Vulnerability Issues in Main Branch';
+            let body = '## OWASP Dependency Check Failed\n\n';
+            body += `**Commit:** [\`${{ github.sha }}\`](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})\n`;
+            body += `**Run:** [${{ github.run_id }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\n\n`;
+
+            try {
+              const markdownReport = fs.readFileSync('.owasp-reports/owasp-report.md', 'utf8');
+              body += '## Report\n\n' + markdownReport + '\n\n';
+            } catch (e) {
+              body += 'See workflow artifacts for detailed reports.\n\n';
+            }
+
+            body += '## Reproduction Steps\n\n';
+            body += '```bash\n';
+            body += '# Install Task (one-time)\n';
+            body += 'curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin\n\n';
+            body += '# Run analysis locally\n';
+            body += 'task owasp\n';
+            body += '```\n\n';
+            body += '## Guidelines\n\n';
+            body += '- **CRITICAL (CVSS ≥ 9.0)**: Immediate action required\n';
+            body += '- **HIGH (CVSS 7.0-8.9)**: Fix as soon as possible\n';
+            body += '- **MEDIUM (CVSS 4.0-6.9)**: Fix in next release\n';
+            body += '- **LOW (CVSS < 4.0)**: Fix when convenient\n';
+
+            // Check for existing open issue
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: ['owasp-vulnerability']
+            });
+
+            if (issues.data.length === 0) {
+              // Create new issue
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: ['owasp-vulnerability', 'security']
+              });
+            } else {
+              // Update existing issue
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues.data[0].number,
+                body: `## New Report\n\n${new Date().toISOString()}\n\n${body}`
+              });
+            }
+
+      - name: Fail job if CRITICAL/HIGH vulnerabilities found
+        if: steps.check-vulns.outputs.high_vulns_found == '1'
+        run: |
+          echo "❌ CRITICAL/HIGH vulnerabilities detected in dependencies"
+          echo "Please review the OWASP report above and update vulnerable dependencies"
+          exit 1
