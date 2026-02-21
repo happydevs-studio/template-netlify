@@ -145,6 +145,134 @@ tasks:
         fi
     silent: false
 
+  semgrep:
+    desc: Run Semgrep security analysis
+    summary: |
+      Performs static analysis using Semgrep with auto-configured rules.
+      Generates both JSON and Markdown reports.
+      
+      Usage:
+        task semgrep           # Run analysis
+    cmds:
+      - task: semgrep:check-tool
+      - task: semgrep:analyze
+      - task: semgrep:report
+    silent: false
+
+  semgrep:check-tool:
+    desc: Check if Semgrep is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v semgrep &> /dev/null; then
+          echo "📦 Installing Semgrep..."
+          
+          INSTALL_SUCCESS=0
+          
+          if command -v pip3 &> /dev/null; then
+            echo "Trying pip3..."
+            if pip3 install --user semgrep; then
+              INSTALL_SUCCESS=1
+            fi
+          elif command -v pip &> /dev/null; then
+            echo "Trying pip..."
+            if pip install --user semgrep; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Semgrep"
+            echo "Please install Semgrep manually:"
+            echo "  - pip install semgrep"
+            echo "  - https://semgrep.dev/docs/getting-started/"
+            exit 1
+          fi
+        fi
+        
+        if ! command -v semgrep &> /dev/null; then
+          echo "❌ Semgrep installed but not found in PATH"
+          exit 1
+        fi
+        
+        SEMGREP_VERSION=$(semgrep --version 2>&1)
+        echo "✅ Semgrep $SEMGREP_VERSION"
+    silent: false
+
+  semgrep:analyze:
+    desc: Run Semgrep analysis and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔍 Running Semgrep security analysis..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        # Create reports directory
+        mkdir -p .semgrep-reports
+        
+        # Run semgrep with auto config and JSON output
+        semgrep \
+          --config=auto \
+          --json \
+          --output=".semgrep-reports/semgrep-report.json" \
+          --exclude="node_modules" \
+          --exclude=".git" \
+          . \
+          || true
+        
+        # Convert to markdown using Python
+        python3 .scripts/generate-semgrep-md.py
+        
+        echo "✅ Analysis complete"
+    silent: false
+
+  semgrep:report:
+    desc: Display formatted Semgrep report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🔒 SEMGREP REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .semgrep-reports/semgrep-report.md ]; then
+          echo "❌ Semgrep report not generated!"
+          echo "This indicates an error in the analysis step. Check the logs above."
+          exit 1
+        fi
+        
+        cat .semgrep-reports/semgrep-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .semgrep-reports/"
+        echo "   • semgrep-report.md (human-readable)"
+        echo "   • semgrep-report.json (machine-readable)"
+        echo ""
+        
+        if [ -f .semgrep-reports/semgrep-report.json ]; then
+          ERROR_COUNT=$(python3 -c "
+        import json, sys
+        with open('.semgrep-reports/semgrep-report.json') as f:
+          data = json.load(f)
+        errors = [r for r in data.get('results', []) if r.get('extra', {}).get('severity', '').upper() == 'ERROR']
+        print(len(errors))
+        " 2>/dev/null || echo "0")
+          if [ "$ERROR_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $ERROR_COUNT error-severity finding(s)"
+            echo ""
+          else
+            echo "✅ No error-severity findings detected"
+            echo ""
+          fi
+        fi
+    silent: false
+
   test:
     desc: Run Playwright tests
     cmds:
@@ -159,6 +287,11 @@ tasks:
     desc: Run complexity report generation tests
     cmds:
       - python3 tests/generate_complexity_report.test.py
+
+  test:semgrep:
+    desc: Run Semgrep report generation tests
+    cmds:
+      - python3 tests/generate_semgrep_report.test.py
 
   start:
     desc: Start local development server
