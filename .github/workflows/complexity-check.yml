@@ -134,8 +134,8 @@ jobs:
               body: reportContent
             });
       
-      - name: Create/Update issue on main branch failure
-        if: failure() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      - name: Create/Update issue on main branch with high complexity
+        if: steps.check-complexity.outputs.high_complexity_found == '1' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/github-script@v7
         with:
           script: |
