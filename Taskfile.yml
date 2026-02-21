@@ -145,21 +145,21 @@ tasks:
         fi
     silent: false
 
-  semgrep:
-    desc: Run Semgrep security analysis
+  security:
+    desc: Run security analysis using Semgrep
     summary: |
-      Performs static analysis using Semgrep with auto-configured rules.
+      Performs static security analysis on the codebase using Semgrep.
       Generates both JSON and Markdown reports.
       
       Usage:
-        task semgrep           # Run analysis
+        task security           # Run analysis
     cmds:
-      - task: semgrep:check-tool
-      - task: semgrep:analyze
-      - task: semgrep:report
+      - task: security:check-tool
+      - task: security:analyze
+      - task: security:report
     silent: false
 
-  semgrep:check-tool:
+  security:check-tool:
     desc: Check if Semgrep is installed, install if necessary
     internal: true
     cmds:
@@ -199,66 +199,66 @@ tasks:
         echo "✅ Semgrep $SEMGREP_VERSION"
     silent: false
 
-  semgrep:analyze:
+  security:analyze:
     desc: Run Semgrep analysis and generate reports
     internal: true
     dir: .
     cmds:
       - |
         echo ""
-        echo "🔍 Running Semgrep security analysis..."
+        echo "🔍 Running security analysis..."
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
         
         # Create reports directory
-        mkdir -p .semgrep-reports
+        mkdir -p .security-reports
         
         # Run semgrep with auto config and JSON output
         semgrep \
           --config=auto \
           --json \
-          --output=".semgrep-reports/semgrep-report.json" \
+          --output=".security-reports/security-report.json" \
           --exclude="node_modules" \
           --exclude=".git" \
           . \
           || true
         
         # Convert to markdown using Python
-        python3 .scripts/generate-semgrep-md.py
+        python3 .scripts/generate-security-md.py
         
         echo "✅ Analysis complete"
     silent: false
 
-  semgrep:report:
-    desc: Display formatted Semgrep report
+  security:report:
+    desc: Display formatted security report
     internal: true
     cmds:
       - |
         echo ""
-        echo "🔒 SEMGREP REPORT"
+        echo "🔒 SECURITY REPORT"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
         
-        if [ ! -f .semgrep-reports/semgrep-report.md ]; then
-          echo "❌ Semgrep report not generated!"
+        if [ ! -f .security-reports/security-report.md ]; then
+          echo "❌ Security report not generated!"
           echo "This indicates an error in the analysis step. Check the logs above."
           exit 1
         fi
         
-        cat .semgrep-reports/semgrep-report.md
+        cat .security-reports/security-report.md
         
         echo ""
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
-        echo "📁 Reports saved to: .semgrep-reports/"
-        echo "   • semgrep-report.md (human-readable)"
-        echo "   • semgrep-report.json (machine-readable)"
+        echo "📁 Reports saved to: .security-reports/"
+        echo "   • security-report.md (human-readable)"
+        echo "   • security-report.json (machine-readable)"
         echo ""
         
-        if [ -f .semgrep-reports/semgrep-report.json ]; then
+        if [ -f .security-reports/security-report.json ]; then
           ERROR_COUNT=$(python3 -c "
         import json, sys
-        with open('.semgrep-reports/semgrep-report.json') as f:
+        with open('.security-reports/security-report.json') as f:
           data = json.load(f)
         errors = [r for r in data.get('results', []) if r.get('extra', {}).get('severity', '').upper() == 'ERROR']
         print(len(errors))
@@ -288,10 +288,10 @@ tasks:
     cmds:
       - python3 tests/generate_complexity_report.test.py
 
-  test:semgrep:
-    desc: Run Semgrep report generation tests
+  test:security:
+    desc: Run security report generation tests
     cmds:
-      - python3 tests/generate_semgrep_report.test.py
+      - python3 tests/generate_security_report.test.py
 
   start:
     desc: Start local development server

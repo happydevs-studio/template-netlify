@@ -1,4 +1,4 @@
-"""Tests for the Semgrep report generation script."""
+"""Tests for the security report generation script."""
 
 import json
 import os
@@ -12,7 +12,7 @@ def setup_test_env():
     """Create a temporary directory for test files."""
     tmpdir = tempfile.mkdtemp()
     os.chdir(tmpdir)
-    os.makedirs(".semgrep-reports", exist_ok=True)
+    os.makedirs(".security-reports", exist_ok=True)
     return tmpdir
 
 
@@ -26,7 +26,7 @@ SCRIPT_PATH = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),
     "..",
     ".scripts",
-    "generate-semgrep-md.py",
+    "generate-security-md.py",
 )
 
 
@@ -40,7 +40,7 @@ def run_script(cwd):
 
 
 def write_json(tmpdir, data):
-    with open(os.path.join(tmpdir, ".semgrep-reports", "semgrep-report.json"), "w") as f:
+    with open(os.path.join(tmpdir, ".security-reports", "security-report.json"), "w") as f:
         json.dump(data, f)
 
 
@@ -53,7 +53,7 @@ def test_missing_json_fails():
         assert result.returncode != 0, "Script should fail when JSON is missing"
         assert "not found" in result.stderr, "Should report missing JSON"
         assert not os.path.exists(
-            os.path.join(tmpdir, ".semgrep-reports", "semgrep-report.md")
+            os.path.join(tmpdir, ".security-reports", "security-report.md")
         ), "Should not generate report on error"
 
         print("✅ test_missing_json_fails passed")
@@ -70,13 +70,13 @@ def test_generates_report_with_no_findings():
         result = run_script(tmpdir)
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
-        report_path = os.path.join(tmpdir, ".semgrep-reports", "semgrep-report.md")
+        report_path = os.path.join(tmpdir, ".security-reports", "security-report.md")
         assert os.path.exists(report_path), "Should generate markdown report"
 
         with open(report_path) as f:
             content = f.read()
 
-        assert "Semgrep Security Analysis Report" in content, "Should have title"
+        assert "Security Analysis Report" in content, "Should have title"
         assert "No findings detected" in content, "Should indicate clean status"
 
         print("✅ test_generates_report_with_no_findings passed")
@@ -118,7 +118,7 @@ def test_identifies_error_findings():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(os.path.join(tmpdir, ".semgrep-reports", "semgrep-report.md")) as f:
+        with open(os.path.join(tmpdir, ".security-reports", "security-report.md")) as f:
             content = f.read()
 
         assert "Error Findings" in content, "Should have error findings section"
@@ -142,12 +142,12 @@ def test_report_includes_guidelines():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(os.path.join(tmpdir, ".semgrep-reports", "semgrep-report.md")) as f:
+        with open(os.path.join(tmpdir, ".security-reports", "security-report.md")) as f:
             content = f.read()
 
         assert "Guidelines" in content, "Should include guidelines"
         assert "Semgrep" in content, "Should mention Semgrep"
-        assert "semgrep-report.json" in content, "Should reference JSON report"
+        assert "security-report.json" in content, "Should reference JSON report"
 
         print("✅ test_report_includes_guidelines passed")
     finally:
@@ -167,7 +167,7 @@ def test_scan_errors_shown_in_report():
 
         assert result.returncode == 0, f"Script should succeed. stderr: {result.stderr}"
 
-        with open(os.path.join(tmpdir, ".semgrep-reports", "semgrep-report.md")) as f:
+        with open(os.path.join(tmpdir, ".security-reports", "security-report.md")) as f:
             content = f.read()
 
         assert "scan error(s)" in content, "Should mention scan errors"
@@ -178,7 +178,7 @@ def test_scan_errors_shown_in_report():
 
 
 if __name__ == "__main__":
-    print("\n🧪 Running Semgrep script tests...\n")
+    print("\n🧪 Running security script tests...\n")
 
     try:
         test_missing_json_fails()

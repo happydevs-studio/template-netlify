@@ -1,16 +1,16 @@
-# Semgrep Security Analysis Configuration
+# Security Analysis Workflow Configuration
 
-This template includes automated static analysis using **Semgrep** to help detect security issues and bugs early. This guide explains how to customize and use this feature for your cloned repository.
+This template includes automated static security analysis using **Semgrep** to help detect security issues and bugs early. This guide explains how to customize and use this feature for your cloned repository.
 
 ## Quick Start
 
 ### Run Analysis Locally
 ```bash
-task semgrep
+task security
 ```
 
 ### What You Get Automatically
-- ✅ PR comments with Semgrep findings report
+- ✅ PR comments with security findings report
 - ✅ Merge blocking if any ERROR-severity findings exist
 - ✅ GitHub issues on main branch for error-severity problems
 
@@ -18,9 +18,9 @@ task semgrep
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/semgrep.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/security-check.yml` |
 | Want stricter/looser rules? | Use a custom Semgrep config file (see below) |
-| Don't want Semgrep checks? | Delete `.github/workflows/semgrep.yml` |
+| Don't want security checks? | Delete `.github/workflows/security-check.yml` |
 
 ### Severity Reference
 
@@ -34,7 +34,7 @@ task semgrep
 
 ## Overview
 
-The Semgrep workflow:
+The security workflow:
 - ✅ Runs automatically on every PR to `main` and push to `main`
 - ✅ Analyzes code using Semgrep's auto-configured rule set
 - ✅ Posts findings as PR comments
@@ -45,10 +45,10 @@ The Semgrep workflow:
 
 | File | Purpose | Customization |
 |------|---------|---------------|
-| [`.github/workflows/semgrep.yml`](.github/workflows/semgrep.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
+| [`.github/workflows/security-check.yml`](.github/workflows/security-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
 | [`Taskfile.yml`](Taskfile.yml) | Local task runner config | Rule config, exclusions |
-| [`.scripts/generate-semgrep-md.py`](.scripts/generate-semgrep-md.py) | Report generator | Markdown formatting |
-| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.semgrep-reports/` from version control |
+| [`.scripts/generate-security-md.py`](.scripts/generate-security-md.py) | Report generator | Markdown formatting |
+| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.security-reports/` from version control |
 
 ## Key Configuration Points
 
@@ -68,7 +68,7 @@ rules:
     languages: [python]
 ```
 
-Then update the `semgrep:analyze` task in `Taskfile.yml`:
+Then update the `security:analyze` task in `Taskfile.yml`:
 
 ```yaml
 semgrep \
@@ -88,7 +88,7 @@ semgrep \
 
 ### 2. **File/Directory Exclusions**
 
-Edit the `semgrep:analyze` task in `Taskfile.yml`:
+Edit the `security:analyze` task in `Taskfile.yml`:
 
 ```yaml
 semgrep \
@@ -104,47 +104,47 @@ semgrep \
 
 | Trigger | Behavior |
 |---------|----------|
-| **Pull Request** | Posts Semgrep findings as comment, **fails if ERROR findings exist**, blocks merge |
+| **Pull Request** | Posts security findings as comment, **fails if ERROR findings exist**, blocks merge |
 | **Push to main** | Posts findings report, creates GitHub issue if error findings present |
 | **Workflow Dispatch** | Manual run for verification |
 
-To make findings non-blocking (warnings only), edit `.github/workflows/semgrep.yml`:
+To make findings non-blocking (warnings only), edit `.github/workflows/security-check.yml`:
 
 ```yaml
 # Remove or comment out the "Fail job" step at the end:
 - name: Fail job if error-severity findings found
-  # if: steps.check-semgrep.outputs.errors_found == '1'  # ← Comment this out
+  # if: steps.check-security.outputs.errors_found == '1'  # ← Comment this out
   run: |
-    echo "⚠️ Semgrep findings detected (non-blocking)"
+    echo "⚠️ Security findings detected (non-blocking)"
 ```
 
-### 4. **Disable Semgrep Checking**
+### 4. **Disable Security Checking**
 
 **Option A:** Disable the workflow in GitHub UI
-- Go to Actions → Semgrep Security Analysis → Disable workflow
+- Go to Actions → Security Analysis → Disable workflow
 
 **Option B:** Delete the workflow file
 ```bash
-rm .github/workflows/semgrep.yml
+rm .github/workflows/security-check.yml
 ```
 
-## Running Semgrep Analysis Locally
+## Running Security Analysis Locally
 
-Before pushing code, run Semgrep locally:
+Before pushing code, run security analysis locally:
 
 ```bash
 # Install Task (one-time setup)
 curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
 
-# Run Semgrep analysis
-task semgrep
+# Run security analysis
+task security
 ```
 
 This generates:
-- `.semgrep-reports/semgrep-report.md` - Human-readable report
-- `.semgrep-reports/semgrep-report.json` - Machine-readable findings
+- `.security-reports/security-report.md` - Human-readable report
+- `.security-reports/security-report.json` - Machine-readable findings
 
-## Understanding Semgrep Findings
+## Understanding Security Findings
 
 ### Severity Levels
 
@@ -167,14 +167,14 @@ Message: Avoid calling exec() with user-controlled input
 
 When error-severity findings are detected on pushes to `main`:
 
-1. A GitHub issue is created automatically with label `semgrep`
-2. Contains link to workflow run and Semgrep report
+1. A GitHub issue is created automatically with label `security`
+2. Contains link to workflow run and security report
 3. Includes reproduction steps and guidelines
 4. Future error findings comment on the same open issue
 
 **To resolve:**
 1. Create a branch to address the reported findings
-2. Run `task semgrep` locally to verify findings are resolved
+2. Run `task security` locally to verify findings are resolved
 3. Open PR with the fix
 4. CI will verify no error-severity findings remain
 5. After merge, close the GitHub issue
@@ -186,7 +186,7 @@ Since this is a **static HTML template**, code should remain minimal:
 - ✅ Keep helper scripts small and focused
 - ✅ Avoid patterns flagged by security rules
 - ✅ Review WARNING findings even when they don't block the build
-- ✅ Test code locally before pushing: `task semgrep`
+- ✅ Test code locally before pushing: `task security`
 
 ## Troubleshooting
 
@@ -203,9 +203,9 @@ If the workflow fails with "semgrep: command not found":
 
 ### Reports Not Generated
 
-If `.semgrep-reports/` directory is empty:
+If `.security-reports/` directory is empty:
 1. Check workflow logs for errors
-2. Verify Python script is accessible: `.scripts/generate-semgrep-md.py`
+2. Verify Python script is accessible: `.scripts/generate-security-md.py`
 
 ## For More Information
 
