@@ -145,6 +145,549 @@ tasks:
         fi
     silent: false
 
+  security:
+    desc: Run all security checks (SAST, dependencies, DAST, secrets)
+    summary: |
+      Runs the full security suite: SAST (Semgrep), dependency scanning (Trivy),
+      DAST (OWASP ZAP), and secrets detection (Gitleaks).
+
+      Usage:
+        task security                           # Run all checks
+        task sast                               # SAST only
+        task dependencies                       # Dependency scan only
+        task dast -- http://localhost:8080      # DAST only
+        task secrets                            # Secrets detection only
+    cmds:
+      - task: sast
+      - task: dependencies
+      - task: dast
+      - task: secrets
+    silent: false
+
+  sast:
+    desc: Run static application security testing using Semgrep
+    summary: |
+      Performs SAST on the codebase using Semgrep.
+      Generates both JSON and Markdown reports.
+
+      Usage:
+        task sast           # Run analysis
+    cmds:
+      - task: sast:check-tool
+      - task: sast:analyze
+      - task: sast:report
+    silent: false
+
+  sast:check-tool:
+    desc: Check if Semgrep is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v semgrep &> /dev/null; then
+          echo "📦 Installing Semgrep..."
+          
+          INSTALL_SUCCESS=0
+          
+          if command -v pip3 &> /dev/null; then
+            echo "Trying pip3..."
+            if pip3 install --user semgrep; then
+              INSTALL_SUCCESS=1
+            fi
+          elif command -v pip &> /dev/null; then
+            echo "Trying pip..."
+            if pip install --user semgrep; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Semgrep"
+            echo "Please install Semgrep manually:"
+            echo "  - pip install semgrep"
+            echo "  - https://semgrep.dev/docs/getting-started/"
+            exit 1
+          fi
+        fi
+        
+        if ! command -v semgrep &> /dev/null; then
+          echo "❌ Semgrep installed but not found in PATH"
+          exit 1
+        fi
+        
+        SEMGREP_VERSION=$(semgrep --version 2>&1)
+        echo "✅ Semgrep $SEMGREP_VERSION"
+    silent: false
+
+  sast:analyze:
+    desc: Run Semgrep SAST analysis and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔍 Running SAST analysis..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        mkdir -p .sast-reports
+        
+        semgrep \
+          --config=auto \
+          --json \
+          --output=".sast-reports/sast-report.json" \
+          --exclude="node_modules" \
+          --exclude=".git" \
+          . \
+          || true
+        
+        python3 .scripts/generate-sast-md.py
+        
+        echo "✅ Analysis complete"
+    silent: false
+
+  sast:report:
+    desc: Display formatted SAST report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🔍 SAST REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .sast-reports/sast-report.md ]; then
+          echo "❌ SAST report not generated!"
+          exit 1
+        fi
+        
+        cat .sast-reports/sast-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .sast-reports/"
+        echo "   • sast-report.md (human-readable)"
+        echo "   • sast-report.json (machine-readable)"
+        echo ""
+        
+        if [ -f .sast-reports/sast-report.json ]; then
+          ERROR_COUNT=$(python3 -c "
+        import json, sys
+        with open('.sast-reports/sast-report.json') as f:
+          data = json.load(f)
+        errors = [r for r in data.get('results', []) if r.get('extra', {}).get('severity', '').upper() == 'ERROR']
+        print(len(errors))
+        " 2>/dev/null || echo "0")
+          if [ "$ERROR_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $ERROR_COUNT error-severity finding(s)"
+            echo ""
+          else
+            echo "✅ No error-severity findings detected"
+            echo ""
+          fi
+        fi
+    silent: false
+
+  dependencies:
+    desc: Run dependency vulnerability scanning using Trivy
+    summary: |
+      Scans project dependencies for known CVEs using Trivy.
+      Generates both JSON and Markdown reports.
+
+      Usage:
+        task dependencies           # Run scan
+    cmds:
+      - task: dependencies:check-tool
+      - task: dependencies:analyze
+      - task: dependencies:report
+    silent: false
+
+  dependencies:check-tool:
+    desc: Check if Trivy is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v trivy &> /dev/null; then
+          echo "📦 Installing Trivy..."
+          
+          INSTALL_SUCCESS=0
+          
+          if command -v curl &> /dev/null; then
+            echo "Trying install script..."
+            if curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b ~/.local/bin; then
+              export PATH="$PATH:$HOME/.local/bin"
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Trivy"
+            echo "Please install Trivy manually:"
+            echo "  - https://trivy.dev/latest/getting-started/installation/"
+            exit 1
+          fi
+        fi
+        
+        if ! command -v trivy &> /dev/null; then
+          echo "❌ Trivy installed but not found in PATH"
+          exit 1
+        fi
+        
+        TRIVY_VERSION=$(trivy --version 2>&1 | head -1)
+        echo "✅ $TRIVY_VERSION"
+    silent: false
+
+  dependencies:analyze:
+    desc: Run Trivy dependency scan and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔍 Scanning dependencies for vulnerabilities..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        mkdir -p .dependencies-reports
+        
+        trivy fs \
+          --format json \
+          --output ".dependencies-reports/dependencies-report.json" \
+          --skip-dirs node_modules \
+          --skip-dirs .git \
+          . \
+          || true
+        
+        python3 .scripts/generate-dependencies-md.py
+        
+        echo "✅ Scan complete"
+    silent: false
+
+  dependencies:report:
+    desc: Display formatted dependency vulnerability report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "📦 DEPENDENCY VULNERABILITY REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .dependencies-reports/dependencies-report.md ]; then
+          echo "❌ Dependency report not generated!"
+          exit 1
+        fi
+        
+        cat .dependencies-reports/dependencies-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .dependencies-reports/"
+        echo "   • dependencies-report.md (human-readable)"
+        echo "   • dependencies-report.json (machine-readable)"
+        echo ""
+        
+        if [ -f .dependencies-reports/dependencies-report.json ]; then
+          VULN_COUNT=$(python3 -c "
+        import json, sys
+        with open('.dependencies-reports/dependencies-report.json') as f:
+          data = json.load(f)
+        count = 0
+        for r in data.get('Results', []):
+          for v in r.get('Vulnerabilities', []):
+            if v.get('Severity', '').upper() in ('CRITICAL', 'HIGH'):
+              count += 1
+        print(count)
+        " 2>/dev/null || echo "0")
+          if [ "$VULN_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $VULN_COUNT CRITICAL/HIGH vulnerability(ies)"
+            echo ""
+          else
+            echo "✅ No CRITICAL/HIGH vulnerabilities detected"
+            echo ""
+          fi
+        fi
+    silent: false
+
+  dast:
+    desc: Run dynamic application security testing using OWASP ZAP
+    summary: |
+      Performs DAST against a running site using OWASP ZAP (requires Docker).
+      Generates both JSON and Markdown reports.
+
+      Usage:
+        task start &                           # Start site first
+        task dast -- http://localhost:8080     # Then run DAST
+    vars:
+      TARGET: '{{default "http://localhost:8080" .CLI_ARGS}}'
+    cmds:
+      - task: dast:check-tool
+      - task: dast:analyze
+        vars:
+          TARGET: '{{.TARGET}}'
+      - task: dast:report
+    silent: false
+
+  dast:check-tool:
+    desc: Check if Docker (for ZAP) is available
+    internal: true
+    cmds:
+      - |
+        if ! command -v docker &> /dev/null; then
+          echo "❌ Docker is required to run OWASP ZAP"
+          echo "Please install Docker: https://docs.docker.com/get-docker/"
+          exit 1
+        fi
+        
+        DOCKER_VERSION=$(docker --version 2>&1)
+        echo "✅ $DOCKER_VERSION"
+    silent: false
+
+  dast:analyze:
+    desc: Run OWASP ZAP baseline scan and generate reports
+    internal: true
+    dir: .
+    vars:
+      TARGET: '{{default "http://localhost:8080" .TARGET}}'
+    cmds:
+      - |
+        echo ""
+        echo "🌐 Running DAST analysis against {{.TARGET}}..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        mkdir -p .dast-reports
+        chmod 777 .dast-reports
+        
+        # Check if target is localhost and if server needs to be started  
+        TARGET="{{.TARGET}}"
+        if [[ "$TARGET" == *"localhost"* ]] || [[ "$TARGET" == "http://127.0.0.1"* ]]; then
+          echo "🚀 Starting local development server..."
+          npx -y http-server . -p 8080 -s > /dev/null 2>&1 &
+          SERVER_PID=$!
+          
+          # Wait for server to be ready
+          echo "⏳ Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8080 > /dev/null 2>&1; then
+              echo "✅ Server is ready"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ Server failed to start within 30 seconds"
+              kill $SERVER_PID 2>/dev/null || true
+              exit 1
+            fi
+            sleep 1
+          done
+          
+          trap "kill $SERVER_PID 2>/dev/null || true" EXIT
+          # Replace localhost with Docker gateway IP for access from container
+          TARGET="http://172.17.0.1:8080"
+          echo "📍 Using Docker-compatible target: $TARGET"
+        fi
+        
+        docker run --rm \
+          -v "$(pwd)/.dast-reports:/zap/wrk/:rw" \
+          ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py \
+          -t "$TARGET" \
+          -J "dast-report.json" \
+          -I \
+          || true
+        
+        python3 .scripts/generate-dast-md.py
+        
+        echo "✅ Analysis complete"
+    silent: false
+
+  dast:report:
+    desc: Display formatted DAST report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🌐 DAST REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .dast-reports/dast-report.md ]; then
+          echo "❌ DAST report not generated!"
+          exit 1
+        fi
+        
+        cat .dast-reports/dast-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .dast-reports/"
+        echo "   • dast-report.md (human-readable)"
+        echo "   • dast-report.json (machine-readable)"
+        echo ""
+        
+        if [ -f .dast-reports/dast-report.json ]; then
+          ALERT_COUNT=$(python3 -c "
+        import json, sys
+        with open('.dast-reports/dast-report.json') as f:
+          data = json.load(f)
+        count = 0
+        for site in data.get('site', []):
+          for alert in site.get('alerts', []):
+            if int(alert.get('riskcode', 0)) >= 2:
+              count += 1
+        print(count)
+        " 2>/dev/null || echo "0")
+          if [ "$ALERT_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $ALERT_COUNT medium/high alert(s)"
+            echo ""
+          else
+            echo "✅ No medium/high alerts detected"
+            echo ""
+          fi
+        fi
+    silent: false
+
+  secrets:
+    desc: Run secrets detection using Gitleaks
+    summary: |
+      Scans the codebase and git history for hardcoded credentials using Gitleaks.
+      Generates both JSON and Markdown reports.
+
+      Usage:
+        task secrets           # Run detection
+    cmds:
+      - task: secrets:check-tool
+      - task: secrets:analyze
+      - task: secrets:report
+    silent: false
+
+  secrets:check-tool:
+    desc: Check if Gitleaks is installed, install if necessary
+    internal: true
+    cmds:
+      - |
+        if ! command -v gitleaks &> /dev/null; then
+          echo "📦 Installing Gitleaks..."
+          
+          INSTALL_SUCCESS=0
+          
+          if command -v curl &> /dev/null; then
+            echo "Trying GitHub releases..."
+            
+            # Detect OS and architecture
+            OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+            ARCH=$(uname -m)
+            case "$ARCH" in
+              x86_64) ARCH="x64" ;;
+              aarch64|arm64) ARCH="arm64" ;;
+              *) ARCH="x64" ;;
+            esac
+            case "$OS" in
+              darwin) OS="darwin" ;;
+              linux)  OS="linux" ;;
+              *)      OS="linux" ;;
+            esac
+            
+            LATEST=$(curl -s https://api.github.com/repos/gitleaks/gitleaks/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+            DOWNLOAD_URL="https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_${LATEST}_${OS}_${ARCH}.tar.gz"
+            
+            mkdir -p ~/.local/bin
+            if curl -sSfL "$DOWNLOAD_URL" | tar -xz -C ~/.local/bin gitleaks 2>/dev/null; then
+              export PATH="$PATH:$HOME/.local/bin"
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ]; then
+            echo "❌ Failed to install Gitleaks"
+            echo "Please install Gitleaks manually:"
+            echo "  - https://gitleaks.io/"
+            exit 1
+          fi
+        fi
+        
+        if ! command -v gitleaks &> /dev/null; then
+          echo "❌ Gitleaks installed but not found in PATH"
+          exit 1
+        fi
+        
+        GITLEAKS_VERSION=$(gitleaks version 2>&1)
+        echo "✅ Gitleaks $GITLEAKS_VERSION"
+    silent: false
+
+  secrets:analyze:
+    desc: Run Gitleaks secrets detection and generate reports
+    internal: true
+    dir: .
+    cmds:
+      - |
+        echo ""
+        echo "🔑 Running secrets detection..."
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        mkdir -p .secrets-reports
+        
+        # Run gitleaks against full git history; exit code 1 means secrets found, which is expected
+        gitleaks detect \
+          --source=. \
+          --report-format=json \
+          --report-path=".secrets-reports/secrets-report.json" \
+          || true
+        
+        python3 .scripts/generate-secrets-md.py
+        
+        echo "✅ Detection complete"
+    silent: false
+
+  secrets:report:
+    desc: Display formatted secrets detection report
+    internal: true
+    cmds:
+      - |
+        echo ""
+        echo "🔑 SECRETS DETECTION REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .secrets-reports/secrets-report.md ]; then
+          echo "❌ Secrets report not generated!"
+          exit 1
+        fi
+        
+        cat .secrets-reports/secrets-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .secrets-reports/"
+        echo "   • secrets-report.md (human-readable)"
+        echo "   • secrets-report.json (machine-readable)"
+        echo ""
+        
+        if [ -f .secrets-reports/secrets-report.json ]; then
+          SECRET_COUNT=$(python3 -c "
+        import json, sys
+        with open('.secrets-reports/secrets-report.json') as f:
+          content = f.read().strip()
+        if not content or content == 'null':
+          print(0)
+        else:
+          data = json.loads(content)
+          print(len(data) if isinstance(data, list) else 0)
+        " 2>/dev/null || echo "0")
+          if [ "$SECRET_COUNT" -gt 0 ]; then
+            echo "⚠️  Found $SECRET_COUNT secret(s) — revoke and remove immediately"
+            echo ""
+          else
+            echo "✅ No secrets detected"
+            echo ""
+          fi
+        fi
+    silent: false
+
   test:
     desc: Run Playwright tests
     cmds:
@@ -159,6 +702,34 @@ tasks:
     desc: Run complexity report generation tests
     cmds:
       - python3 tests/generate_complexity_report.test.py
+
+  test:security:
+    desc: Run all security report generation tests
+    cmds:
+      - task: test:sast
+      - task: test:dependencies
+      - task: test:dast
+      - task: test:secrets
+
+  test:sast:
+    desc: Run SAST report generation tests
+    cmds:
+      - python3 tests/generate_sast_report.test.py
+
+  test:dependencies:
+    desc: Run dependency vulnerability report generation tests
+    cmds:
+      - python3 tests/generate_dependencies_report.test.py
+
+  test:dast:
+    desc: Run DAST report generation tests
+    cmds:
+      - python3 tests/generate_dast_report.test.py
+
+  test:secrets:
+    desc: Run secrets detection report generation tests
+    cmds:
+      - python3 tests/generate_secrets_report.test.py
 
   start:
     desc: Start local development server
