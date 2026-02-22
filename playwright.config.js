@@ -39,7 +39,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'npx http-server . -p 8080',
+    command: 'node server.js',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
   },
