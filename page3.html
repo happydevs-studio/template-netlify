@@ -3,21 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Page 3</title>
+    <title>Exercise Statistics</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: Arial, sans-serif;
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            padding: 2rem 1rem;
         }
         .container {
             text-align: center;
             color: white;
+            max-width: 600px;
+            width: 100%;
         }
         h1 {
             font-size: 4rem;
@@ -35,18 +38,41 @@
         nav a {
             color: white;
             text-decoration: none;
-            margin: 0 1rem;
-            padding: 0.5rem 1.5rem;
+            margin: 0 0.5rem;
+            padding: 0.5rem 1rem;
             background: rgba(255, 255, 255, 0.2);
             border-radius: 5px;
             transition: background 0.3s;
             display: inline-block;
+            font-size: 0.9rem;
         }
         nav a:hover {
             background: rgba(255, 255, 255, 0.3);
         }
         .interactive {
             margin-top: 2rem;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 10px;
+        }
+        .stat-card h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1rem;
+            opacity: 0.9;
+            font-weight: normal;
+        }
+        .stat-value {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        #counter {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: bold;
         }
         button {
             padding: 0.7rem 2rem;
@@ -57,56 +83,87 @@
             border-radius: 5px;
             cursor: pointer;
             transition: transform 0.2s;
-            margin: 0.5rem;
+            margin-top: 1rem;
+            width: 100%;
         }
         button:hover {
-            transform: scale(1.05);
+            transform: scale(1.02);
         }
-        #counter {
-            margin-top: 1rem;
-            font-size: 2rem;
-            min-height: 1.5rem;
-            font-weight: bold;
+        .empty-state {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 2rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Page 3</h1>
-        <p>This is the third page with a counter!</p>
+        <h1>Statistics</h1>
+        <p>Your exercise summary</p>
         <nav>
-            <a href="index.html" id="nav-home">Home</a>
-            <a href="page2.html" id="nav-page2">Page 2</a>
-            <a href="page3.html" id="nav-page3">Page 3</a>
+            <a href="index.html" id="nav-home">Add Exercise</a>
+            <a href="page2.html" id="nav-page2">History</a>
+            <a href="page3.html" id="nav-page3">Statistics</a>
         </nav>
-        <div class="interactive">
-            <button id="increment-btn" onclick="increment()">+</button>
-            <button id="decrement-btn" onclick="decrement()">-</button>
-            <button id="reset-btn" onclick="reset()">Reset</button>
+        <div class="interactive" id="stats-container">
             <div id="counter">0</div>
         </div>
+        <button id="reset-btn" onclick="clearAllData()">Clear All Data</button>
     </div>
     <script>
-        let count = 0;
-        
-        function updateDisplay() {
-            document.getElementById('counter').textContent = count;
+        function calculateStats() {
+            const exercises = JSON.parse(localStorage.getItem('exercises') || '[]');
+            const container = document.getElementById('stats-container');
+            
+            if (exercises.length === 0) {
+                container.innerHTML = '<div class="empty-state">No exercises logged yet. Start by adding an exercise!</div>';
+                return;
+            }
+            
+            const totalExercises = exercises.length;
+            const totalMinutes = exercises.reduce((sum, ex) => sum + ex.duration, 0);
+            
+            // Count exercises by type
+            const typeCount = {};
+            exercises.forEach(ex => {
+                typeCount[ex.type] = (typeCount[ex.type] || 0) + 1;
+            });
+            
+            // Find most common type
+            let mostCommonType = '';
+            let maxCount = 0;
+            for (const [type, count] of Object.entries(typeCount)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostCommonType = type;
+                }
+            }
+            
+            container.innerHTML = `
+                <div class="stat-card">
+                    <h3>Total Exercises</h3>
+                    <div class="stat-value">${totalExercises}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Total Time</h3>
+                    <div class="stat-value">${totalMinutes} min</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Most Common Type</h3>
+                    <div class="stat-value">${mostCommonType}</div>
+                </div>
+            `;
         }
         
-        function increment() {
-            count++;
-            updateDisplay();
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all exercise data? This cannot be undone.')) {
+                localStorage.removeItem('exercises');
+                calculateStats();
+            }
         }
         
-        function decrement() {
-            count--;
-            updateDisplay();
-        }
-        
-        function reset() {
-            count = 0;
-            updateDisplay();
-        }
+        // Load stats on page load
+        calculateStats();
     </script>
 </body>
 </html>
