@@ -459,13 +459,40 @@ tasks:
         
         mkdir -p .dast-reports
         
+        # Check if target is localhost and if server needs to be started  
+        TARGET="{{.TARGET}}"
+        if [[ "$TARGET" == *"localhost"* ]] || [[ "$TARGET" == "http://127.0.0.1"* ]]; then
+          echo "🚀 Starting local development server..."
+          npx -y http-server . -p 8080 -s > /dev/null 2>&1 &
+          SERVER_PID=$!
+          
+          # Wait for server to be ready
+          echo "⏳ Waiting for server to be ready..."
+          for i in {1..30}; do
+            if curl -s http://localhost:8080 > /dev/null 2>&1; then
+              echo "✅ Server is ready"
+              break
+            fi
+            if [ $i -eq 30 ]; then
+              echo "❌ Server failed to start within 30 seconds"
+              kill $SERVER_PID 2>/dev/null || true
+              exit 1
+            fi
+            sleep 1
+          done
+          
+          trap "kill $SERVER_PID 2>/dev/null || true" EXIT
+          # Replace localhost with Docker gateway IP for access from container
+          TARGET="http://172.17.0.1:8080"
+          echo "📍 Using Docker-compatible target: $TARGET"
+        fi
+        
         docker run --rm \
-          --network host \
           -v "$(pwd)/.dast-reports:/zap/wrk/:rw" \
           ghcr.io/zaproxy/zaproxy:stable \
           zap-baseline.py \
-          -t "{{.TARGET}}" \
-          -J "/zap/wrk/dast-report.json" \
+          -t "$TARGET" \
+          -J "dast-report.json" \
           -I \
           || true
         
