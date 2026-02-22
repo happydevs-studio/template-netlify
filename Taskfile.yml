@@ -458,6 +458,7 @@ tasks:
         echo ""
         
         mkdir -p .dast-reports
+        chmod 777 .dast-reports
         
         # Check if target is localhost and if server needs to be started  
         TARGET="{{.TARGET}}"
