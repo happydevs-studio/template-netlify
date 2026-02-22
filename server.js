@@ -1,5 +1,6 @@
 /**
- * Static file server with security headers matching netlify.toml.
+ * Static file server that reads security headers directly from netlify.toml.
+ * netlify.toml is the single source of truth — no header duplication.
  * Used by DAST scanning and local development (`task start`).
  */
 const http = require('http');
@@ -9,15 +10,87 @@ const path = require('path');
 const PORT = process.env.PORT || 8080;
 const ROOT = process.cwd();
 
-const SECURITY_HEADERS = {
-  'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'",
-  'X-Frame-Options': 'DENY',
-  'X-Content-Type-Options': 'nosniff',
-  'Permissions-Policy': 'geolocation=(), camera=(), microphone=()',
-  'Cross-Origin-Opener-Policy': 'same-origin',
-  'Cross-Origin-Embedder-Policy': 'require-corp',
-  'Cross-Origin-Resource-Policy': 'same-origin',
-};
+/**
+ * Minimal parser for the [[headers]] sections of netlify.toml.
+ * Returns an array of { for: string, values: Object } rules.
+ */
+function parseNetlifyHeaders(tomlPath) {
+  let content;
+  try {
+    content = fs.readFileSync(tomlPath, 'utf8');
+  } catch (e) {
+    console.warn(`Warning: could not read ${tomlPath} (${e.message}) — no headers will be applied`);
+    return [];
+  }
+
+  const rules = [];
+  let current = null;
+  let inValues = false;
+
+  for (const raw of content.split('\n')) {
+    const line = raw.trim();
+
+    if (line === '[[headers]]') {
+      current = { for: null, values: {} };
+      rules.push(current);
+      inValues = false;
+      continue;
+    }
+
+    if (!current) continue;
+
+    if (line === '[headers.values]') {
+      inValues = true;
+      continue;
+    }
+
+    // Any new section ends the values block for the current rule
+    if (line.startsWith('[')) {
+      inValues = false;
+      continue;
+    }
+
+    // Parse key = "value" pairs; values may contain anything except an unescaped closing quote
+    const match = line.match(/^([^=]+?)\s*=\s*"((?:[^"\\]|\\.)*)"$/);
+    if (!match) continue;
+
+    const [, key, value] = match;
+
+    if (inValues) {
+      current.values[key.trim()] = value;
+    } else if (key.trim() === 'for') {
+      current.for = value;
+    }
+  }
+
+  return rules.filter(r => r.for !== null);
+}
+
+/**
+ * Returns true if the Netlify path pattern matches the request URL path.
+ * Supports exact paths and glob-style "/*" and "/prefix/*".
+ */
+function matchesPattern(pattern, urlPath) {
+  if (pattern === '/*') return true;
+  if (!pattern.endsWith('/*')) return pattern === urlPath;
+  const prefix = pattern.slice(0, -1); // strip trailing *
+  return urlPath.startsWith(prefix);
+}
+
+/**
+ * Collect all matching headers for a given URL path, applying rules in order.
+ */
+function headersForPath(rules, urlPath) {
+  const result = {};
+  for (const rule of rules) {
+    if (matchesPattern(rule.for, urlPath)) {
+      Object.assign(result, rule.values);
+    }
+  }
+  return result;
+}
+
+const HEADER_RULES = parseNetlifyHeaders(path.join(ROOT, 'netlify.toml'));
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',
@@ -33,30 +106,32 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
+  // Compute headers for the global catch-all rule first (used for early error responses)
+  const globalHeaders = headersForPath(HEADER_RULES, '/');
+
   let urlPath = req.url.split('?')[0];
   try {
     urlPath = decodeURIComponent(urlPath);
   } catch (e) {
-    res.writeHead(400, SECURITY_HEADERS);
+    res.writeHead(400, globalHeaders);
     res.end('Bad Request');
     return;
   }
 
   if (urlPath === '/') urlPath = '/index.html';
 
+  const securityHeaders = headersForPath(HEADER_RULES, urlPath);
+
   // Prevent directory traversal
   const filePath = path.resolve(ROOT, urlPath.slice(1));
   let safePath;
   try {
-    // Resolve any symbolic links and get the canonical absolute path
     safePath = fs.realpathSync(filePath);
   } catch (e) {
-    // If the path does not exist yet, fall back to the resolved path;
-    // subsequent fs.readFile will handle ENOENT and other errors.
     safePath = filePath;
   }
   if (!safePath.startsWith(ROOT + path.sep) && safePath !== ROOT) {
-    res.writeHead(403, SECURITY_HEADERS);
+    res.writeHead(403, securityHeaders);
     res.end('Forbidden');
     return;
   }
@@ -67,15 +142,15 @@ const server = http.createServer((req, res) => {
   fs.readFile(safePath, (err, data) => {
     if (err) {
       if (err.code === 'ENOENT') {
-        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', ...SECURITY_HEADERS });
+        res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', ...securityHeaders });
         res.end('<h1>404 Not Found</h1>');
       } else {
-        res.writeHead(500, SECURITY_HEADERS);
+        res.writeHead(500, securityHeaders);
         res.end('Internal Server Error');
       }
       return;
     }
-    res.writeHead(200, { 'Content-Type': contentType, ...SECURITY_HEADERS });
+    res.writeHead(200, { 'Content-Type': contentType, ...securityHeaders });
     res.end(data);
   });
 });
