@@ -67,28 +67,32 @@ def format_findings_section(findings, section_title, icon):
     return result
 
 
+def _collect_parsing_errors(errors):
+    """Collect parsing error files and affected lines from Semgrep errors."""
+    parsing_error_files = {}
+    for error in errors:
+        error_type = error.get("type", [])
+        if not (isinstance(error_type, list) and error_type and error_type[0] == "PartialParsing"):
+            continue
+        path = error.get("path", "unknown")
+        if path not in parsing_error_files:
+            parsing_error_files[path] = []
+        spans = error.get("spans", [])
+        if spans:
+            start_line = spans[0].get("start", {}).get("line", "?")
+            parsing_error_files[path].append(start_line)
+    return parsing_error_files
+
+
 def format_scan_errors_explanation(errors):
     """Format explanation of scan errors and parsing issues."""
     if not errors:
         return ""
 
     result = "### 📋 Scan Errors Explanation\n\n"
-    
-    # Check if errors are parsing errors (the common case)
-    parsing_error_files = {}
-    for error in errors:
-        error_type = error.get("type", [])
-        if isinstance(error_type, list) and len(error_type) > 0:
-            if error_type[0] == "PartialParsing":
-                path = error.get("path", "unknown")
-                if path not in parsing_error_files:
-                    parsing_error_files[path] = []
-                # Extract line info if available
-                spans = error.get("spans", [])
-                if spans:
-                    start_line = spans[0].get("start", {}).get("line", "?")
-                    parsing_error_files[path].append(start_line)
-    
+
+    parsing_error_files = _collect_parsing_errors(errors)
+
     if parsing_error_files:
         result += "The " + str(len(errors)) + " warning(s) are **parsing errors in YAML workflow files**, not security issues:\n\n"
         for path, lines in sorted(parsing_error_files.items()):
@@ -104,7 +108,7 @@ def format_scan_errors_explanation(errors):
             msg = error.get("message", "Unknown error").split('\n')[0]
             result += f"{i}. {msg}\n"
         result += "\n"
-    
+
     return result
 
 
