@@ -46,16 +46,25 @@ const server = http.createServer((req, res) => {
 
   // Prevent directory traversal
   const filePath = path.resolve(ROOT, urlPath.slice(1));
-  if (!filePath.startsWith(ROOT + path.sep) && filePath !== ROOT) {
+  let safePath;
+  try {
+    // Resolve any symbolic links and get the canonical absolute path
+    safePath = fs.realpathSync(filePath);
+  } catch (e) {
+    // If the path does not exist yet, fall back to the resolved path;
+    // subsequent fs.readFile will handle ENOENT and other errors.
+    safePath = filePath;
+  }
+  if (!safePath.startsWith(ROOT + path.sep) && safePath !== ROOT) {
     res.writeHead(403, SECURITY_HEADERS);
     res.end('Forbidden');
     return;
   }
 
-  const ext = path.extname(filePath).toLowerCase();
+  const ext = path.extname(safePath).toLowerCase();
   const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
-  fs.readFile(filePath, (err, data) => {
+  fs.readFile(safePath, (err, data) => {
     if (err) {
       if (err.code === 'ENOENT') {
         res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8', ...SECURITY_HEADERS });
