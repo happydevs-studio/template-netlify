@@ -31,12 +31,9 @@ jobs:
           curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
           task --version
 
-      - name: Install http-server
-        run: npm install -g http-server
-
       - name: Start local server
         run: |
-          http-server . -p 8080 &
+          npx --yes http-server . -p 8080 &
           echo "SERVER_PID=$!" >> $GITHUB_ENV
           # Wait for server to be ready
           for i in $(seq 1 10); do
