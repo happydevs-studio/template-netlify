@@ -87,20 +87,10 @@
         </nav>
         <div class="interactive">
             <input type="text" id="text-input" placeholder="Enter your name">
-            <button id="submit-btn" onclick="greetUser()">Submit</button>
+            <button id="submit-btn">Submit</button>
             <div id="output"></div>
         </div>
     </div>
-    <script>
-        function greetUser() {
-            const name = document.getElementById('text-input').value;
-            const output = document.getElementById('output');
-            if (name.trim()) {
-                output.textContent = `Hello, ${name}! Welcome to Page 2!`;
-            } else {
-                output.textContent = 'Please enter your name.';
-            }
-        }
-    </script>
+    <script src="page2.js"></script>
 </body>
 </html>

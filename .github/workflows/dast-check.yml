@@ -33,7 +33,7 @@ jobs:
 
       - name: Start local server
         run: |
-          npx --yes http-server . -p 8080 &
+          node server.js &
           echo "SERVER_PID=$!" >> $GITHUB_ENV
           # Wait for server to be ready
           for i in $(seq 1 10); do

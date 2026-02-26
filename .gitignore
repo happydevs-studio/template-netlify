@@ -6,3 +6,5 @@ test-results/
 .dependencies-reports/
 .dast-reports/
 .secrets-reports/
+# Local Netlify folder
+.netlify

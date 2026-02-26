@@ -1,3 +1,14 @@
 [build]
   publish = "."
   command = "echo 'No build step required for static site'"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Permissions-Policy = "geolocation=(), camera=(), microphone=()"
+    Cross-Origin-Opener-Policy = "same-origin"
+    Cross-Origin-Embedder-Policy = "require-corp"
+    Cross-Origin-Resource-Policy = "same-origin"

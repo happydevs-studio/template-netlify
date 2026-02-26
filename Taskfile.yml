@@ -464,7 +464,7 @@ tasks:
         TARGET="{{.TARGET}}"
         if [[ "$TARGET" == *"localhost"* ]] || [[ "$TARGET" == "http://127.0.0.1"* ]]; then
           echo "🚀 Starting local development server..."
-          npx -y http-server . -p 8080 -s > /dev/null 2>&1 &
+          node server.js > /dev/null 2>&1 &
           SERVER_PID=$!
           
           # Wait for server to be ready
@@ -734,4 +734,4 @@ tasks:
   start:
     desc: Start local development server
     cmds:
-      - npx http-server . -p 8080 -o
+      - node server.js
