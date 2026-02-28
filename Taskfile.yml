@@ -1018,7 +1018,7 @@ tasks:
   security:vulnerability:all:
     desc: Run vulnerability scanning
     cmds:
-      - task: dependencies
+      - task: vulnerability:all
 
   security:dast:
     desc: Run dynamic application security testing
