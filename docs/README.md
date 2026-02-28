@@ -11,6 +11,12 @@ The live site is at [https://griff-template.netlify.app/](https://griff-template
 - 🔄 Feature branch preview deployments for PRs
 - 💻 Local development server
 
+## 📚 Documentation
+
+This project follows a structured documentation framework. For comprehensive navigation and to find specific topics:
+
+**→ [Documentation Hub (index.md)](index.md)** - Central navigation for all project documentation
+
 ## Quick Start
 
 ### Running Locally

@@ -2,6 +2,8 @@
 
 This is an open standard for agents, AI assistants, and automation tools to understand project conventions and best practices.
 
+> 📚 **Documentation Hub**: For comprehensive documentation navigation, see [docs/index.md](index.md) which provides a structured map of all project documentation.
+
 ## Project Overview
 
 This is a minimal static site template demonstrating Netlify deployment with GitHub Actions CI/CD. The entire application is a single [index.html](index.html) file with embedded CSS—no build process, no bundlers, no frameworks.
