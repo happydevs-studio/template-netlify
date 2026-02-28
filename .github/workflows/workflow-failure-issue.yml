@@ -1,0 +1,93 @@
+name: Raise Issue on Workflow Failure
+
+on:
+  workflow_run:
+    workflows:
+      - "Deploy to Netlify"
+      - "Playwright Tests"
+      - "Reliability Smoke Tests"
+      - "SAST Analysis"
+      - "Dependency review"
+      - "DAST Analysis"
+      - "Secrets Detection"
+      - "Code Complexity Check"
+      - "Hygiene - Documentation Accuracy Check"
+      - "Documentation Size Monitor"
+      - "Hygiene - Documentation Structure Check"
+      - "Hygiene - Auto Label PRs"
+      - "Dependency Vulnerability Scan"
+      - "Hygiene - Documentation Updater"
+    types:
+      - completed
+
+permissions:
+  issues: write
+
+jobs:
+  raise-issue:
+    if: >
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create or update issue for workflow failure
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const workflowName = context.payload.workflow_run.name;
+            const runId = context.payload.workflow_run.id;
+            const runUrl = context.payload.workflow_run.html_url;
+            const sha = context.payload.workflow_run.head_sha;
+            const branch = context.payload.workflow_run.head_branch;
+
+            const title = `❌ Workflow Failure: ${workflowName}`;
+            const label = 'workflow-failure';
+
+            const body = [
+              `## Workflow Failure Detected`,
+              ``,
+              `**Workflow:** ${workflowName}`,
+              `**Branch:** ${branch}`,
+              `**Commit:** [\`${sha.substring(0, 7)}\`](${{ github.server_url }}/${{ github.repository }}/commit/${sha})`,
+              `**Run:** [#${runId}](${runUrl})`,
+              ``,
+              `The **${workflowName}** workflow failed on the \`main\` branch.`,
+              ``,
+              `[View the failed workflow run](${runUrl})`,
+              ``,
+              `---`,
+              `*This issue was automatically created by the Raise Issue on Workflow Failure workflow.*`
+            ].join('\n');
+
+            // Check for an existing open issue for this workflow
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: [label]
+            });
+
+            const existingIssue = issues.find(issue => issue.title === title);
+
+            if (existingIssue) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: [
+                  `## New Failure`,
+                  ``,
+                  `**Time:** ${new Date().toISOString()}`,
+                  `**Commit:** [\`${sha.substring(0, 7)}\`](${{ github.server_url }}/${{ github.repository }}/commit/${sha})`,
+                  `**Run:** [#${runId}](${runUrl})`
+                ].join('\n')
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: title,
+                body: body,
+                labels: [label]
+              });
+            }
