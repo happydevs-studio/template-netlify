@@ -50,10 +50,18 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 
 ### Agentic Workflows
 
-**Copilot Coding Agent** ([.github/copilot-setup-steps.yml](../.github/copilot-setup-steps.yml)):
+**Copilot Coding Agent** ([.github/workflows/copilot-setup-steps.yml](../.github/workflows/copilot-setup-steps.yml)):
 - Enables GitHub Copilot to be assigned to issues and autonomously create PRs
-- Sets up Node.js, Playwright, Taskfile, and Python analysis tools
+- Sets up Node.js, Playwright, Taskfile, Python analysis tools, and gh-aw MCP server
 - Agent uses `AGENTS.md` and `docs/` for project context and conventions
+
+**Documentation Updater** ([.github/workflows/hygiene-doc-updater.md](../.github/workflows/hygiene-doc-updater.md)):
+- GitHub Agentic Workflow (gh-aw) that runs weekly on Fridays (or on-demand via `workflow_dispatch`)
+- Scans merged PRs from the last 7 days and identifies documentation gaps
+- Checks open `documentation`-labeled issues for unaddressed gaps
+- Creates PRs with documentation updates, auto-assigned to Copilot for review
+- Respects `docs/index.md` governance model and project conventions
+- Requires `ANTHROPIC_API_KEY` secret for Claude engine
 
 **Auto-label PRs** ([.github/workflows/hygiene-auto-label-pr.yml](../.github/workflows/hygiene-auto-label-pr.yml)):
 - Automatically labels PRs based on changed files using [.github/labeler.yml](../.github/labeler.yml)
