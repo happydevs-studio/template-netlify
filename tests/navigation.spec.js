@@ -58,6 +58,16 @@ test.describe('Navigation Tests', () => {
     await page.click('#nav-home');
     await expect(page).toHaveTitle('Hello World');
   });
+
+  test('should navigate to pet insurance page', async ({ page }) => {
+    await page.goto('/');
+    await expect(page).toHaveTitle('Hello World');
+    
+    // Click on Pet Insurance link
+    await page.click('#nav-pet-insurance');
+    await expect(page).toHaveURL(/.*pet-insurance.html/);
+    await expect(page).toHaveTitle('Pet Insurance - Get Your Quote');
+  });
 });
 
 test.describe('Interactive Elements Tests', () => {

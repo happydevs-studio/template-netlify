@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Insurance - Get Your Quote</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+            min-height: 100vh;
+            color: #1E293B;
+            padding: 2rem 1rem;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #3B82F6;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 1.125rem;
+            color: #64748B;
+            font-weight: 400;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(59, 130, 246, 0.1);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .question {
+            display: none;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .question.active {
+            display: block;
+        }
+
+        .question h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-indicator {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            background: #3B82F6;
+            color: white;
+            border-radius: 50%;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: #E2E8F0;
+            border-radius: 2px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3B82F6 0%, #60A5FA 100%);
+            transition: width 0.5s ease;
+            width: 0%;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        label .required {
+            color: #F97316;
+            margin-left: 0.25rem;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            background: #F8FAFC;
+            color: #1E293B;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #3B82F6;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        input:hover,
+        select:hover {
+            border-color: #60A5FA;
+        }
+
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+        }
+
+        .radio-option {
+            position: relative;
+        }
+
+        .radio-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .radio-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem 1rem;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            background: #F8FAFC;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 100px;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            border-color: #3B82F6;
+            background: #EFF6FF;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .radio-option label:hover {
+            border-color: #60A5FA;
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .radio-option .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .radio-option .label-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #1E293B;
+            margin: 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .checkbox-option {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-option input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 0.75rem;
+            cursor: pointer;
+            accent-color: #3B82F6;
+        }
+
+        .checkbox-option label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .info-text {
+            font-size: 0.875rem;
+            color: #64748B;
+            margin-top: 0.5rem;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .next-button, .back-button, .submit-button {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .next-button, .submit-button {
+            flex: 1;
+            color: white;
+            background: linear-gradient(135deg, #F97316 0%, #FB923C 100%);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .next-button:hover, .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
+        }
+
+        .next-button:active, .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .next-button:disabled, .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-button {
+            background: #F8FAFC;
+            color: #64748B;
+            border: 2px solid #E2E8F0;
+            padding: 1rem 1.5rem;
+        }
+
+        .back-button:hover {
+            background: #E2E8F0;
+            color: #1E293B;
+        }
+
+        .submit-button {
+            width: 100%;
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background: #ECFDF5;
+            border: 2px solid #10B981;
+            border-radius: 12px;
+            color: #065F46;
+            margin-top: 1rem;
+            animation: fadeInUp 0.4s ease-out;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-message .icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .success-message h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: #065F46;
+        }
+
+        .nav-footer {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .nav-footer a {
+            color: #3B82F6;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: background 0.3s ease;
+            display: inline-block;
+        }
+
+        .nav-footer a:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-card {
+                padding: 1.5rem;
+            }
+
+            .radio-group {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🐾</div>
+            <h1>Pet Insurance</h1>
+            <p>Protect your furry friend in minutes</p>
+        </div>
+
+        <div class="form-card">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+
+            <form id="petInsuranceForm">
+                <!-- Question 1: Pet's Name -->
+                <div class="question active" data-question="1">
+                    <h2>What's your pet's name? 🐾</h2>
+                    <div class="form-group">
+                        <input type="text" id="petName" name="petName" required placeholder="e.g., Buddy" autofocus>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="next-button" onclick="nextQuestion(1)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 2: Pet Type -->
+                <div class="question" data-question="2">
+                    <h2>What type of pet is <span id="petNameDisplay"></span>? 🐶</h2>
+                    <div class="form-group">
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="petTypeDog" name="petType" value="dog" required>
+                                <label for="petTypeDog">
+                                    <span class="icon">🐕</span>
+                                    <span class="label-text">Dog</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="petTypeCat" name="petType" value="cat">
+                                <label for="petTypeCat">
+                                    <span class="icon">🐈</span>
+                                    <span class="label-text">Cat</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="petTypeOther" name="petType" value="other">
+                                <label for="petTypeOther">
+                                    <span class="icon">🐰</span>
+                                    <span class="label-text">Other</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(2)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(2)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 3: Breed -->
+                <div class="question" data-question="3">
+                    <h2>What breed is <span id="petNameDisplay2"></span>? 📝</h2>
+                    <div class="form-group">
+                        <input type="text" id="breed" name="breed" required placeholder="e.g., Golden Retriever">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(3)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(3)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 4: Age -->
+                <div class="question" data-question="4">
+                    <h2>How old is <span id="petNameDisplay3"></span>? 🎂</h2>
+                    <div class="form-group">
+                        <input type="number" id="age" name="age" required min="0" max="30" placeholder="Age in years">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(4)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(4)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 5: Coverage Level -->
+                <div class="question" data-question="5">
+                    <h2>Choose your coverage level 🛡️</h2>
+                    <div class="form-group">
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="coverageBasic" name="coverage" value="basic" required>
+                                <label for="coverageBasic">
+                                    <span class="icon">🥉</span>
+                                    <span class="label-text">Basic</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="coverageStandard" name="coverage" value="standard">
+                                <label for="coverageStandard">
+                                    <span class="icon">🥈</span>
+                                    <span class="label-text">Standard</span>
+                                </label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="coveragePremium" name="coverage" value="premium">
+                                <label for="coveragePremium">
+                                    <span class="icon">🥇</span>
+                                    <span class="label-text">Premium</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(5)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(5)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 6: Additional Coverage -->
+                <div class="question" data-question="6">
+                    <h2>Any additional coverage? (Optional) ✨</h2>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="dentalCoverage" name="additionalCoverage" value="dental">
+                                <label for="dentalCoverage">Dental Coverage 🦷</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="wellnessCoverage" name="additionalCoverage" value="wellness">
+                                <label for="wellnessCoverage">Wellness & Prevention 💊</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="emergencyCoverage" name="additionalCoverage" value="emergency">
+                                <label for="emergencyCoverage">24/7 Emergency Care 🚑</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(6)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(6)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 7: Your Name -->
+                <div class="question" data-question="7">
+                    <h2>What's your name? 👋</h2>
+                    <div class="form-group">
+                        <input type="text" id="ownerName" name="ownerName" required placeholder="John Smith">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(7)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(7)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 8: Email -->
+                <div class="question" data-question="8">
+                    <h2>Where can we reach you? 📧</h2>
+                    <div class="form-group">
+                        <input type="email" id="email" name="email" required placeholder="john@example.com">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(8)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(8)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 9: Phone -->
+                <div class="question" data-question="9">
+                    <h2>What's your phone number? 📱</h2>
+                    <div class="form-group">
+                        <input type="tel" id="phone" name="phone" required placeholder="(555) 123-4567">
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(9)">Back</button>
+                        <button type="button" class="next-button" onclick="nextQuestion(9)">Continue</button>
+                    </div>
+                </div>
+
+                <!-- Question 10: ZIP Code -->
+                <div class="question" data-question="10">
+                    <h2>Finally, what's your ZIP code? 📍</h2>
+                    <div class="form-group">
+                        <input type="text" id="zipCode" name="zipCode" required placeholder="12345" pattern="[0-9]{5}">
+                        <div class="info-text">Coverage availability varies by location</div>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="back-button" onclick="prevQuestion(10)">Back</button>
+                        <button type="submit" class="submit-button" id="submitButton">Get My Free Quote</button>
+                    </div>
+                </div>
+
+                <div class="success-message" id="successMessage">
+                    <div class="icon">✅</div>
+                    <h3>Quote Requested!</h3>
+                    <p>We'll send your personalized pet insurance quote to your email within 24 hours.</p>
+                </div>
+            </form>
+        </div>
+
+        <div class="nav-footer">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('petInsuranceForm');
+        const submitButton = document.getElementById('submitButton');
+        const successMessage = document.getElementById('successMessage');
+        const progressFill = document.getElementById('progressFill');
+        const totalQuestions = 10;
+        let currentQuestion = 1;
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = (currentQuestion / totalQuestions) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        // Validate current question
+        function validateQuestion(questionNum) {
+            const question = document.querySelector(`.question[data-question="${questionNum}"]`);
+            const inputs = question.querySelectorAll('input[required]');
+            
+            for (let input of inputs) {
+                if (input.type === 'radio') {
+                    const radioGroup = question.querySelectorAll(`input[name="${input.name}"]`);
+                    const isChecked = Array.from(radioGroup).some(radio => radio.checked);
+                    if (!isChecked) return false;
+                } else {
+                    if (!input.value.trim()) return false;
+                    if (input.validity && !input.validity.valid) return false;
+                }
+            }
+            return true;
+        }
+
+        // Show next question
+        function nextQuestion(current) {
+            if (!validateQuestion(current)) {
+                alert('Please complete this question before continuing.');
+                return;
+            }
+
+            // Update pet name displays
+            if (current === 1) {
+                const petName = document.getElementById('petName').value;
+                document.getElementById('petNameDisplay').textContent = petName;
+                document.getElementById('petNameDisplay2').textContent = petName;
+                document.getElementById('petNameDisplay3').textContent = petName;
+            }
+
+            const currentQ = document.querySelector(`.question[data-question="${current}"]`);
+            const nextQ = document.querySelector(`.question[data-question="${current + 1}"]`);
+            
+            if (currentQ && nextQ) {
+                currentQ.classList.remove('active');
+                setTimeout(() => {
+                    currentQ.style.display = 'none';
+                    nextQ.style.display = 'block';
+                    setTimeout(() => {
+                        nextQ.classList.add('active');
+                        // Focus on first input in next question
+                        const firstInput = nextQ.querySelector('input');
+                        if (firstInput && firstInput.type !== 'radio' && firstInput.type !== 'checkbox') {
+                            firstInput.focus();
+                        }
+                    }, 50);
+                }, 300);
+                
+                currentQuestion = current + 1;
+                updateProgress();
+            }
+        }
+
+        // Show previous question
+        function prevQuestion(current) {
+            const currentQ = document.querySelector(`.question[data-question="${current}"]`);
+            const prevQ = document.querySelector(`.question[data-question="${current - 1}"]`);
+            
+            if (currentQ && prevQ) {
+                currentQ.classList.remove('active');
+                setTimeout(() => {
+                    currentQ.style.display = 'none';
+                    prevQ.style.display = 'block';
+                    setTimeout(() => {
+                        prevQ.classList.add('active');
+                    }, 50);
+                }, 300);
+                
+                currentQuestion = current - 1;
+                updateProgress();
+            }
+        }
+
+        // Handle Enter key to advance
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const activeQuestion = document.querySelector('.question.active');
+                if (activeQuestion) {
+                    const questionNum = parseInt(activeQuestion.getAttribute('data-question'));
+                    const nextButton = activeQuestion.querySelector('.next-button');
+                    if (nextButton && questionNum < totalQuestions) {
+                        e.preventDefault();
+                        nextQuestion(questionNum);
+                    }
+                }
+            }
+        });
+
+        // Auto-advance for radio buttons
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const question = this.closest('.question');
+                const questionNum = parseInt(question.getAttribute('data-question'));
+                // Small delay for UX feedback
+                setTimeout(() => {
+                    if (validateQuestion(questionNum)) {
+                        nextQuestion(questionNum);
+                    }
+                }, 400);
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validateQuestion(10)) {
+                alert('Please complete all required fields.');
+                return;
+            }
+
+            // Disable submit button
+            submitButton.disabled = true;
+            submitButton.textContent = 'Processing...';
+
+            // Simulate form submission
+            setTimeout(() => {
+                // Hide all questions
+                document.querySelectorAll('.question').forEach(q => q.style.display = 'none');
+                
+                // Hide progress bar
+                document.querySelector('.progress-bar').style.display = 'none';
+                
+                // Show success message
+                successMessage.classList.add('show');
+                
+                // Scroll to success message
+                successMessage.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 1500);
+        });
+
+        // Initialize progress
+        updateProgress();
+    </script>
+</body>
+</html>
