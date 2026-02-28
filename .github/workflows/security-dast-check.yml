@@ -31,8 +31,17 @@ jobs:
           curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
           task --version
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Start local server
         run: |
+          npm run build
           node server.js &
           echo "SERVER_PID=$!" >> $GITHUB_ENV
           # Wait for server to be ready

@@ -9,6 +9,7 @@ const path = require('path');
 
 const PORT = process.env.PORT || 8080;
 const ROOT = process.cwd();
+const SERVE_ROOT = path.join(ROOT, 'app');
 
 /**
  * Minimal parser for the [[headers]] sections of netlify.toml.
@@ -123,14 +124,14 @@ const server = http.createServer((req, res) => {
   const securityHeaders = headersForPath(HEADER_RULES, urlPath);
 
   // Prevent directory traversal
-  const filePath = path.resolve(ROOT, urlPath.slice(1));
+  const filePath = path.resolve(SERVE_ROOT, urlPath.slice(1));
   let safePath;
   try {
     safePath = fs.realpathSync(filePath);
   } catch (e) {
     safePath = filePath;
   }
-  if (!safePath.startsWith(ROOT + path.sep) && safePath !== ROOT) {
+  if (!safePath.startsWith(SERVE_ROOT + path.sep) && safePath !== SERVE_ROOT) {
     res.writeHead(403, securityHeaders);
     res.end('Forbidden');
     return;

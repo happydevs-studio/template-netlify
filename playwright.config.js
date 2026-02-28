@@ -40,7 +40,7 @@ export default defineConfig({
   /* Run your local dev server before starting the tests */
   /* Skip webServer when running smoke tests against external URLs */
   webServer: process.env.SMOKE_TEST_URL ? undefined : {
-    command: 'node server.js',
+    command: 'npm run build && node server.js',
     url: 'http://localhost:8080',
     reuseExistingServer: !process.env.CI,
   },

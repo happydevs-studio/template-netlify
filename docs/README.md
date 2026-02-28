@@ -1,12 +1,12 @@
 # template.netlify
 
-A simple "Hello World" static website with automated Netlify deployment and feature branch preview support.
+SlopStopper — a static site promoting deterministic feedback for AI-driven development, with automated Netlify deployment and feature branch preview support.
 
 The live site is at [https://griff-template.netlify.app/](https://griff-template.netlify.app/).
 
 ## Features
 
-- 🌐 Simple static "Hello World" website
+- 🛡️ SlopStopper: deterministic feedback for AI-driven development
 - 🚀 Automated deployment to Netlify via GitHub Actions
 - 🔄 Feature branch preview deployments for PRs
 - 💻 Local development server
@@ -36,7 +36,7 @@ npm start
 
 This runs `node server.js`, which starts a local HTTP server on port 8080 that reads security headers from `netlify.toml` to match production behavior.
 
-Alternatively, you can open `index.html` directly in your browser.
+Alternatively, you can open `app/index.html` directly in your browser (note: JS interactions require the compiled files from `npm run build`).
 
 ## Local Development
 
@@ -181,12 +181,20 @@ template-netlify/
 │   ├── runbooks/
 │   └── security/
 ├── tests/                   # Playwright and other tests
-├── index.html               # Homepage
-├── page1.css / page1.js     # Homepage styles and scripts
-├── page2.html / page2.css / page2.js  # Page 2
-├── page3.html / page3.css / page3.js  # Page 3
-├── server.js                # Local dev server (reads netlify.toml headers)
+├── app/                     # Static site: HTML, CSS, compiled JS (publish dir)
+│   ├── index.html           # SlopStopper home page
+│   ├── index.css            # Home styles
+│   ├── features.html        # Features page
+│   ├── features.css         # Features styles
+│   ├── tools.html           # Tools page
+│   └── tools.css            # Tools styles
+├── src/                     # TypeScript source files
+│   ├── index.ts             # Home interaction (compiled → app/index.js)
+│   ├── features.ts          # Features interaction (compiled → app/features.js)
+│   └── tools.ts             # Tools interaction (compiled → app/tools.js)
+├── server.js                # Local dev server (reads netlify.toml headers, serves app/)
 ├── netlify.toml             # Netlify configuration
+├── tsconfig.json            # TypeScript configuration
 ├── package.json             # NPM config and dev dependencies
 ├── playwright.config.js     # Playwright test configuration
 └── Taskfile.yml             # Task runner definitions
@@ -196,7 +204,7 @@ template-netlify/
 
 ### netlify.toml
 
-Configures Netlify build and deployment settings. The current configuration specifies that the current directory should be published as-is with no build step required.
+Configures Netlify build and deployment settings. The publish directory is `app/` and the build command runs `npm run build` (TypeScript compilation).
 
 ### .github/workflows/netlify-deploy.yml
 

@@ -9,3 +9,5 @@ test-results/
 .docs-reports/
 # Local Netlify folder
 .netlify
+# TypeScript compiled output
+app/*.js

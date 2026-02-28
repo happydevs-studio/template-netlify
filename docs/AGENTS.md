@@ -12,14 +12,14 @@ This is a minimal static site template demonstrating Netlify deployment with Git
 
 ## Architecture
 
-**Static Multi-Page Site**: The site consists of three pages (`index.html`, `page2.html`, `page3.html`), each with its own CSS and JS file (`page1.css`/`page1.js`, `page2.css`/`page2.js`, `page3.css`/`page3.js`). There's no templating and no build step.
+**Static Multi-Page Site**: The site (SlopStopper) consists of three pages (`app/index.html`, `app/features.html`, `app/tools.html`), each with its own CSS file. TypeScript source files live in `src/` and compile to JavaScript in `app/` via `tsc`.
 
 **Deployment Pipeline**: 
 - Production: Pushes to `main` trigger production deployment via [.github/workflows/netlify-deploy.yml](../.github/workflows/netlify-deploy.yml)
 - Preview: PRs to `main` create preview deployments at `https://pr-{number}--{site-name}.netlify.app`
 - Cleanup: PRs closed/merged trigger automatic preview deletion via [.github/workflows/netlify-cleanup-preview.yml](../.github/workflows/netlify-cleanup-preview.yml)
 
-**Configuration**: [netlify.toml](../netlify.toml) publishes the root directory `.` as-is with no build command.
+**Configuration**: [netlify.toml](../netlify.toml) publishes the `app/` directory and runs `npm run build` (TypeScript compilation) before deployment.
 
 ## Critical Workflows
 
@@ -27,7 +27,7 @@ This is a minimal static site template demonstrating Netlify deployment with Git
 ```bash
 npm start  # Runs node server.js on port 8080
 ```
-The custom `server.js` reads security headers from `netlify.toml` so local dev matches production behavior. Alternative: Open [index.html](../index.html) directly in browser.
+The custom `server.js` reads security headers from `netlify.toml` so local dev matches production behavior. Alternative: Run `npm run build` first, then open `app/index.html` directly in browser.
 
 ### Deployment
 - **Production**: Push/merge to `main` → Auto-deploys → Commit comment with URL
@@ -70,11 +70,11 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 
 ## Project Conventions
 
-**Dev Dependencies Only**: [package.json](../package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`) for testing and linting. The `start` script runs `node server.js`.
+**Dev Dependencies Only**: [package.json](../package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`, `typescript`) for testing, linting, and TypeScript compilation. The `start` script runs `node server.js`.
 
-**Separate Stylesheets**: Each page has its own CSS file (e.g., `page1.css`). The homepage uses a gradient background (`linear-gradient(135deg, #ff8c00 0%, #ff6347 100%)`) and flexbox centering.
+**Separate Stylesheets**: Each page has its own CSS file (e.g., `index.css`). The homepage uses a dark gradient background (`linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)`) with teal accent (`#00d4aa`) and flexbox centering.
 
-**No Build Step**: [netlify.toml](../netlify.toml) explicitly uses `echo 'No build step required for static site'` as the build command. The publish directory is `.` (root).
+**TypeScript Build**: [netlify.toml](../netlify.toml) runs `npm run build` (which runs `tsc`) before deployment. The publish directory is `app/`. TypeScript source is in `src/`, compiled output in `app/`.
 
 **Conventional Commits**: All commits follow the [Conventional Commits](https://www.conventionalcommits.org/) standard for clear, predictable commit history. Format: `<type>(<scope>): <description>` where type is one of:
 - `feat:` - New feature or content
@@ -91,21 +91,21 @@ Examples: `feat(hero): add gradient animation`, `fix(nav): correct mobile menu a
 
 This is a **template** repository—here's how to customize it:
 
-**Visual Changes** (in individual CSS files, e.g., `page1.css`):
-- Background gradient: Modify `linear-gradient(135deg, #ff8c00 0%, #ff6347 100%)` with new color stops
+**Visual Changes** (in individual CSS files, e.g., `app/index.css`):
+- Background gradient: Modify `linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)` with new color stops
 - Font sizes: `h1 { font-size: 4rem }` and `p { font-size: 1.5rem }`
 - Layout: Change flexbox properties in `body` or `.container`
 
-**Content Changes** (in individual HTML files):
-- Homepage: Edit [index.html](../index.html) — heading, subtext, navigation
-- Page 2: Edit [page2.html](../page2.html) — text input interactive feature
-- Page 3: Edit [page3.html](../page3.html) — counter interactive feature
+**Content Changes** (in HTML and TypeScript files):
+- Homepage: Edit [app/index.html](../app/index.html) and [src/index.ts](../src/index.ts) — heading, subtext, navigation
+- Features: Edit [app/features.html](../app/features.html) and [src/features.ts](../src/features.ts) — text input interactive feature
+- Tools: Edit [app/tools.html](../app/tools.html) and [src/tools.ts](../src/tools.ts) — counter interactive feature
 
 **Site Configuration**:
 - Set `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` as GitHub repo secrets (see [README.md](README.md) Netlify Setup)
 - Netlify site name determines preview URLs: `pr-{number}--{site-name}.netlify.app`
 
-**Adding Pages**: Create additional HTML/CSS/JS files in root. They'll deploy automatically. Add navigation links in each page's `<nav>` block. See existing pages (`page2.html`, `page3.html`) for the pattern.
+**Adding Pages**: Create HTML/CSS in `app/` and TypeScript in `src/`. Run `npm run build` to compile. Add navigation links in each page's `<nav>` block. See existing pages for the pattern.
 
 ## Integration Points
 

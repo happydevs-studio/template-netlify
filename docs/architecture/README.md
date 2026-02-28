@@ -30,7 +30,7 @@ flowchart LR
 flowchart LR
     B[Browser]
     CDN[Netlify CDN + Static Hosting]
-    APP[Static Assets\nindex.html, page2.html, page3.html, JS/CSS]
+    APP[Static Assets\napp/index.html, app/features.html, app/tools.html, CSS, compiled JS]
     TOML[netlify.toml\nheaders + routing config]
     DEV[Local Node Server\nserver.js]
 
