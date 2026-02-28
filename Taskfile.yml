@@ -32,7 +32,7 @@ tasks:
         echo "🔍 Running smoke tests against: $SMOKE_TEST_URL"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
-        npx playwright test tests/smoke.spec.js --reporter=list
+        npx playwright test tests/smoke.spec.ts --reporter=list
     silent: false
 
   reliability:smoke:ci:
@@ -53,7 +53,7 @@ tasks:
         echo "🔍 Running smoke tests (CI mode) against: $SMOKE_TEST_URL"
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         
-        CI=true npx playwright test tests/smoke.spec.js --reporter=list,html
+        CI=true npx playwright test tests/smoke.spec.ts --reporter=list,html
     silent: false
 
   hygiene:complexity:

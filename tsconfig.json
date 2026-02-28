@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES6",
+    "module": "none",
+    "lib": ["ES6", "DOM"],
+    "strict": true,
+    "outDir": "app",
+    "rootDir": "src"
+  },
+  "include": ["src/**/*.ts"]
+}

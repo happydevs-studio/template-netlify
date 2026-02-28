@@ -6,7 +6,7 @@ body {
     justify-content: center;
     align-items: center;
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
 }
 .container {
     text-align: center;
@@ -15,7 +15,7 @@ body {
 h1 {
     font-size: 4rem;
     margin: 0;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 p {
     font-size: 1.5rem;
@@ -51,13 +51,14 @@ input[type="text"] {
 button {
     padding: 0.7rem 2rem;
     font-size: 1rem;
-    background: white;
-    color: #764ba2;
+    background: #00d4aa;
+    color: #0f3460;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: transform 0.2s;
     margin-left: 0.5rem;
+    font-weight: bold;
 }
 button:hover {
     transform: scale(1.05);

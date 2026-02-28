@@ -1,22 +1,24 @@
 {
-  "name": "netlify-hello-world",
+  "name": "slopstopper",
   "version": "1.0.0",
-  "description": "Simple static hello world site for Netlify deployment",
+  "description": "SlopStopper – deterministic feedback for AI-driven development",
   "scripts": {
+    "build": "tsc",
     "start": "node server.js",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "test:smoke": "playwright test tests/smoke.spec.js"
+    "test:smoke": "playwright test tests/smoke.spec.ts"
   },
   "keywords": [
     "netlify",
-    "static",
-    "hello-world"
+    "slopstopper",
+    "code-quality"
   ],
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@playwright/test": "^1.40.0",
-    "markdownlint-cli": "^0.47.0"
+    "markdownlint-cli": "^0.47.0",
+    "typescript": "^5.9.3"
   }
 }
