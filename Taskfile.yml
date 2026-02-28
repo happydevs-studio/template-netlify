@@ -1,22 +1,22 @@
 version: '3'
 
 tasks:
-  complexity:
+  hygiene:complexity:
     desc: Analyze code complexity using Lizard
     summary: |
       Performs code complexity analysis on the codebase using Lizard.
       Generates both text and CSV reports with configurable thresholds.
       
       Usage:
-        task complexity           # Run analysis
-        task complexity -- -v     # Verbose output
+        task hygiene:complexity           # Run analysis
+        task hygiene:complexity -- -v     # Verbose output
     cmds:
-      - task: complexity:check-tool
-      - task: complexity:analyze
-      - task: complexity:report
+      - task: hygiene:complexity:check-tool
+      - task: hygiene:complexity:analyze
+      - task: hygiene:complexity:report
     silent: false
 
-  complexity:check-tool:
+  hygiene:complexity:check-tool:
     desc: Check if Lizard is installed, install if necessary
     internal: true
     cmds:
@@ -68,7 +68,7 @@ tasks:
         echo "✅ Lizard $LIZARD_VERSION"
     silent: false
 
-  complexity:analyze:
+  hygiene:complexity:analyze:
     desc: Run Lizard analysis and generate reports
     internal: true
     dir: .
@@ -106,7 +106,7 @@ tasks:
         echo "✅ Analysis complete"
     silent: false
 
-  complexity:report:
+  hygiene:complexity:report:
     desc: Display formatted complexity report
     internal: true
     cmds:
@@ -146,25 +146,27 @@ tasks:
     silent: false
 
   security:
-    desc: Run all security checks (SAST, dependencies, DAST, secrets)
+    internal: true
+    desc: Run all security checks (SAST, vulnerabilities, DAST, secrets)
     summary: |
-      Runs the full security suite: SAST (Semgrep), dependency scanning (Trivy),
+      Runs the full security suite: SAST (Semgrep), vulnerability scanning (Trivy),
       DAST (OWASP ZAP), and secrets detection (Gitleaks).
 
       Usage:
         task security                           # Run all checks
         task sast                               # SAST only
-        task dependencies                       # Dependency scan only
+        task vulnerability:all                  # Vulnerability scan only
         task dast -- http://localhost:8080      # DAST only
         task secrets                            # Secrets detection only
     cmds:
       - task: sast
-      - task: dependencies
+      - task: vulnerability:all
       - task: dast
       - task: secrets
     silent: false
 
   sast:
+    internal: true
     desc: Run static application security testing using Semgrep
     summary: |
       Performs SAST on the codebase using Semgrep.
@@ -288,21 +290,22 @@ tasks:
         fi
     silent: false
 
-  dependencies:
-    desc: Run dependency vulnerability scanning using Trivy
+  vulnerability:all:
+    internal: true
+    desc: Run vulnerability scanning using Trivy
     summary: |
       Scans project dependencies for known CVEs using Trivy.
       Generates both JSON and Markdown reports.
 
       Usage:
-        task dependencies           # Run scan
+        task vulnerability:all           # Run scan
     cmds:
-      - task: dependencies:check-tool
-      - task: dependencies:analyze
-      - task: dependencies:report
+      - task: vulnerability:all:check-tool
+      - task: vulnerability:all:analyze
+      - task: vulnerability:all:report
     silent: false
 
-  dependencies:check-tool:
+  vulnerability:all:check-tool:
     desc: Check if Trivy is installed, install if necessary
     internal: true
     cmds:
@@ -337,7 +340,7 @@ tasks:
         echo "✅ $TRIVY_VERSION"
     silent: false
 
-  dependencies:analyze:
+  vulnerability:all:analyze:
     desc: Run Trivy dependency scan and generate reports
     internal: true
     dir: .
@@ -363,7 +366,7 @@ tasks:
         echo "✅ Scan complete"
     silent: false
 
-  dependencies:report:
+  vulnerability:all:report:
     desc: Display formatted dependency vulnerability report
     internal: true
     cmds:
@@ -411,6 +414,7 @@ tasks:
     silent: false
 
   dast:
+    internal: true
     desc: Run dynamic application security testing using OWASP ZAP
     summary: |
       Performs DAST against a running site using OWASP ZAP (requires Docker).
@@ -550,6 +554,7 @@ tasks:
     silent: false
 
   secrets:
+    internal: true
     desc: Run secrets detection using Gitleaks
     summary: |
       Scans the codebase and git history for hardcoded credentials using Gitleaks.
@@ -688,50 +693,216 @@ tasks:
         fi
     silent: false
 
-  test:
+  contributing:setup:
+    desc: Install project dependencies
+    cmds:
+      - npm install
+
+  contributing:build:
+    desc: Build the project (if a build script is defined)
+    cmds:
+      - |
+        if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.build ? 0 : 1)"; then
+          npm run build {{.CLI_ARGS}}
+        else
+          echo "ℹ️  No build script defined in package.json; nothing to build for this static project."
+        fi
+
+  contributing:lint:
+    desc: Run lint checks
+    cmds:
+      - |
+        if node -e "const p=require('./package.json'); process.exit(p.scripts && p.scripts.lint ? 0 : 1)"; then
+          npm run lint {{.CLI_ARGS}}
+        else
+          files="docs/**/*.md"
+          if [ -f CONTRIBUTING.md ]; then
+            files="$files CONTRIBUTING.md"
+          fi
+          npx markdownlint $files
+        fi
+
+  contributing:run:
+    desc: Run local development server
+    cmds:
+      - node server.js
+
+  contributing:test:
     desc: Run Playwright tests
     cmds:
       - npx playwright test {{.CLI_ARGS}}
 
-  test:headed:
+  contributing:test:headed:
     desc: Run Playwright tests with headed browser
     cmds:
       - npx playwright test --headed {{.CLI_ARGS}}
 
-  test:complexity:
+  contributing:test:complexity:
     desc: Run complexity report generation tests
     cmds:
       - python3 tests/generate_complexity_report.test.py
 
-  test:security:
+  contributing:test:security:
     desc: Run all security report generation tests
     cmds:
-      - task: test:sast
-      - task: test:dependencies
-      - task: test:dast
-      - task: test:secrets
+      - task: contributing:test:sast
+      - task: contributing:test:dependencies
+      - task: contributing:test:dast
+      - task: contributing:test:secrets
 
-  test:sast:
+  contributing:test:sast:
     desc: Run SAST report generation tests
     cmds:
       - python3 tests/generate_sast_report.test.py
 
-  test:dependencies:
-    desc: Run dependency vulnerability report generation tests
+  contributing:test:vulnerability:
+    desc: Run vulnerability report generation tests
     cmds:
       - python3 tests/generate_dependencies_report.test.py
 
-  test:dast:
+  contributing:test:dast:
     desc: Run DAST report generation tests
     cmds:
       - python3 tests/generate_dast_report.test.py
 
-  test:secrets:
+  contributing:test:secrets:
     desc: Run secrets detection report generation tests
     cmds:
       - python3 tests/generate_secrets_report.test.py
 
-  start:
+  contributing:start:
     desc: Start local development server
     cmds:
-      - node server.js
+      - task: contributing:run
+
+  # Hygiene tasks
+  hygiene:lint:
+    desc: Lint documentation markdown files
+    cmds:
+      - npx markdownlint "docs/**/*.md"
+
+  hygiene:structure:
+    desc: Verify documentation index exists
+    cmds:
+      - |
+        if [ ! -f docs/index.md ]; then
+          echo "❌ docs/index.md not found"
+          exit 1
+        fi
+        echo "✅ docs/index.md found"
+
+  hygiene:size:
+    desc: Check for oversized markdown files in docs
+    cmds:
+      - |
+        python3 - <<'PY'
+        import glob
+        import pathlib
+        import re
+        import sys
+
+        max_words = 2500
+        violations = []
+
+        for path in glob.glob('docs/**/*.md', recursive=True):
+          text = pathlib.Path(path).read_text(encoding='utf-8')
+          words = len(re.findall(r"\\b\\w+\\b", text))
+          if words > max_words:
+            violations.append((path, words))
+
+        if violations:
+          print(f"❌ Found {len(violations)} oversized doc file(s) (>{max_words} words):")
+          for path, words in violations:
+            print(f"  - {path}: {words} words")
+          sys.exit(1)
+
+        print("✅ No oversized markdown files found in docs")
+        PY
+
+  hygiene:docs-size:
+    desc: Monitor documentation size and check against thresholds
+    summary: |
+      Analyzes documentation size against configured thresholds:
+      - Total documentation size (max 150 KB)
+      - Individual file sizes (max 20 KB)
+      - Number of documentation files (max 15)
+      
+      Generates a detailed report in .docs-reports/docs-size-report.md
+      
+      Usage:
+        task hygiene:docs-size    # Run size monitoring
+    cmds:
+      - bash .scripts/check-docs-size.sh
+
+  hygiene:test:
+    desc: Run all hygiene checks for code and documentation
+    cmds:
+      - task: hygiene:lint
+      - task: hygiene:structure
+      - task: hygiene:size
+      - task: hygiene:docs-size
+      - task: hygiene:complexity
+
+  # Security tasks
+  security:scan:
+    desc: Run full security scan suite
+    cmds:
+      - task: security
+
+  security:sast:
+    desc: Run static application security testing
+    cmds:
+      - task: sast
+
+  security:vulnerability:all:
+    desc: Run vulnerability scanning
+    cmds:
+      - task: dependencies
+
+  security:dast:
+    desc: Run dynamic application security testing
+    cmds:
+      - task: dast
+
+  security:secrets:
+    desc: Run secrets detection
+    cmds:
+      - task: secrets
+
+  # Decisions tasks
+  decisions:validate:
+    desc: Validate decisions documentation baseline
+    cmds:
+      - |
+        if [ ! -f docs/decisions/DECISIONS.md ]; then
+          echo "❌ docs/decisions/DECISIONS.md not found"
+          exit 1
+        fi
+        if [ ! -f docs/decisions/DECISION_TEMPLATE.md ]; then
+          echo "❌ docs/decisions/DECISION_TEMPLATE.md not found"
+          exit 1
+        fi
+        if ! grep -q "| Date | Decision | Status | Rationale | Notes |" docs/decisions/DECISIONS.md; then
+          echo "❌ docs/decisions/DECISIONS.md is missing the decisions table header"
+          exit 1
+        fi
+        echo "✅ Decisions documentation baseline is valid"
+
+  decisions:new:
+    desc: Create a new decision note from template (use SLUG=<name>)
+    vars:
+      DATE:
+        sh: date +%F
+    cmds:
+      - |
+        if [ -z "{{.SLUG}}" ]; then
+          echo "❌ Missing SLUG. Usage: task decisions:new SLUG=<decision-name>"
+          exit 1
+        fi
+        target="docs/decisions/{{.DATE}}-{{.SLUG}}.md"
+        if [ -f "$target" ]; then
+          echo "❌ $target already exists"
+          exit 1
+        fi
+        cp docs/decisions/DECISION_TEMPLATE.md "$target"
+        echo "✅ Created $target"

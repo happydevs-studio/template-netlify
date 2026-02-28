@@ -18,9 +18,9 @@ task dependencies
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/dependencies-check.yml` |
-| Want to change blocking threshold? | Edit severity check in `dependencies-check.yml` |
-| Don't want dependency scans? | Delete `.github/workflows/dependencies-check.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/security-vulnerability-all-check.yml` |
+| Want to change blocking threshold? | Edit severity check in `security-vulnerability-all-check.yml` |
+| Don't want vulnerability scans? | Delete `.github/workflows/security-vulnerability-all-check.yml` |
 
 ### Severity Reference
 
@@ -48,7 +48,7 @@ The dependency scanning workflow:
 
 | File | Purpose |
 |------|---------|
-| `.github/workflows/dependencies-check.yml` | GitHub Actions workflow |
+| `.github/workflows/vulnerability-all-check.yml` | GitHub Actions workflow |
 | `Taskfile.yml` (`dependencies*` tasks) | Local task runner config |
 | `.scripts/generate-dependencies-md.py` | Report generator |
 | `.gitignore` | Excludes `.dependencies-reports/` |
@@ -57,7 +57,7 @@ The dependency scanning workflow:
 
 ### Change the Blocking Threshold
 
-To block only on CRITICAL (not HIGH), edit the `check-dependencies` step in `dependencies-check.yml`:
+To block only on CRITICAL (not HIGH), edit the `check-dependencies` step in `vulnerability-all-check.yml`:
 
 ```bash
 # Change this line:
@@ -70,7 +70,7 @@ if v.get('Severity', '').upper() == 'CRITICAL':
 
 ```bash
 # Option A: delete the workflow
-rm .github/workflows/dependencies-check.yml
+rm .github/workflows/vulnerability-all-check.yml
 
 # Option B: disable in GitHub UI → Actions → Dependency Vulnerability Scan → Disable workflow
 ```

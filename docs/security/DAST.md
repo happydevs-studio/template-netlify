@@ -51,7 +51,7 @@ The DAST workflow:
 
 | File | Purpose |
 |------|---------|
-| `.github/workflows/dast-check.yml` | GitHub Actions workflow |
+| `.github/workflows/security-dast-check.yml` | GitHub Actions workflow |
 | `Taskfile.yml` (`dast*` tasks) | Local task runner config |
 | `.scripts/generate-dast-md.py` | Report generator |
 | `.gitignore` | Excludes `.dast-reports/` |
@@ -66,11 +66,11 @@ In `Taskfile.yml`, the `dast` task accepts the target URL as an argument:
 task dast -- http://your-site-url
 ```
 
-In `dast-check.yml`, the CI workflow starts a local server and passes `http://localhost:8080`. To scan a deployed preview instead, update that step with your preview URL.
+In `security-dast-check.yml`, the CI workflow starts a local server and passes `http://localhost:8080`. To scan a deployed preview instead, update that step with your preview URL.
 
 ### Change the Blocking Threshold
 
-To block only on High (not Medium), edit `dast-check.yml`:
+To block only on High (not Medium), edit `security-dast-check.yml`:
 
 ```python
 # Change this line:
@@ -83,7 +83,7 @@ if int(alert.get('riskcode', 0)) >= 3:
 
 ```bash
 # Option A: delete the workflow
-rm .github/workflows/dast-check.yml
+rm .github/workflows/security-dast-check.yml
 
 # Option B: disable in GitHub UI → Actions → DAST Analysis → Disable workflow
 ```

@@ -18,9 +18,9 @@ task sast
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/sast-check.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/security-sast-check.yml` |
 | Want stricter/looser rules? | Use a custom Semgrep config file (see below) |
-| Don't want SAST checks? | Delete `.github/workflows/sast-check.yml` |
+| Don't want SAST checks? | Delete `.github/workflows/security-sast-check.yml` |
 
 ### Severity Reference
 
@@ -47,7 +47,7 @@ The SAST workflow:
 
 | File | Purpose |
 |------|---------|
-| `.github/workflows/sast-check.yml` | GitHub Actions workflow |
+| `.github/workflows/security-sast-check.yml` | GitHub Actions workflow |
 | `Taskfile.yml` (`sast*` tasks) | Local task runner config |
 | `.scripts/generate-sast-md.py` | Report generator |
 | `.gitignore` | Excludes `.sast-reports/` |
@@ -69,7 +69,7 @@ semgrep \
 
 ```bash
 # Option A: delete the workflow
-rm .github/workflows/sast-check.yml
+rm .github/workflows/security-sast-check.yml
 
 # Option B: disable in GitHub UI → Actions → SAST Analysis → Disable workflow
 ```

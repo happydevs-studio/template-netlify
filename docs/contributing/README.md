@@ -2,6 +2,37 @@
 
 This document defines the default way to contribute to this project.
 
+## Prerequisites
+
+- Install Task (Taskfile runner): [taskfile.dev/installation](https://taskfile.dev/installation/)
+- Verify installation: `task --version`
+
+## Taskfile-Driven Basics
+
+Use `Taskfile.yml` as the default interface for contributor workflows:
+
+- `task contributing:setup` — Install dependencies
+- `task contributing:build` — Build the project
+- `task contributing:lint` — Run lint checks
+- `task contributing:run` — Run local development server
+- `task contributing:test` — Run Playwright tests
+- `task contributing:test:complexity` — Run code complexity checks
+- `task contributing:test:security` — Run all security test suites
+- `task contributing:test:sast` — Run SAST tests
+- `task contributing:test:vulnerability` — Run vulnerability scanning tests
+- `task contributing:test:dast` — Run DAST tests
+- `task contributing:test:secrets` — Run secrets detection tests
+
+Use namespaced documentation tasks via root Taskfile. Check available tasks with `task --list`:
+
+- `task hygiene:test`
+- `task hygiene:lint`
+- `task security:scan`
+- `task security:sast`
+- `task security:dependencies`
+- `task decisions:validate`
+- `task decisions:new SLUG=<name>`
+
 ## Workflow
 
 - Create a focused branch for each change.

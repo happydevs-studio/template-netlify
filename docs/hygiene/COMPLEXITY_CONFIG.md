@@ -18,9 +18,9 @@ task complexity
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/complexity-check.yml` (not `.github/`) |
-| Need different threshold? | Update CCN > 10 threshold in `Taskfile.yml`, `.github/workflows/complexity-check.yml`, and `.github/scripts/generate-complexity-md.py` |
-| Don't want complexity checks? | Delete `.github/workflows/complexity-check.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/hygiene-complexity-check.yml` (not `.github/`) |
+| Need different threshold? | Update CCN > 10 threshold in `Taskfile.yml`, `.github/workflows/hygiene-complexity-check.yml`, and `.github/scripts/generate-complexity-md.py` |
+| Don't want complexity checks? | Delete `.github/workflows/hygiene-complexity-check.yml` |
 
 ### Threshold Reference
 
@@ -45,7 +45,7 @@ The complexity workflow:
 
 | File | Purpose | Customization |
 |------|---------|---------------|
-| [`.github/workflows/complexity-check.yml`](.github/workflows/complexity-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
+| [`.github/workflows/hygiene-complexity-check.yml`](.github/workflows/hygiene-complexity-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
 | [`Taskfile.yml`](Taskfile.yml) | Local task runner config | Complexity thresholds, exclusions |
 | [`.github/scripts/generate-complexity-md.py`](.github/scripts/generate-complexity-md.py) | Report generator | Markdown formatting, metrics |
 | [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.complexity-reports/` from version control |
@@ -56,7 +56,7 @@ The complexity workflow:
 
 **Where it's defined:**
 - `Taskfile.yml` - Python script checks `if ccn > 10` (line ~20)
-- `.github/workflows/complexity-check.yml` - AWK filter `'$2 > 10'` (multiple places)
+- `.github/workflows/hygiene-complexity-check.yml` - AWK filter `'$2 > 10'` (multiple places)
 
 **To change CCN threshold:**
 
@@ -70,7 +70,7 @@ if ccn > 10:  # ← Change this number (e.g., 15 for higher tolerance, 8 for str
 
 Also update the workflow file:
 ```yaml
-# .github/workflows/complexity-check.yml, line ~51
+# .github/workflows/hygiene-complexity-check.yml, line ~51
 HIGH_COUNT=$(awk -F',' '$2 > 10' ...)  # ← Change 10 to your threshold
 ```
 
@@ -98,7 +98,7 @@ The workflow has different behavior based on the trigger:
 | **Push to main** | Posts complexity report, creates GitHub issue if complexities found |
 | **Workflow Dispatch** | Manual run for verification |
 
-To disable PR failures (warnings only), edit `.github/workflows/complexity-check.yml`:
+To disable PR failures (warnings only), edit `.github/workflows/hygiene-complexity-check.yml`:
 
 ```yaml
 # Remove or comment out the "Fail job" step at the end:
@@ -118,7 +118,7 @@ To temporarily disable this workflow:
 **Option B:** Delete/rename the workflow file
 ```bash
 # This will prevent the workflow from running
-rm .github/workflows/complexity-check.yml
+rm .github/workflows/hygiene-complexity-check.yml
 ```
 
 **Option C:** Comment out the trigger
@@ -225,7 +225,7 @@ If `.complexity-reports/` directory is empty:
 ### Custom Threshold Not Working
 
 If your threshold changes aren't taking effect:
-1. Both `Taskfile.yml` AND `.github/workflows/complexity-check.yml` must be updated
+1. Both `Taskfile.yml` AND `.github/workflows/hygiene-complexity-check.yml` must be updated
 2. The Python script also has threshold checks
 3. Rebuild Docker image or clear cache if using containers
 

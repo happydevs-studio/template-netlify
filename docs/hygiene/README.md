@@ -1,7 +1,97 @@
 # Hygiene
 
-Overview of documentation hygiene and quality gates.
+Overview of code and documentation hygiene and quality gates.
+
+## Overview
+
+Hygiene checks ensure that the project's code and documentation are well-maintained, appropriately sized, and adhere to quality standards. These checks help maintain code that is efficient and sustainable, and documentation that is easy to navigate, quick to load, and stays within manageable limits for AI context windows.
+
+## Checks
+
+### Code Complexity Analysis
+Analyzes code complexity using Lizard to identify overly complex functions and modules. Helps identify refactoring opportunities and maintain code health.
+
+```bash
+task hygiene:complexity
+```
+
+### Documentation Linting
+Validates markdown syntax and formatting using markdownlint. Ensures consistent style across all documentation files.
+
+```bash
+task hygiene:lint
+```
+
+### Documentation Structure
+Verifies that the documentation index file exists at `docs/index.md`. This ensures proper documentation organization.
+
+```bash
+task hygiene:structure
+```
+
+### File Size Checks
+Checks individual markdown files to ensure they don't exceed the 2,500 word limit. This keeps documents focused and manageable.
+
+```bash
+task hygiene:size
+```
+
+### Documentation Size Monitoring
+Monitors overall documentation size and checks against configured thresholds:
+
+- **Total documentation size:** max 150 KB
+- **Individual file sizes:** max 20 KB
+- **Number of documentation files:** max 15
+
+This check is particularly important for AI-assisted development where documentation needs to fit within context windows efficiently. Running this check generates a detailed report in `.docs-reports/docs-size-report.md`.
+
+```bash
+task hygiene:docs-size
+```
+
+## Quick Reference
+
+Run all hygiene checks:
+```bash
+task hygiene:test
+```
+
+Run individual checks:
+```bash
+task hygiene:complexity     # Analyze code complexity
+task hygiene:lint          # Check markdown formatting
+task hygiene:structure     # Verify documentation index
+task hygiene:size          # Check individual file sizes
+task hygiene:docs-size     # Monitor overall documentation size
+```
 
 ## Contents
 
 - [COMPLEXITY_CONFIG.md](COMPLEXITY_CONFIG.md)
+- [DOCS_SIZE_MONITORING.md](DOCS_SIZE_MONITORING.md) - Setup and usage of local documentation size monitoring
+
+## When to Run
+
+- **Before commits:** Run `task hygiene:test` to catch code and documentation issues early
+- **During code review:** Complexity analysis helps identify refactoring opportunities
+- **During PR reviews:** Size monitoring helps track documentation growth
+- **In CI/CD:** These checks run automatically in GitHub Actions workflows
+- **Local development:** Run manually to validate changes before pushing
+
+## Thresholds & Rationale
+
+The thresholds are designed to:
+1. **Keep code maintainable** - Identifies complex functions that may need refactoring
+2. **Stay within AI context windows** - Ensures documentation can be referenced in full during AI-assisted development
+3. **Maintain document readability** - Prevents any single document from becoming unwieldy
+4. **Keep navigation simple** - Limits file count to maintain a reasonable documentation structure
+5. **Support rapid iteration** - Smaller documentation and simpler code is easier to update and refactor
+
+## Recommendations
+
+If thresholds are exceeded:
+- Consider consolidating related documentation
+- Move historical/completed content to an archive folder
+- Split large files into focused, topic-specific documents
+- Remove redundant or outdated information
+- Use the `.docs-reports/docs-size-report.md` report to identify which files need attention

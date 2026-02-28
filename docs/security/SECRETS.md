@@ -18,9 +18,9 @@ task secrets
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/secrets-check.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/security-secrets-check.yml` |
 | False positives? | Add a `.gitleaks.toml` allowlist (see below) |
-| Don't want secrets checks? | Delete `.github/workflows/secrets-check.yml` |
+| Don't want secrets checks? | Delete `.github/workflows/security-secrets-check.yml` |
 
 ---
 
@@ -39,7 +39,7 @@ The secrets workflow:
 
 | File | Purpose |
 |------|---------|
-| `.github/workflows/secrets-check.yml` | GitHub Actions workflow |
+| `.github/workflows/security-secrets-check.yml` | GitHub Actions workflow |
 | `Taskfile.yml` (`secrets*` tasks) | Local task runner config |
 | `.scripts/generate-secrets-md.py` | Report generator |
 | `.gitignore` | Excludes `.secrets-reports/` |
