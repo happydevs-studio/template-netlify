@@ -469,7 +469,6 @@ tasks:
     silent: false
 
   dast:
-    internal: true
     desc: Run dynamic application security testing using OWASP ZAP
     summary: |
       Performs DAST against a running site using OWASP ZAP (requires Docker).
