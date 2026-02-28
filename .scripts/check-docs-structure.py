@@ -32,23 +32,11 @@ def extract_categories_from_index():
     return sorted(set(categories))
 
 
-def check_docs_structure():
-    """Validate docs structure against index.md governance."""
-    docs_path = Path("docs")
-    
-    if not docs_path.exists():
-        print("❌ docs/ directory not found")
-        sys.exit(1)
-    
-    expected_categories = extract_categories_from_index()
-    actual_dirs = sorted([d.name for d in docs_path.iterdir() if d.is_dir()])
-    
+def _check_expected_categories(docs_path, expected_categories):
+    """Check that all expected categories exist with README.md files."""
     violations = []
-    
-    # Check for expected categories
     for category in expected_categories:
         category_path = docs_path / category
-        
         if not category_path.exists():
             violations.append({
                 "type": "missing_directory",
@@ -61,30 +49,45 @@ def check_docs_structure():
                 "path": f"docs/{category}/README.md",
                 "message": f"Missing README.md: docs/{category}/README.md"
             })
-    
-    # Check for unexpected files
+    return violations
+
+
+def _check_unexpected_items(docs_path, expected_categories):
+    """Check for unexpected files and directories in docs/."""
+    violations = []
+
     expected_files = {"index.md", "README.md", "AGENTS.md", "CONTRIBUTING.md"}
     actual_files = {f.name for f in docs_path.iterdir() if f.is_file()}
-    unexpected_files = actual_files - expected_files
-    
-    for filename in sorted(unexpected_files):
+    for filename in sorted(actual_files - expected_files):
         violations.append({
             "type": "unexpected_file",
             "path": f"docs/{filename}",
             "message": f"Unexpected file (not in index): docs/{filename}"
         })
-    
-    # Check for unexpected directories
+
     expected_dirs = set(expected_categories)
-    unexpected_dirs = set(actual_dirs) - expected_dirs
-    
-    for dirname in sorted(unexpected_dirs):
+    actual_dirs = sorted([d.name for d in docs_path.iterdir() if d.is_dir()])
+    for dirname in sorted(set(actual_dirs) - expected_dirs):
         violations.append({
             "type": "unexpected_directory",
             "path": f"docs/{dirname}/",
             "message": f"Unexpected directory (not in index): docs/{dirname}/"
         })
-    
+
+    return violations
+
+
+def check_docs_structure():
+    """Validate docs structure against index.md governance."""
+    docs_path = Path("docs")
+
+    if not docs_path.exists():
+        print("❌ docs/ directory not found")
+        sys.exit(1)
+
+    expected_categories = extract_categories_from_index()
+    violations = _check_expected_categories(docs_path, expected_categories)
+    violations += _check_unexpected_items(docs_path, expected_categories)
     return violations
 
 

@@ -133,6 +133,30 @@ def check_workflow_references(md_path, valid_workflows):
     return issues
 
 
+_TRACKED_EXTENSIONS = frozenset(
+    (".html", ".js", ".css", ".json", ".yml", ".yaml", ".toml", ".py", ".sh", ".md")
+)
+
+
+def _should_skip_ref(ref, ext, base, content, m, suggestion_ctx):
+    """Return True if this file reference should be skipped."""
+    if ref.startswith(("http", "mailto")):
+        return True
+    if ext not in _TRACKED_EXTENSIONS:
+        return True
+    if Path(ref).exists() or (base / ref).exists():
+        return True
+    if any(sub in ref for sub in ("example", "your-", "<", "YYYY")):
+        return True
+    start = max(0, m.start() - 250)
+    end = min(len(content), m.end() + 250)
+    if suggestion_ctx.search(content[start:end]):
+        return True
+    if ext in (".yml", ".yaml") and "/" not in ref:
+        return True
+    return False
+
+
 def check_source_file_references(md_path, project_files):
     """Find references to source files in prose that no longer exist.
 
@@ -153,25 +177,8 @@ def check_source_file_references(md_path, project_files):
 
     for m in re.finditer(r'`([a-zA-Z0-9_./-]+\.[a-z]{1,4})`', content):
         ref = m.group(1)
-        if ref.startswith(("http", "mailto")):
-            continue
-        # Only flag known project-file extensions
         ext = Path(ref).suffix
-        if ext not in (".html", ".js", ".css", ".json", ".yml", ".yaml", ".toml", ".py", ".sh", ".md"):
-            continue
-        if Path(ref).exists() or (base / ref).exists():
-            continue
-        # Skip generic example filenames / patterns
-        if any(sub in ref for sub in ("example", "your-", "<", "YYYY")):
-            continue
-        # Check surrounding context (±250 chars) for suggestion language
-        start = max(0, m.start() - 250)
-        end = min(len(content), m.end() + 250)
-        context_window = content[start:end]
-        if suggestion_ctx.search(context_window):
-            continue
-        # Skip workflow-name-pattern examples (no path separator)
-        if ext in (".yml", ".yaml") and "/" not in ref:
+        if _should_skip_ref(ref, ext, base, content, m, suggestion_ctx):
             continue
         line_no = content[:m.start()].count("\n") + 1
         issues.append({

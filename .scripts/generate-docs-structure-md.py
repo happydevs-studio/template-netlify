@@ -28,11 +28,40 @@ def read_json_report(json_path):
     return data
 
 
+def _format_violations_content(violations):
+    """Format violations into markdown sections grouped by type."""
+    content = f"Found **{len(violations)}** violation(s):\n\n"
+
+    by_type = {}
+    for v in violations:
+        by_type.setdefault(v.get("type", "unknown"), []).append(v)
+
+    sections = [
+        ("missing_directory", "### Missing Directories\n\n", None),
+        ("missing_readme", "### Missing README.md Files\n\n", None),
+        ("unexpected_file", "### Unexpected Files\n\n",
+         "  *Either add to `docs/index.md` or remove the file*\n"),
+        ("unexpected_directory", "### Unexpected Directories\n\n",
+         "  *Either add to `docs/index.md` or remove the directory*\n"),
+    ]
+
+    for vtype, header, note in sections:
+        if vtype in by_type:
+            content += header
+            for v in by_type[vtype]:
+                content += f"- {v['message']}\n"
+                if note:
+                    content += note
+            content += "\n"
+
+    return content
+
+
 def generate_markdown_report(data):
     """Convert JSON report to markdown format."""
     violations = data.get("violations", [])
     is_valid = data.get("valid", True)
-    
+
     report = f"""# 📋 Documentation Structure Report
 
 **Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}
@@ -50,47 +79,9 @@ The documentation structure is governed by [`docs/index.md`](../index.md). All d
 ## Violations
 
 """
-    
+
     if violations:
-        report += f"Found **{len(violations)}** violation(s):\n\n"
-        
-        # Group violations by type
-        by_type = {}
-        for v in violations:
-            vtype = v.get("type", "unknown")
-            if vtype not in by_type:
-                by_type[vtype] = []
-            by_type[vtype].append(v)
-        
-        # Missing directories
-        if "missing_directory" in by_type:
-            report += "### Missing Directories\n\n"
-            for v in by_type["missing_directory"]:
-                report += f"- {v['message']}\n"
-            report += "\n"
-        
-        # Missing READMEs
-        if "missing_readme" in by_type:
-            report += "### Missing README.md Files\n\n"
-            for v in by_type["missing_readme"]:
-                report += f"- {v['message']}\n"
-            report += "\n"
-        
-        # Unexpected files
-        if "unexpected_file" in by_type:
-            report += "### Unexpected Files\n\n"
-            for v in by_type["unexpected_file"]:
-                report += f"- {v['message']}\n"
-                report += f"  *Either add to `docs/index.md` or remove the file*\n"
-            report += "\n"
-        
-        # Unexpected directories
-        if "unexpected_directory" in by_type:
-            report += "### Unexpected Directories\n\n"
-            for v in by_type["unexpected_directory"]:
-                report += f"- {v['message']}\n"
-                report += f"  *Either add to `docs/index.md` or remove the directory*\n"
-            report += "\n"
+        report += _format_violations_content(violations)
     else:
         report += "✅ No violations found\n\n"
     
