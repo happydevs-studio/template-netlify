@@ -15,11 +15,11 @@ This is a minimal static site template demonstrating Netlify deployment with Git
 **Static Multi-Page Site**: The site consists of three pages (`index.html`, `page2.html`, `page3.html`), each with its own CSS and JS file (`page1.css`/`page1.js`, `page2.css`/`page2.js`, `page3.css`/`page3.js`). There's no templating and no build step.
 
 **Deployment Pipeline**: 
-- Production: Pushes to `main` trigger production deployment via [.github/workflows/netlify-deploy.yml](.github/workflows/netlify-deploy.yml)
+- Production: Pushes to `main` trigger production deployment via [.github/workflows/netlify-deploy.yml](../.github/workflows/netlify-deploy.yml)
 - Preview: PRs to `main` create preview deployments at `https://pr-{number}--{site-name}.netlify.app`
-- Cleanup: PRs closed/merged trigger automatic preview deletion via [.github/workflows/netlify-cleanup-preview.yml](.github/workflows/netlify-cleanup-preview.yml)
+- Cleanup: PRs closed/merged trigger automatic preview deletion via [.github/workflows/netlify-cleanup-preview.yml](../.github/workflows/netlify-cleanup-preview.yml)
 
-**Configuration**: [netlify.toml](netlify.toml) publishes the root directory `.` as-is with no build command.
+**Configuration**: [netlify.toml](../netlify.toml) publishes the root directory `.` as-is with no build command.
 
 ## Critical Workflows
 
@@ -27,7 +27,7 @@ This is a minimal static site template demonstrating Netlify deployment with Git
 ```bash
 npm start  # Runs node server.js on port 8080
 ```
-The custom `server.js` reads security headers from `netlify.toml` so local dev matches production behavior. Alternative: Open [index.html](index.html) directly in browser.
+The custom `server.js` reads security headers from `netlify.toml` so local dev matches production behavior. Alternative: Open [index.html](../index.html) directly in browser.
 
 ### Deployment
 - **Production**: Push/merge to `main` → Auto-deploys → Commit comment with URL
@@ -36,13 +36,13 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 - **Secrets Required**: `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` in GitHub repo secrets
 
 ### GitHub Actions Workflows
-**Deploy** ([.github/workflows/netlify-deploy.yml](.github/workflows/netlify-deploy.yml)):
+**Deploy** ([.github/workflows/netlify-deploy.yml](../.github/workflows/netlify-deploy.yml)):
 - Uses `nwtgck/actions-netlify@v2.1` action
 - Runs on `ubuntu-latest` with `pull-requests: write` permission
 - Has separate steps for production (main branch) and preview (PRs) with different comment settings
 - Times out after 5 minutes
 
-**Cleanup** ([.github/workflows/netlify-cleanup-preview.yml](.github/workflows/netlify-cleanup-preview.yml)):
+**Cleanup** ([.github/workflows/netlify-cleanup-preview.yml](../.github/workflows/netlify-cleanup-preview.yml)):
 - Triggers on `pull_request: [closed]` events
 - Queries Netlify API for deployment matching `pr-{number}` alias
 - Deletes the preview deployment via Netlify API
@@ -50,11 +50,11 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 
 ## Project Conventions
 
-**Dev Dependencies Only**: [package.json](package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`) for testing and linting. The `start` script runs `node server.js`.
+**Dev Dependencies Only**: [package.json](../package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`) for testing and linting. The `start` script runs `node server.js`.
 
 **Separate Stylesheets**: Each page has its own CSS file (e.g., `page1.css`). The homepage uses a gradient background (`linear-gradient(135deg, #ff8c00 0%, #ff6347 100%)`) and flexbox centering.
 
-**No Build Step**: [netlify.toml](netlify.toml) explicitly uses `echo 'No build step required for static site'` as the build command. The publish directory is `.` (root).
+**No Build Step**: [netlify.toml](../netlify.toml) explicitly uses `echo 'No build step required for static site'` as the build command. The publish directory is `.` (root).
 
 **Conventional Commits**: All commits follow the [Conventional Commits](https://www.conventionalcommits.org/) standard for clear, predictable commit history. Format: `<type>(<scope>): <description>` where type is one of:
 - `feat:` - New feature or content
@@ -77,9 +77,9 @@ This is a **template** repository—here's how to customize it:
 - Layout: Change flexbox properties in `body` or `.container`
 
 **Content Changes** (in individual HTML files):
-- Homepage: Edit [index.html](index.html) — heading, subtext, navigation
-- Page 2: Edit [page2.html](page2.html) — text input interactive feature
-- Page 3: Edit [page3.html](page3.html) — counter interactive feature
+- Homepage: Edit [index.html](../index.html) — heading, subtext, navigation
+- Page 2: Edit [page2.html](../page2.html) — text input interactive feature
+- Page 3: Edit [page3.html](../page3.html) — counter interactive feature
 
 **Site Configuration**:
 - Set `NETLIFY_AUTH_TOKEN` and `NETLIFY_SITE_ID` as GitHub repo secrets (see [README.md](README.md) Netlify Setup)
@@ -97,10 +97,10 @@ This is a **template** repository—here's how to customize it:
 
 ## When Making Changes
 
-- Content/style edits: Modify [index.html](index.html) directly
-- Deployment behavior: Edit [.github/workflows/netlify-deploy.yml](.github/workflows/netlify-deploy.yml)
-- Cleanup behavior: Edit [.github/workflows/netlify-cleanup-preview.yml](.github/workflows/netlify-cleanup-preview.yml)
-- Netlify settings: Update [netlify.toml](netlify.toml) (though current config is minimal)
+- Content/style edits: Modify [index.html](../index.html) directly
+- Deployment behavior: Edit [.github/workflows/netlify-deploy.yml](../.github/workflows/netlify-deploy.yml)
+- Cleanup behavior: Edit [.github/workflows/netlify-cleanup-preview.yml](../.github/workflows/netlify-cleanup-preview.yml)
+- Netlify settings: Update [netlify.toml](../netlify.toml) (though current config is minimal)
 - No need to run builds or install dependencies—changes are deployed as-is
 
 ## Common Patterns

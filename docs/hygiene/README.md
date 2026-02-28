@@ -64,6 +64,15 @@ The documentation index is the **sole source of truth for documentation structur
 task hygiene:docs-structure
 ```
 
+### Documentation Accuracy
+Scans all documentation for stale or broken references: internal markdown links that don't resolve, `task <name>` references to non-existent Taskfile tasks, workflow filename references that don't match `.github/workflows/`, and possible stale source-file references.
+
+Runs **weekly on a schedule** (Monday 07:00 UTC), on PRs/pushes that change docs or project structure, and can be triggered manually. When issues are found, a GitHub issue is automatically created or updated.
+
+```bash
+task hygiene:docs-accuracy
+```
+
 ## Quick Reference
 
 Run all hygiene checks:
@@ -79,6 +88,7 @@ task hygiene:structure         # Verify documentation index exists
 task hygiene:size              # Check individual file sizes
 task hygiene:docs-size         # Monitor overall documentation size
 task hygiene:docs-structure    # Validate structure matches governance
+task hygiene:docs-accuracy     # Check for broken links and stale refs
 ```
 
 ## Contents

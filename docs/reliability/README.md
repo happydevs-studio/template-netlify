@@ -117,7 +117,7 @@ jobs:
 
 ### Test Configuration
 
-Tests are configured in [playwright.config.js](../playwright.config.js):
+Tests are configured in [playwright.config.js](../../playwright.config.js):
 - Uses `SMOKE_TEST_URL` environment variable when set
 - Falls back to `BASE_URL` or localhost
 - Skips local dev server when testing external URLs
@@ -125,7 +125,7 @@ Tests are configured in [playwright.config.js](../playwright.config.js):
 
 ### Adding New Smoke Tests
 
-When adding critical functionality to your site, update [tests/smoke.spec.js](../tests/smoke.spec.js):
+When adding critical functionality to your site, update [tests/smoke.spec.js](../../tests/smoke.spec.js):
 
 ```javascript
 test('new critical feature works', async ({ page }) => {

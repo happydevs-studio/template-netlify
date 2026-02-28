@@ -11,7 +11,6 @@ The directory structure must conform to this index—not the reverse. This file 
 ### Key Principles
 
 - **Index-first**: Any new document must have a corresponding entry in this index before being added
-- **Accepted deviations**: Unexpected files are listed in the [Accepted Deviations](#accepted-deviations) section with rationale
 
 ## Documentation Categories
 

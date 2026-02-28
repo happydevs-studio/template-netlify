@@ -19,7 +19,7 @@ task hygiene:complexity
 | Problem | Solution |
 |---------|----------|
 | Workflow not triggering? | Check workflow is at `.github/workflows/hygiene-complexity-check.yml` (not `.github/`) |
-| Need different threshold? | Update CCN > 10 threshold in `Taskfile.yml`, `.github/workflows/hygiene-complexity-check.yml`, and `.github/scripts/generate-complexity-md.py` |
+| Need different threshold? | Update CCN > 10 threshold in `Taskfile.yml`, `.github/workflows/hygiene-complexity-check.yml`, and `.scripts/generate-complexity-md.py` |
 | Don't want complexity checks? | Delete `.github/workflows/hygiene-complexity-check.yml` |
 
 ### Threshold Reference
@@ -45,10 +45,10 @@ The complexity workflow:
 
 | File | Purpose | Customization |
 |------|---------|---------------|
-| [`.github/workflows/hygiene-complexity-check.yml`](.github/workflows/hygiene-complexity-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
-| [`Taskfile.yml`](Taskfile.yml) | Local task runner config | Complexity thresholds, exclusions |
-| [`.github/scripts/generate-complexity-md.py`](.github/scripts/generate-complexity-md.py) | Report generator | Markdown formatting, metrics |
-| [`.gitignore`](.gitignore) | Git ignore rules | Excludes `.complexity-reports/` from version control |
+| [`.github/workflows/hygiene-complexity-check.yml`](../../.github/workflows/hygiene-complexity-check.yml) | GitHub Actions workflow | Triggers, failure behavior, reporting |
+| [`Taskfile.yml`](../../Taskfile.yml) | Local task runner config | Complexity thresholds, exclusions |
+| [`.scripts/generate-complexity-md.py`](../../.scripts/generate-complexity-md.py) | Report generator | Markdown formatting, metrics |
+| [`.gitignore`](../../.gitignore) | Git ignore rules | Excludes `.complexity-reports/` from version control |
 
 ## Key Configuration Points
 
@@ -123,7 +123,7 @@ rm .github/workflows/hygiene-complexity-check.yml
 
 **Option C:** Comment out the trigger
 ```yaml
-# .github/workflows/complexity-check.yml
+# .github/workflows/hygiene-complexity-check.yml
 # on:
 #   pull_request:
 #     branches: [ main ]
