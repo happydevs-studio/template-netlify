@@ -42,6 +42,17 @@ jobs:
               const runUrl = run.html_url;
               const title = `❌ Workflow Failure: ${workflowName}`;
 
+              // Skip if any open issue already references this run URL.
+              // Workflows that raise their own domain-specific issues (e.g. SAST,
+              // DAST, secrets, complexity) include the run URL in their issue body,
+              // so this prevents a duplicate generic issue being raised alongside them.
+              const { data: runSearch } = await github.rest.search.issuesAndPullRequests({
+                q: `repo:${context.repo.owner}/${context.repo.repo} is:issue is:open ${runUrl} in:body`,
+              });
+              if (runSearch.total_count > 0) {
+                continue;
+              }
+
               const body = [
                 `## Workflow Failure Detected`,
                 ``,
@@ -58,7 +69,7 @@ jobs:
                 `*This issue was automatically created by the Raise Issue on Workflow Failure workflow.*`
               ].join('\n');
 
-              // Check for an existing open issue for this workflow
+              // Check for an existing open workflow-failure issue for this workflow
               const { data: issues } = await github.rest.issues.listForRepo({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
