@@ -48,6 +48,18 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 - Deletes the preview deployment via Netlify API
 - Handles gracefully if no deployment exists
 
+### Agentic Workflows
+
+**Copilot Coding Agent** ([.github/copilot-setup-steps.yml](../.github/copilot-setup-steps.yml)):
+- Enables GitHub Copilot to be assigned to issues and autonomously create PRs
+- Sets up Node.js, Playwright, Taskfile, and Python analysis tools
+- Agent uses `AGENTS.md` and `docs/` for project context and conventions
+
+**Auto-label PRs** ([.github/workflows/hygiene-auto-label-pr.yml](../.github/workflows/hygiene-auto-label-pr.yml)):
+- Automatically labels PRs based on changed files using [.github/labeler.yml](../.github/labeler.yml)
+- Categories match project structure: `docs`, `security`, `reliability`, `hygiene`, `deployment`, `tests`, `ci`, `content`
+- Labels sync on PR open, synchronize, and reopen
+
 ## Project Conventions
 
 **Dev Dependencies Only**: [package.json](../package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`) for testing and linting. The `start` script runs `node server.js`.
