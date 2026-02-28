@@ -125,7 +125,7 @@ Tests are configured in [playwright.config.js](../../playwright.config.js):
 
 ### Adding New Smoke Tests
 
-When adding critical functionality to your site, update [tests/smoke.spec.js](../../tests/smoke.spec.js):
+When adding critical functionality to your site, update [tests/smoke.spec.ts](../../tests/smoke.spec.ts):
 
 ```javascript
 test('new critical feature works', async ({ page }) => {

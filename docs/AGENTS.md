@@ -117,7 +117,7 @@ This is a **template** repository—here's how to customize it:
 
 ## When Making Changes
 
-- Content/style edits: Modify [index.html](../index.html) directly
+- Content/style edits: Modify [index.html](../app/index.html) directly
 - Deployment behavior: Edit [.github/workflows/netlify-deploy.yml](../.github/workflows/netlify-deploy.yml)
 - Cleanup behavior: Edit [.github/workflows/netlify-cleanup-preview.yml](../.github/workflows/netlify-cleanup-preview.yml)
 - Netlify settings: Update [netlify.toml](../netlify.toml) (though current config is minimal)
