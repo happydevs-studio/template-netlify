@@ -1067,3 +1067,23 @@ tasks:
         fi
         cp docs/decisions/DECISION_TEMPLATE.md "$target"
         echo "✅ Created $target"
+
+  install:
+    desc: Install SlopStopper tooling into another repository (use TARGET=<path>)
+    summary: |
+      Installs the SlopStopper tooling (Taskfile, scripts, and GitHub workflows)
+      into a target repository directory.
+
+      Usage:
+        task install TARGET=/path/to/other-repo
+        task install                              # installs into current directory
+
+      What gets installed:
+        - Taskfile.yml          (skipped if already present)
+        - .scripts/             (skipped if already present)
+        - .github/workflows/    (generic hygiene, security, and reliability workflows)
+        - package.json          (created or devDependencies merged)
+    vars:
+      TARGET: '{{.TARGET | default "."}}'
+    cmds:
+      - bash "{{.TASKFILE_DIR}}/install.sh" "{{.TARGET}}"
