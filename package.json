@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "playwright test",
-    "test:headed": "playwright test --headed"
+    "test:headed": "playwright test --headed",
+    "test:smoke": "playwright test tests/smoke.spec.js"
   },
   "keywords": [
     "netlify",

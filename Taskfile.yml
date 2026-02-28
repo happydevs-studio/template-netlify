@@ -1,6 +1,61 @@
 version: '3'
 
 tasks:
+  reliability:smoke:
+    desc: Run smoke tests against a live URL
+    summary: |
+      Runs critical smoke tests against a deployed site to verify basic functionality.
+      
+      Usage:
+        task reliability:smoke -- https://your-site.netlify.app
+        SMOKE_TEST_URL=https://your-site.netlify.app task reliability:smoke
+        
+      Used for:
+        - Production health checks
+        - Post-deployment verification
+        - Scheduled reliability monitoring
+    cmds:
+      - |
+        {{if .CLI_ARGS}}
+          export SMOKE_TEST_URL="{{.CLI_ARGS}}"
+        {{end}}
+        
+        if [ -z "$SMOKE_TEST_URL" ]; then
+          echo "❌ Error: SMOKE_TEST_URL is required"
+          echo ""
+          echo "Usage:"
+          echo "  task reliability:smoke -- https://your-site.netlify.app"
+          echo "  SMOKE_TEST_URL=https://example.com task reliability:smoke"
+          exit 1
+        fi
+        
+        echo "🔍 Running smoke tests against: $SMOKE_TEST_URL"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+        npx playwright test tests/smoke.spec.js --reporter=list
+    silent: false
+
+  reliability:smoke:ci:
+    desc: Run smoke tests in CI mode with retries
+    summary: |
+      Runs smoke tests with CI-specific configuration (retries, single worker).
+      Intended for GitHub Actions and automated testing.
+      
+      Usage:
+        SMOKE_TEST_URL=https://your-site.netlify.app task reliability:smoke:ci
+    cmds:
+      - |
+        if [ -z "$SMOKE_TEST_URL" ]; then
+          echo "❌ Error: SMOKE_TEST_URL environment variable is required"
+          exit 1
+        fi
+        
+        echo "🔍 Running smoke tests (CI mode) against: $SMOKE_TEST_URL"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+        CI=true npx playwright test tests/smoke.spec.js --reporter=list,html
+    silent: false
+
   hygiene:complexity:
     desc: Analyze code complexity using Lizard
     summary: |
