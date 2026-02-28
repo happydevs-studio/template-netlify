@@ -55,6 +55,42 @@
                 </ul>
             </div>
         </div>
+        <section class="loops">
+            <h2>Development Loops</h2>
+            <p class="loops-intro">SlopStopper organises quality feedback into two loops that keep velocity high and quality consistent.</p>
+            <div class="loop-diagram">
+                <h3>Inner Loop — Local</h3>
+                <p class="loop-desc">The fast, local cycle a developer (or AI agent) runs before pushing. Completes in seconds to minutes.</p>
+                <div class="loop-flow">
+                    <div class="loop-step">✏️ Write Code<span class="step-sub">with AI</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">🔨 Build &amp; Lint<span class="step-sub">locally</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">🧪 Run Tests<span class="step-sub">locally</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">📤 Commit &amp; Push<span class="step-sub">open PR</span></div>
+                </div>
+                <div class="loop-back">↩ iterate on feedback</div>
+            </div>
+            <div class="loop-diagram">
+                <h3>Outer Loop — CI/CD</h3>
+                <p class="loop-desc">Automated checks triggered on every push or PR. Deterministic feedback before code reaches production.</p>
+                <div class="loop-flow">
+                    <div class="loop-step loop-step--trigger">📤 Push / PR</div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">🔒 Security<span class="step-sub">SAST · DAST · Secrets · CVEs</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">🧹 Hygiene<span class="step-sub">Complexity · Docs</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">✅ Reliability<span class="step-sub">E2E · Smoke Tests</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step">🚀 Deploy<span class="step-sub">Preview URL</span></div>
+                    <div class="loop-arrow">→</div>
+                    <div class="loop-step loop-step--feedback">💬 Feedback<span class="step-sub">to developer</span></div>
+                </div>
+                <div class="loop-back">↩ fix &amp; iterate</div>
+            </div>
+        </section>
     </main>
 </body>
 </html>
