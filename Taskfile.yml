@@ -609,6 +609,7 @@ tasks:
     silent: false
 
   secrets:
+    internal: true
     desc: Run secrets detection using Gitleaks
     summary: |
       Scans the codebase and git history for hardcoded credentials using Gitleaks.
