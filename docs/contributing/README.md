@@ -29,7 +29,7 @@ Use namespaced documentation tasks via root Taskfile. Check available tasks with
 - `task hygiene:lint`
 - `task security:scan`
 - `task security:sast`
-- `task security:dependencies`
+- `task security:vulnerability:all`
 - `task decisions:validate`
 - `task decisions:new SLUG=<name>`
 

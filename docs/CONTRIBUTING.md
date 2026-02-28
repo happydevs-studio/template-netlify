@@ -2,7 +2,7 @@
 
 GitHub-facing entry point for contribution guidance.
 
-See the canonical guide: [docs/contributing/README.md](docs/contributing/README.md).
+See the canonical guide: [docs/contributing/README.md](contributing/README.md).
 
 ## Quick Expectations
 

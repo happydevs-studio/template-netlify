@@ -25,8 +25,8 @@ This project follows a structured documentation framework. For comprehensive nav
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/dataGriff/template.netlify.git
-cd template.netlify
+git clone https://github.com/happydevs-studio/template-netlify.git
+cd template-netlify
 ```
 
 2. Start the local development server:
@@ -34,16 +34,9 @@ cd template.netlify
 npm start
 ```
 
-This will start a local HTTP server on port 8080 and automatically open your browser to view the site.
+This runs `node server.js`, which starts a local HTTP server on port 8080 that reads security headers from `netlify.toml` to match production behavior.
 
-Alternatively, you can open `index.html` directly in your browser or use any other HTTP server of your choice:
-```bash
-# Using Python 3
-python -m http.server 8080
-
-# Using Python 2
-python -m SimpleHTTPServer 8080
-```
+Alternatively, you can open `index.html` directly in your browser.
 
 ## Local Development
 
@@ -67,7 +60,7 @@ task --list
 Analyze code complexity locally using Lizard:
 
 ```bash
-task complexity
+task hygiene:complexity
 ```
 
 This will:
@@ -88,7 +81,7 @@ This will:
 The same analysis runs in CI/CD on pull requests and pushes to `main`.
 
 **For customizing complexity thresholds or configuration:**
-See [COMPLEXITY_CONFIG.md](COMPLEXITY_CONFIG.md) for detailed setup instructions, threshold customization, and troubleshooting.
+See [hygiene/COMPLEXITY_CONFIG.md](hygiene/COMPLEXITY_CONFIG.md) for detailed setup instructions, threshold customization, and troubleshooting.
 
 ## Netlify Setup
 
@@ -174,14 +167,29 @@ git push origin feature/my-new-feature
 ## Project Structure
 
 ```
-template.netlify/
+template-netlify/
 ├── .github/
-│   └── workflows/
-│       └── netlify-deploy.yml   # GitHub Actions workflow for deployment
-├── index.html                   # Main HTML file with "Hello World"
-├── netlify.toml                 # Netlify configuration
-├── package.json                 # NPM config with local server script
-└── README.md                    # This file
+│   └── workflows/           # GitHub Actions workflows
+├── docs/                    # Project documentation
+│   ├── index.md             # Documentation hub and governance
+│   ├── architecture/
+│   ├── contributing/
+│   ├── decisions/
+│   ├── deployment/
+│   ├── hygiene/
+│   ├── reliability/
+│   ├── runbooks/
+│   └── security/
+├── tests/                   # Playwright and other tests
+├── index.html               # Homepage
+├── page1.css / page1.js     # Homepage styles and scripts
+├── page2.html / page2.css / page2.js  # Page 2
+├── page3.html / page3.css / page3.js  # Page 3
+├── server.js                # Local dev server (reads netlify.toml headers)
+├── netlify.toml             # Netlify configuration
+├── package.json             # NPM config and dev dependencies
+├── playwright.config.js     # Playwright test configuration
+└── Taskfile.yml             # Task runner definitions
 ```
 
 ## Configuration Files
@@ -213,7 +221,7 @@ GitHub Actions workflow that:
 
 ## Agent Instructions
 
-For instructions on project conventions, deployment workflows, and best practices intended for AI agents and automation tools, see [AGENTS.md](../AGENTS.md) in the root directory. This is an open standard that applies across all tooling.
+For instructions on project conventions, deployment workflows, and best practices intended for AI agents and automation tools, see [AGENTS.md](AGENTS.md) in the docs directory. This is an open standard that applies across all tooling.
 
 ## License
 

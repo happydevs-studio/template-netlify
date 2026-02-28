@@ -91,4 +91,4 @@ Reports are saved to `.sast-reports/`.
 - **Semgrep Documentation:** https://semgrep.dev/docs/
 - **Semgrep Registry:** https://semgrep.dev/r
 - **Task Documentation:** https://taskfile.dev
-- See also: [`DEPENDENCIES_CONFIG.md`](DEPENDENCIES_CONFIG.md) and [`DAST_CONFIG.md`](DAST_CONFIG.md)
+- See also: [`DEPENDENCIES.md`](DEPENDENCIES.md) and [`DAST.md`](DAST.md)

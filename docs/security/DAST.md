@@ -21,9 +21,9 @@ task dast -- http://localhost:8080
 
 | Problem | Solution |
 |---------|----------|
-| Workflow not triggering? | Check workflow is at `.github/workflows/dast-check.yml` |
+| Workflow not triggering? | Check workflow is at `.github/workflows/security-dast-check.yml` |
 | ZAP not available? | The workflow uses Docker to run ZAP — no installation needed in CI |
-| Don't want DAST checks? | Delete `.github/workflows/dast-check.yml` |
+| Don't want DAST checks? | Delete `.github/workflows/security-dast-check.yml` |
 
 ### Risk Level Reference
 
@@ -108,4 +108,4 @@ Reports are saved to `.dast-reports/`.
 - **OWASP ZAP Documentation:** https://www.zaproxy.org/docs/
 - **ZAP Baseline Scan:** https://www.zaproxy.org/docs/docker/baseline-scan/
 - **Task Documentation:** https://taskfile.dev
-- See also: [`SAST_CONFIG.md`](SAST_CONFIG.md) and [`DEPENDENCIES_CONFIG.md`](DEPENDENCIES_CONFIG.md)
+- See also: [`SAST.md`](SAST.md) and [`DEPENDENCIES.md`](DEPENDENCIES.md)

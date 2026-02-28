@@ -87,7 +87,7 @@ Act immediately:
 
 ```bash
 # Option A: delete the workflow
-rm .github/workflows/secrets-check.yml
+rm .github/workflows/security-secrets-check.yml
 
 # Option B: disable in GitHub UI → Actions → Secrets Detection → Disable workflow
 ```
@@ -109,4 +109,4 @@ Reports are saved to `.secrets-reports/`.
 - **Gitleaks Documentation:** https://gitleaks.io/
 - **Gitleaks Rules:** https://github.com/gitleaks/gitleaks/tree/master/cmd/generate/config/rules
 - **Task Documentation:** https://taskfile.dev
-- See also: [`SAST_CONFIG.md`](SAST_CONFIG.md), [`DEPENDENCIES_CONFIG.md`](DEPENDENCIES_CONFIG.md), [`DAST_CONFIG.md`](DAST_CONFIG.md)
+- See also: [`SAST.md`](SAST.md), [`DEPENDENCIES.md`](DEPENDENCIES.md), [`DAST.md`](DAST.md)
