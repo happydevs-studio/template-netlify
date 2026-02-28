@@ -19,6 +19,49 @@ This project follows a structured documentation framework. For comprehensive nav
 
 > **Note**: The categories defined in [index.md](index.md) drive naming conventions across the project—local tasks use `category:action` format, CI/CD workflows use `category-action-check.yml` format.
 
+## Installing the Tooling into Another Repository
+
+You can install the SlopStopper tooling (Taskfile tasks, analysis scripts, and
+generic GitHub Actions workflows) into any existing repository.
+
+**Recommended two-step approach** (review the script before running):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/happydevs-studio/template-netlify/main/install.sh -o install.sh
+bash install.sh [TARGET_DIR]
+```
+
+Or, if you already have this repo checked out, use the Task runner:
+
+```bash
+task install TARGET=/path/to/your-repo
+```
+
+**What gets installed:**
+
+| Item | Description |
+|------|-------------|
+| `Taskfile.yml` | All task definitions (`task --list` to see them) |
+| `.scripts/` | Python/shell analysis scripts used by the tasks |
+| `.github/workflows/` | Hygiene, security, and reliability workflows |
+| `package.json` | Created (or `devDependencies` merged into an existing file) |
+
+Existing files are never overwritten — remove them first if you want to
+reinstall.
+
+**After installing**, run:
+
+```bash
+# 1. Install Task runner (if you don't have it)
+curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
+
+# 2. Install npm dependencies
+npm install
+
+# 3. See all available tasks
+task --list
+```
+
 ## Quick Start
 
 ### Running Locally
