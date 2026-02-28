@@ -12,7 +12,6 @@ permissions:
   pull-requests: read
 
 tracker-id: hygiene-doc-updater
-engine: claude
 strict: true
 
 network:
