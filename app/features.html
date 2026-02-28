@@ -7,20 +7,54 @@
     <link rel="stylesheet" href="features.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Features</h1>
-        <p>Quality gates that keep your repo clean</p>
+    <header>
+        <a href="index.html" class="site-title">SlopStopper</a>
         <nav>
             <a href="index.html" id="nav-home">Home</a>
             <a href="features.html" id="nav-features">Features</a>
             <a href="tools.html" id="nav-tools">Tools</a>
         </nav>
-        <div class="interactive">
-            <input type="text" id="text-input" placeholder="Enter a feature name">
-            <button id="submit-btn">Check</button>
-            <div id="output"></div>
+    </header>
+    <main>
+        <div class="hero">
+            <h1>Practices &amp; Feedback</h1>
+            <p>The categories of automated checks that keep your repo healthy</p>
         </div>
-    </div>
-    <script src="features.js"></script>
+        <div class="card-grid">
+            <div class="card">
+                <h2>🔒 Security</h2>
+                <ul>
+                    <li><strong>SAST</strong> — Static application security testing flags vulnerabilities in source code before merge</li>
+                    <li><strong>DAST</strong> — Dynamic scanning probes a running site for common web vulnerabilities</li>
+                    <li><strong>Secrets Detection</strong> — Scans every commit for accidentally committed credentials or tokens</li>
+                    <li><strong>Dependency Scanning</strong> — Checks all dependencies for known CVEs on every pull request</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>🧹 Hygiene</h2>
+                <ul>
+                    <li><strong>Complexity Checks</strong> — Enforces complexity thresholds to keep functions readable and maintainable</li>
+                    <li><strong>Doc Structure</strong> — Validates that required documentation sections are present</li>
+                    <li><strong>Doc Accuracy</strong> — Ensures documentation reflects the actual state of the codebase</li>
+                    <li><strong>Doc Size</strong> — Prevents documentation from growing unwieldy or stale</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>✅ Reliability</h2>
+                <ul>
+                    <li><strong>E2E Tests</strong> — Playwright tests verify all pages and user flows work on every pull request</li>
+                    <li><strong>Smoke Tests</strong> — Lightweight smoke tests run against staging and production after every deploy</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>🚀 Deployment</h2>
+                <ul>
+                    <li><strong>Preview Deploys</strong> — Every pull request gets a unique preview URL on Netlify for review</li>
+                    <li><strong>Production Deploy</strong> — Merges to main trigger an automatic production release</li>
+                    <li><strong>Preview Cleanup</strong> — Stale preview environments are automatically removed after PRs close</li>
+                </ul>
+            </div>
+        </div>
+    </main>
 </body>
 </html>
