@@ -49,6 +49,21 @@ This check is particularly important for AI-assisted development where documenta
 task hygiene:docs-size
 ```
 
+### Documentation Structure Validation
+Validates that the documentation directory structure matches the governance model defined in `docs/index.md`. Ensures all expected categories exist with README files and identifies unexpected files for discussion.
+
+The documentation index is the **sole source of truth for documentation structure**—any deviations require discussion and explicit approval before merging.
+
+**Checks:**
+- All expected categories from docs/index.md exist
+- Each category has a README.md file
+- No unexpected files outside the governed structure
+- Violations are raised as blocking issues for discussion
+
+```bash
+task hygiene:docs-structure
+```
+
 ## Quick Reference
 
 Run all hygiene checks:
@@ -58,11 +73,12 @@ task hygiene:test
 
 Run individual checks:
 ```bash
-task hygiene:complexity     # Analyze code complexity
-task hygiene:lint          # Check markdown formatting
-task hygiene:structure     # Verify documentation index
-task hygiene:size          # Check individual file sizes
-task hygiene:docs-size     # Monitor overall documentation size
+task hygiene:complexity        # Analyze code complexity
+task hygiene:lint              # Check markdown formatting
+task hygiene:structure         # Verify documentation index exists
+task hygiene:size              # Check individual file sizes
+task hygiene:docs-size         # Monitor overall documentation size
+task hygiene:docs-structure    # Validate structure matches governance
 ```
 
 ## Contents

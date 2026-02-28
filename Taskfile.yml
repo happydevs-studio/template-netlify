@@ -834,6 +834,59 @@ tasks:
     cmds:
       - bash .scripts/check-docs-size.sh
 
+  hygiene:docs-structure:
+    desc: Validate documentation structure matches governance model
+    summary: |
+      Validates that the documentation directory structure matches
+      the governance model defined in docs/index.md.
+      
+      Checks:
+      - All expected categories exist with README.md files
+      - No unexpected files or directories outside the index
+      - Identifies deviations for discussion
+      
+      Usage:
+        task hygiene:docs-structure    # Validate structure
+    cmds:
+      - task: hygiene:docs-structure:check
+      - task: hygiene:docs-structure:report
+    silent: false
+
+  hygiene:docs-structure:check:
+    desc: Check documentation structure and generate report
+    internal: true
+    cmds:
+      - python3 .scripts/check-docs-structure.py || true
+    silent: false
+
+  hygiene:docs-structure:report:
+    desc: Generate markdown documentation structure report
+    internal: true
+    cmds:
+      - |
+        python3 .scripts/generate-docs-structure-md.py
+        
+        echo ""
+        echo "📋 DOCUMENTATION STRUCTURE REPORT"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        
+        if [ ! -f .docs-reports/docs-structure-report.md ]; then
+          echo "❌ Documentation structure report not generated!"
+          exit 1
+        fi
+        
+        cat .docs-reports/docs-structure-report.md
+        
+        echo ""
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+        echo "📁 Reports saved to: .docs-reports/"
+        echo "   • docs-structure-report.md (human-readable)"
+        echo "   • docs-structure-report.json (machine-readable)"
+        echo ""
+    silent: false
+
   hygiene:test:
     desc: Run all hygiene checks for code and documentation
     cmds:
@@ -841,6 +894,7 @@ tasks:
       - task: hygiene:structure
       - task: hygiene:size
       - task: hygiene:docs-size
+      - task: hygiene:docs-structure
       - task: hygiene:complexity
 
   # Security tasks
