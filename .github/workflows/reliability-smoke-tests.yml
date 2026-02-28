@@ -45,11 +45,15 @@ jobs:
         
       - name: Determine test URL
         id: url
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_URL: ${{ github.event.inputs.url }}
+          DEPLOYMENT_URL: ${{ github.event.deployment_status.target_url }}
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "url=${{ github.event.inputs.url }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event_name }}" == "deployment_status" ]; then
-            echo "url=${{ github.event.deployment_status.target_url }}" >> $GITHUB_OUTPUT
+          if [ "$EVENT_NAME" == "workflow_dispatch" ]; then
+            echo "url=$INPUT_URL" >> $GITHUB_OUTPUT
+          elif [ "$EVENT_NAME" == "deployment_status" ]; then
+            echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
           else
             # Scheduled run - use production URL
             echo "url=https://your-production-site.netlify.app" >> $GITHUB_OUTPUT
