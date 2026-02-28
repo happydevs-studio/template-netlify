@@ -50,13 +50,23 @@ jobs:
           INPUT_URL: ${{ github.event.inputs.url }}
           DEPLOYMENT_URL: ${{ github.event.deployment_status.target_url }}
         run: |
+          validate_url() {
+            local url="$1"
+            if [[ ! "$url" =~ ^https?://[^[:space:][:cntrl:]]+$ ]]; then
+              echo "Error: Invalid URL format: $url" >&2
+              exit 1
+            fi
+            printf '%s' "$url"
+          }
           if [ "$EVENT_NAME" == "workflow_dispatch" ]; then
-            echo "url=$INPUT_URL" >> $GITHUB_OUTPUT
+            SAFE_URL="$(validate_url "$INPUT_URL")"
+            echo "url=$SAFE_URL" >> "$GITHUB_OUTPUT"
           elif [ "$EVENT_NAME" == "deployment_status" ]; then
-            echo "url=$DEPLOYMENT_URL" >> $GITHUB_OUTPUT
+            SAFE_URL="$(validate_url "$DEPLOYMENT_URL")"
+            echo "url=$SAFE_URL" >> "$GITHUB_OUTPUT"
           else
             # Scheduled run - use production URL
-            echo "url=https://your-production-site.netlify.app" >> $GITHUB_OUTPUT
+            echo "url=https://your-production-site.netlify.app" >> "$GITHUB_OUTPUT"
           fi
         
       - name: Run smoke tests
