@@ -17,6 +17,8 @@ This project follows a structured documentation framework. For comprehensive nav
 
 **→ [Documentation Hub (index.md)](index.md)** - Central navigation for all project documentation
 
+> **Note**: The categories defined in [index.md](index.md) drive naming conventions across the project—local tasks use `category:action` format, CI/CD workflows use `category-action-check.yml` format.
+
 ## Quick Start
 
 ### Running Locally

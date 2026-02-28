@@ -4,6 +4,8 @@ This is an open standard for agents, AI assistants, and automation tools to unde
 
 > 📚 **Documentation Hub**: For comprehensive documentation navigation, see [docs/index.md](index.md) which provides a structured map of all project documentation.
 
+> 🏗️ **Structure Convention**: The categories in [docs/index.md](index.md) drive naming across the project—Taskfile tasks use `category:action` (e.g., `hygiene:complexity`), GitHub Actions use `category-action-check.yml` (e.g., `hygiene-complexity-check.yml`).
+
 ## Project Overview
 
 This is a minimal static site template demonstrating Netlify deployment with GitHub Actions CI/CD. The entire application is a single [index.html](index.html) file with embedded CSS—no build process, no bundlers, no frameworks.
