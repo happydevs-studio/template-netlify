@@ -18,6 +18,7 @@ Each category has a README that defines its purpose. Content within categories i
 
 | Category | Purpose | README | Tasks |
 | -------- | ------- | ------ | ----- |
+| [app/](app/) | What the site does and how pages are organised | [README](app/README.md) | — |
 | [architecture/](architecture/) | System structure and boundaries | [README](architecture/README.md) | — |
 | [decisions/](decisions/) | Significant decisions and rationale | [README](decisions/README.md) | `task decisions:*` |
 | [deployment/](deployment/) | Release and environment workflows | [README](deployment/README.md) | — |
