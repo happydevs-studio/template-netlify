@@ -56,12 +56,6 @@ tasks:
         CI=true npx playwright test tests/smoke.spec.ts --reporter=list,html
     silent: false
 
-  complexity:
-    desc: Analyze code complexity using Lizard (alias for hygiene:complexity)
-    cmds:
-      - task: hygiene:complexity
-    silent: false
-
   hygiene:complexity:
     desc: Analyze code complexity using Lizard
     summary: |
