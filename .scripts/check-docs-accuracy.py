@@ -143,10 +143,11 @@ def check_source_file_references(md_path, project_files):
     content = md_path.read_text()
     base = md_path.parent
 
-    # Phrases that indicate the file is an example / suggestion, not a real reference
+    # Phrases that indicate the file is an example / suggestion, or a generated
+    # runtime artifact rather than a real tracked reference
     suggestion_ctx = re.compile(
         r'(split into|could create|create a|for example|e\.g\.|such as|'
-        r'examples?:|add\b.*\bhere|when.*needed|naming|format|add a\b)',
+        r'examples?:|add\b.*\bhere|when.*needed|naming|format|add a\b|generat\w*)',
         re.IGNORECASE,
     )
 

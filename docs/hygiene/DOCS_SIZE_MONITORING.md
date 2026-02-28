@@ -135,6 +135,6 @@ This setup works alongside the existing GitHub Actions workflow (`.github/workfl
 ## Next Steps
 
 - Run `task hygiene:docs-size` regularly as part of your development workflow
-- Check `.docs-reports/docs-size-report.md` for detailed analysis
+- Check the generated `.docs-reports/docs-size-report.md` for detailed analysis
 - Consider running the full `task hygiene:test` suite before commits
 - Monitor the report as documentation grows to stay within thresholds
