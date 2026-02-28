@@ -42,6 +42,11 @@ jobs:
         
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
+
+      - name: Install Task
+        run: |
+          curl -sL https://taskfile.dev/install.sh | sh -s -- -b /usr/local/bin
+          task --version
         
       - name: Determine test URL
         id: url
