@@ -1162,7 +1162,7 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           ref: ${{ github.base_ref || github.event.pull_request.base.ref || github.ref_name || github.event.repository.default_branch }}
-          token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.COPILOT_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           persist-credentials: false
           fetch-depth: 1
       - name: Configure Git credentials
@@ -1170,7 +1170,7 @@ jobs:
         env:
           REPO_NAME: ${{ github.repository }}
           SERVER_URL: ${{ github.server_url }}
-          GIT_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          GIT_TOKEN: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.COPILOT_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
@@ -1190,7 +1190,7 @@ jobs:
           GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"create_pull_request\":{\"auto_merge\":true,\"draft\":false,\"expires\":24,\"labels\":[\"documentation\",\"automation\"],\"max\":1,\"max_patch_size\":1024,\"reviewers\":[\"copilot\"],\"title_prefix\":\"[docs] \"},\"missing_data\":{},\"missing_tool\":{}}"
           GH_AW_CI_TRIGGER_TOKEN: ${{ secrets.GH_AW_CI_TRIGGER_TOKEN }}
         with:
-          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.COPILOT_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
             const { setupGlobals } = require('/opt/gh-aw/actions/setup_globals.cjs');
             setupGlobals(core, github, context, exec, io);
