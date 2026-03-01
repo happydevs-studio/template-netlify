@@ -371,10 +371,14 @@ tasks:
           INSTALL_SUCCESS=0
           
           if command -v curl &> /dev/null; then
-            echo "Trying install script..."
-            if curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b ~/.local/bin; then
-              export PATH="$PATH:$HOME/.local/bin"
-              INSTALL_SUCCESS=1
+            echo "Trying GitHub releases install..."
+            TRIVY_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
+            if [ -n "$TRIVY_VERSION" ]; then
+              mkdir -p "$HOME/.local/bin"
+              if curl -sfL "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" | tar -xz -C "$HOME/.local/bin" trivy; then
+                export PATH="$PATH:$HOME/.local/bin"
+                INSTALL_SUCCESS=1
+              fi
             fi
           fi
           
