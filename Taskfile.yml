@@ -370,7 +370,16 @@ tasks:
           
           INSTALL_SUCCESS=0
           
-          if command -v curl &> /dev/null; then
+          if command -v apt-get &> /dev/null && command -v wget &> /dev/null; then
+            echo "Trying apt-get install..."
+            wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | gpg --dearmor | sudo tee /usr/share/keyrings/trivy.gpg > /dev/null
+            echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb generic main" | sudo tee /etc/apt/sources.list.d/trivy.list
+            if sudo apt-get update -qq && sudo apt-get install -y trivy; then
+              INSTALL_SUCCESS=1
+            fi
+          fi
+          
+          if [ $INSTALL_SUCCESS -eq 0 ] && command -v curl &> /dev/null; then
             echo "Trying GitHub releases install..."
             TRIVY_VERSION=$(curl -s https://api.github.com/repos/aquasecurity/trivy/releases/latest | grep '"tag_name"' | sed 's/.*"v\([^"]*\)".*/\1/')
             if [ -n "$TRIVY_VERSION" ]; then
