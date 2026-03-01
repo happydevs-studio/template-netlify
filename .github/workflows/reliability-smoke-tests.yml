@@ -14,7 +14,7 @@ on:
       url:
         description: 'URL to test'
         required: true
-        default: 'https://your-production-site.netlify.app'
+        default: 'https://magic8bi.com/'
         type: string
 
 jobs:
