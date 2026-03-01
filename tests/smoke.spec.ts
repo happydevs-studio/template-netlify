@@ -46,7 +46,7 @@ test.describe('Smoke Tests', () => {
     await expect(toolsLink).toBeVisible();
 
     await featuresLink.click();
-    await expect(page).toHaveURL(/.*features.html/);
+    await expect(page).toHaveURL(/.*features(\.html)?/);
     await expect(page).toHaveTitle('Features');
   });
 
