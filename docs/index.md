@@ -27,3 +27,4 @@ Each category has a README that defines its purpose. Content within categories i
 | [reliability/](reliability/) | Service level and incident response | [README](reliability/README.md) | — |
 | [runbooks/](runbooks/) | Operational procedures | [README](runbooks/README.md) | — |
 | [security/](security/) | Security scanning and controls | [README](security/README.md) | `task security:*` |
+| [support/](support/) | How to get help and escalation flow | [README](support/README.md) | — |
