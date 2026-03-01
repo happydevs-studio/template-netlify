@@ -68,6 +68,12 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 - Categories match project structure: `docs`, `security`, `reliability`, `hygiene`, `deployment`, `tests`, `ci`, `content`
 - Labels sync on PR open, synchronize, and reopen
 
+**Workflow Failure Issue Tracker** ([.github/workflows/workflow-failure-issue.yml](../.github/workflows/workflow-failure-issue.yml)):
+- Triggers on `workflow_run` completion for all named CI workflows on `main`
+- On failure: creates a `workflow-failure`-labelled GitHub issue with a link to the failed run; uses direct `listForRepo` (not search API) to avoid race conditions when domain-specific workflows have already raised their own issue
+- On recovery: automatically closes any matching open `workflow-failure` issue with a recovery comment
+- Note: some workflows (e.g. smoke tests, SAST, DAST) manage their own issues directly and do not rely on this workflow
+
 ## Project Conventions
 
 **Dev Dependencies Only**: [package.json](../package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`, `typescript`) for testing, linting, and TypeScript compilation. The `start` script runs `node server.js`.

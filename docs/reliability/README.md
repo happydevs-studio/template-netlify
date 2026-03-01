@@ -147,10 +147,19 @@ test('new critical feature works', async ({ page }) => {
 4. **Set appropriate timeouts** - Allow for network latency in production
 5. **Monitor regularly** - Run on a schedule to catch degradation early
 
+### Automatic Issue Tracking
+
+The smoke test workflow includes built-in GitHub issue management:
+
+- **On failure**: Automatically creates a GitHub issue titled `❌ Smoke Tests Failing`, labelled `smoke-test-failure` + `reliability`, with the tested URL, run link, and a repro command. Subsequent failures append a comment to the existing open issue rather than creating duplicates.
+- **On recovery**: When tests pass again, the open issue is automatically closed with a recovery comment.
+
+This mirrors the direct issue-tracking pattern used by the DAST and SAST workflows.
+
 ### Monitoring Recommendations
 
 - **Frequency**: Run every 15-60 minutes depending on SLA requirements
-- **Alerting**: Configure GitHub Actions to notify on failures
+- **Alerting**: Issue creation is automatic — no additional alerting setup is needed for smoke test failures
 - **Retention**: Keep test results for at least 30 days
 - **Review**: Regularly review test coverage and update as site evolves
 
