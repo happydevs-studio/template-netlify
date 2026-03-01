@@ -64,6 +64,13 @@ def get_project_files():
 
 # ── Checks ───────────────────────────────────────────────────────────
 
+_GITHUB_WEB_PATH_SEGMENTS = frozenset({
+    "issues", "discussions", "pulls", "milestones", "projects", "wiki",
+    "pulse", "graphs", "settings", "compare", "tree", "blob", "raw",
+    "blame", "commits", "tags", "releases", "packages", "actions",
+})
+
+
 def check_broken_links(md_path, project_files):
     """Find markdown links whose target file does not exist on disk."""
     issues = []
@@ -76,9 +83,13 @@ def check_broken_links(md_path, project_files):
         # skip external / anchor-only / mermaid
         if target.startswith(("http://", "https://", "mailto:", "#")):
             continue
-        # strip anchor fragment
-        target_path = target.split("#")[0]
+        # strip query string and anchor fragment (query strings are never file paths)
+        target_path = target.split("?")[0].split("#")[0]
         if not target_path:
+            continue
+        # skip relative links targeting GitHub web interface paths
+        # (e.g. ../../issues/new, ../../discussions/new)
+        if any(part in _GITHUB_WEB_PATH_SEGMENTS for part in Path(target_path).parts):
             continue
         resolved = (base / target_path).resolve()
         if not resolved.exists():
