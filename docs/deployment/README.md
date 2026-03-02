@@ -1,6 +1,8 @@
 ---
 title: Deployment
 description: Release and environment workflows for the template-netlify project.
+status: maintained
+date: 2026-03-02
 ---
 
 # Deployment

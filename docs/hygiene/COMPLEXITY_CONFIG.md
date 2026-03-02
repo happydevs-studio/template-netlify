@@ -1,6 +1,8 @@
 ---
 title: Code Complexity Workflow Configuration
 description: Guide for customizing and using automated code complexity analysis with Lizard in the template-netlify project.
+status: maintained
+date: 2026-03-02
 ---
 
 # Code Complexity Workflow Configuration

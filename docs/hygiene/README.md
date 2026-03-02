@@ -1,6 +1,8 @@
 ---
 title: Hygiene
 description: Overview of code and documentation hygiene and quality gates for the template-netlify project.
+status: maintained
+date: 2026-03-02
 ---
 
 # Hygiene
@@ -79,7 +81,14 @@ task hygiene:docs-accuracy
 ```
 
 ### Documentation Front Matter
-Validates that every markdown file under `docs/` contains YAML front matter with the required fields: `title` and `description`. Front matter improves discoverability, aids automated validation, and provides structured metadata for tooling and AI context.
+Validates that every markdown file under `docs/` contains YAML front matter with the required fields: `title`, `description`, `status`, and `date`.
+
+- **`title`** — human-readable document title
+- **`description`** — one-line summary of the document's purpose
+- **`status`** — content lifecycle state: `draft` | `maintained` | `deprecated` (validated against allowed values)
+- **`date`** — last-updated date in `YYYY-MM-DD` format (enables staleness detection)
+
+Front matter improves discoverability, aids automated validation, and provides structured metadata for tooling and AI context.
 
 Runs on PRs and pushes that change documentation files. When issues are found, a GitHub issue is automatically created or updated.
 

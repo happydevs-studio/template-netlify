@@ -136,6 +136,8 @@ jobs:
             ---
             title: <Document Title>
             description: <One-line description of the document.>
+            status: maintained
+            date: YYYY-MM-DD
             ---
             \`\`\`
 

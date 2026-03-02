@@ -1,6 +1,8 @@
 ---
 title: Architecture
 description: Architecture structure and boundaries overview for this static Netlify app using C4 notation.
+status: maintained
+date: 2026-03-02
 ---
 
 # Architecture

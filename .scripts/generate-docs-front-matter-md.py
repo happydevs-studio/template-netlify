@@ -48,6 +48,18 @@ def _format_issues_content(issues):
             content += f"- `{issue['file']}` — {issue['message']}\n"
         content += "\n"
 
+    if "invalid_status" in by_type:
+        content += "### Files with Invalid Status Values\n\n"
+        for issue in by_type["invalid_status"]:
+            content += f"- `{issue['file']}` — {issue['message']}\n"
+        content += "\n"
+
+    if "invalid_date" in by_type:
+        content += "### Files with Invalid Date Format\n\n"
+        for issue in by_type["invalid_date"]:
+            content += f"- `{issue['file']}` — {issue['message']}\n"
+        content += "\n"
+
     return content
 
 
@@ -81,10 +93,12 @@ Front matter improves discoverability, aids automated validation, and provides s
 
 Every markdown file under `docs/` must include:
 
-| Field | Purpose |
-|-------|---------|
-| `title` | The human-readable title of the document |
-| `description` | A one-line summary of the document's purpose |
+| Field | Purpose | Validation |
+|-------|---------|------------|
+| `title` | The human-readable title of the document | Non-empty string |
+| `description` | A one-line summary of the document's purpose | Non-empty string |
+| `status` | Content lifecycle state | One of: `draft`, `maintained`, `deprecated` |
+| `date` | Date the document was last meaningfully updated | `YYYY-MM-DD` format |
 
 ## Issues
 
@@ -103,8 +117,13 @@ Add a front matter block at the very top of the file (before any other content):
 ---
 title: <Document Title>
 description: <One-line description of the document.>
+status: maintained
+date: YYYY-MM-DD
 ---
 ```
+
+`status` must be one of: `draft`, `maintained`, `deprecated`.
+`date` must be in `YYYY-MM-DD` format (e.g. `2026-03-02`).
 
 ---
 

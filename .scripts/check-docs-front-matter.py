@@ -4,7 +4,7 @@
 Documentation Front Matter Validator
 
 Validates that all markdown files under docs/ contain valid YAML front matter
-with the required fields: title and description.
+with the required fields: title, description, status, and date.
 
 Generates a JSON report at .docs-reports/docs-front-matter-report.json.
 """
@@ -14,7 +14,11 @@ import re
 import sys
 from pathlib import Path
 
-REQUIRED_FIELDS = ["title", "description"]
+REQUIRED_FIELDS = ["title", "description", "status", "date"]
+
+ALLOWED_STATUS_VALUES = {"draft", "maintained", "deprecated"}
+
+DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
 def extract_front_matter(content):
@@ -60,6 +64,7 @@ def check_file(md_path):
         return issues
 
     fields = parse_front_matter_fields(raw)
+
     for field in REQUIRED_FIELDS:
         if field not in fields or not fields[field]:
             issues.append({
@@ -68,6 +73,30 @@ def check_file(md_path):
                 "field": field,
                 "message": f"Required front matter field '{field}' missing or empty in {md_path}",
             })
+
+    status = fields.get("status", "")
+    if status and status not in ALLOWED_STATUS_VALUES:
+        issues.append({
+            "type": "invalid_status",
+            "file": str(md_path),
+            "field": "status",
+            "message": (
+                f"Invalid status '{status}' in {md_path} — "
+                f"must be one of: {', '.join(sorted(ALLOWED_STATUS_VALUES))}"
+            ),
+        })
+
+    date_val = fields.get("date", "")
+    if date_val and not DATE_PATTERN.match(date_val):
+        issues.append({
+            "type": "invalid_date",
+            "file": str(md_path),
+            "field": "date",
+            "message": (
+                f"Invalid date format '{date_val}' in {md_path} — "
+                "expected YYYY-MM-DD"
+            ),
+        })
 
     return issues
 

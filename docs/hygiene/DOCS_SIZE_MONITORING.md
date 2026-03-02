@@ -1,6 +1,8 @@
 ---
 title: Documentation Size Monitoring
 description: Setup and usage guide for local documentation size monitoring that replicates GitHub Actions workflow functionality.
+status: maintained
+date: 2026-03-02
 ---
 
 # Documentation Size Monitoring Implementation

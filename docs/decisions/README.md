@@ -1,6 +1,8 @@
 ---
 title: Decisions
 description: Significant decisions and their rationale for the template-netlify project.
+status: maintained
+date: 2026-03-02
 ---
 
 # Decisions

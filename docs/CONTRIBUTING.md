@@ -1,6 +1,8 @@
 ---
 title: Contributing
 description: GitHub-facing entry point for contribution guidance, linking to the canonical contributor workflow.
+status: maintained
+date: 2026-03-02
 ---
 
 # Contributing

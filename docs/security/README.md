@@ -1,6 +1,8 @@
 ---
 title: Security
 description: Overview of security scanning and controls for the template-netlify project.
+status: maintained
+date: 2026-03-02
 ---
 
 # Security
