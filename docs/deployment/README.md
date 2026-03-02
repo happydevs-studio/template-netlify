@@ -1,3 +1,8 @@
+---
+title: Deployment
+description: Release and environment workflows for the template-netlify project.
+---
+
 # Deployment
 
 Release and environment workflows for the template-netlify project.

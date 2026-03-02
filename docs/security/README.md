@@ -1,3 +1,8 @@
+---
+title: Security
+description: Overview of security scanning and controls for the template-netlify project.
+---
+
 # Security
 
 Overview of security scanning and controls for this project.

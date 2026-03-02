@@ -1,3 +1,8 @@
+---
+title: Decisions
+description: Significant decisions and their rationale for the template-netlify project.
+---
+
 # Decisions
 
 This directory records significant decisions and their rationale for the project.

@@ -1,6 +1,9 @@
-# Support
+---
+title: Support
+description: Index of support resources including the support flow, escalation steps, and channel guide.
+---
 
-This directory contains guidance on how to get help with this project.
+# Support
 
 ## Contents
 

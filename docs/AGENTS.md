@@ -1,3 +1,8 @@
+---
+title: Agents Instructions for template.netlify
+description: Open standard instructions for agents, AI assistants, and automation tools to understand project conventions and best practices.
+---
+
 # Agents Instructions for template.netlify
 
 This is an open standard for agents, AI assistants, and automation tools to understand project conventions and best practices.

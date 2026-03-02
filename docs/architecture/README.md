@@ -1,3 +1,8 @@
+---
+title: Architecture
+description: Architecture structure and boundaries overview for this static Netlify app using C4 notation.
+---
+
 # Architecture
 
 Architecture structure and boundaries overview for this static Netlify app.

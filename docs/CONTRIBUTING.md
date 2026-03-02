@@ -1,3 +1,8 @@
+---
+title: Contributing
+description: GitHub-facing entry point for contribution guidance, linking to the canonical contributor workflow.
+---
+
 # Contributing
 
 GitHub-facing entry point for contribution guidance.

@@ -1,6 +1,9 @@
-# Support
+---
+title: Support
+description: How to get help with the template-netlify project, including support flow, escalation steps, and channel guide.
+---
 
-This document describes how to get help with this project.
+# Support
 
 ## Support Flow
 

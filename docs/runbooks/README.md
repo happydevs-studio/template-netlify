@@ -1,3 +1,8 @@
+---
+title: Runbooks
+description: Operational procedures for the template-netlify project.
+---
+
 # Runbooks
 
 Operational procedures for the template-netlify project.

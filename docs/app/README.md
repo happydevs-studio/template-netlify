@@ -1,3 +1,8 @@
+---
+title: App
+description: What the site does and how its pages are organised.
+---
+
 # App
 
 What the site does and how its pages are organised.

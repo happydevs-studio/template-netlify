@@ -1,3 +1,8 @@
+---
+title: Hygiene
+description: Overview of code and documentation hygiene and quality gates for the template-netlify project.
+---
+
 # Hygiene
 
 Overview of code and documentation hygiene and quality gates.
@@ -73,6 +78,15 @@ Runs **weekly on a schedule** (Monday 07:00 UTC), on PRs/pushes that change docs
 task hygiene:docs-accuracy
 ```
 
+### Documentation Front Matter
+Validates that every markdown file under `docs/` contains YAML front matter with the required fields: `title` and `description`. Front matter improves discoverability, aids automated validation, and provides structured metadata for tooling and AI context.
+
+Runs on PRs and pushes that change documentation files. When issues are found, a GitHub issue is automatically created or updated.
+
+```bash
+task hygiene:docs-front-matter
+```
+
 ## Quick Reference
 
 Run all hygiene checks:
@@ -89,6 +103,7 @@ task hygiene:size              # Check individual file sizes
 task hygiene:docs-size         # Monitor overall documentation size
 task hygiene:docs-structure    # Validate structure matches governance
 task hygiene:docs-accuracy     # Check for broken links and stale refs
+task hygiene:docs-front-matter  # Validate front matter in all docs files
 ```
 
 ## Contents

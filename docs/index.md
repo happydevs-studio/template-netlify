@@ -1,3 +1,8 @@
+---
+title: Documentation Index
+description: Defines documentation categories and governance model for the template-netlify project.
+---
+
 # Documentation Index
 
 This file defines documentation categories and governance.

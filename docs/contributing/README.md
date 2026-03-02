@@ -1,3 +1,8 @@
+---
+title: Contributing
+description: Contributor workflow and expectations for the template-netlify project.
+---
+
 # Contributing
 
 This document defines the default way to contribute to this project.
