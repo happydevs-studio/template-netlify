@@ -3,6 +3,14 @@
     margin: 0;
     padding: 0;
 }
+@keyframes fade-in-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 8px rgba(0, 212, 170, 0.3); }
+    50%       { text-shadow: 0 0 24px rgba(0, 212, 170, 0.7); }
+}
 body {
     min-height: 100vh;
     font-family: Arial, sans-serif;
@@ -22,6 +30,10 @@ header {
     color: #00d4aa;
     font-weight: bold;
     text-decoration: none;
+    transition: opacity 0.2s;
+}
+.site-title:hover {
+    opacity: 0.8;
 }
 nav a {
     color: #e0e0e0;
@@ -29,11 +41,15 @@ nav a {
     margin-left: 1.2rem;
     padding: 0.4rem 1rem;
     border-radius: 4px;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
     display: inline-block;
 }
 nav a:hover {
     background: rgba(0, 212, 170, 0.2);
+}
+nav a.active {
+    background: rgba(0, 212, 170, 0.15);
+    color: #00d4aa;
 }
 main {
     max-width: 960px;
@@ -43,15 +59,34 @@ main {
 .hero {
     text-align: center;
     margin-bottom: 2.5rem;
+    animation: fade-in-up 0.7s ease both;
 }
 .hero h1 {
     font-size: 3rem;
     color: #00d4aa;
     margin-bottom: 0.8rem;
+    animation: glow-pulse 4s ease-in-out infinite;
 }
 .hero p {
     font-size: 1.2rem;
     opacity: 0.8;
+}
+.cta-btn {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 0.75rem 2rem;
+    background: #00d4aa;
+    color: #1a1a2e;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.cta-btn:hover {
+    background: #00f0c0;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 212, 170, 0.35);
 }
 .about {
     font-size: 1.05rem;
@@ -73,7 +108,18 @@ main {
     border: 1px solid rgba(0, 212, 170, 0.25);
     border-radius: 8px;
     padding: 1.5rem;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+    animation: fade-in-up 0.5s ease both;
 }
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 36px rgba(0, 212, 170, 0.2);
+    border-color: rgba(0, 212, 170, 0.6);
+}
+.card:nth-child(1) { animation-delay: 0.15s; }
+.card:nth-child(2) { animation-delay: 0.25s; }
+.card:nth-child(3) { animation-delay: 0.35s; }
+.card:nth-child(4) { animation-delay: 0.45s; }
 .card h2 {
     color: #00d4aa;
     font-size: 1.15rem;
@@ -90,7 +136,9 @@ main {
     color: #00d4aa;
     text-decoration: none;
     font-size: 0.9rem;
+    transition: color 0.2s;
 }
 .card-link:hover {
     text-decoration: underline;
+    color: #00f0c0;
 }
