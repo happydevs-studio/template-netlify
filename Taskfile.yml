@@ -56,6 +56,67 @@ tasks:
         CI=true npx playwright test tests/smoke.spec.ts --reporter=list,html
     silent: false
 
+  reliability:cwv:
+    desc: Run a Core Web Vitals (Lighthouse CI) audit against a live URL
+    summary: |
+      Runs a Lighthouse CI audit against a deployed site and checks Core Web
+      Vitals against the thresholds defined in .lighthouserc.json.
+      
+      Usage:
+        task reliability:cwv -- https://your-site.netlify.app
+        CWV_URL=https://your-site.netlify.app task reliability:cwv
+        
+      Thresholds (see .lighthouserc.json):
+        - Performance score  ≥ 70
+        - LCP                ≤ 4 s
+        - TBT                ≤ 600 ms
+        - CLS                ≤ 0.25
+    cmds:
+      - |
+        {{if .CLI_ARGS}}
+          export CWV_URL="{{.CLI_ARGS}}"
+        {{end}}
+        
+        if [ -z "$CWV_URL" ]; then
+          echo "❌ Error: CWV_URL is required"
+          echo ""
+          echo "Usage:"
+          echo "  task reliability:cwv -- https://your-site.netlify.app"
+          echo "  CWV_URL=https://example.com task reliability:cwv"
+          exit 1
+        fi
+        
+        echo "🚦 Running Core Web Vitals audit against: $CWV_URL"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+        npx lhci autorun \
+          --collect.url="$CWV_URL" \
+          --config=.lighthouserc.json
+    silent: false
+
+  reliability:cwv:ci:
+    desc: Run Core Web Vitals audit in CI mode
+    summary: |
+      Runs a Lighthouse CI audit with CI-specific settings.
+      Intended for GitHub Actions and automated testing.
+      
+      Usage:
+        CWV_URL=https://your-site.netlify.app task reliability:cwv:ci
+    cmds:
+      - |
+        if [ -z "$CWV_URL" ]; then
+          echo "❌ Error: CWV_URL environment variable is required"
+          exit 1
+        fi
+        
+        echo "🚦 Running Core Web Vitals audit (CI mode) against: $CWV_URL"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        
+        npx lhci autorun \
+          --collect.url="$CWV_URL" \
+          --config=.lighthouserc.json
+    silent: false
+
   reliability:accessibility:
     desc: Run accessibility audit against a live URL
     summary: |
@@ -112,6 +173,7 @@ tasks:
 
         ACCESSIBILITY_TEST_URL="$TARGET" CI=true npx playwright test tests/accessibility.spec.ts --reporter=list,html
     silent: false
+
 
   hygiene:complexity:
     desc: Analyze code complexity using Lizard
