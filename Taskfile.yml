@@ -117,6 +117,64 @@ tasks:
           --config=.lighthouserc.json
     silent: false
 
+  reliability:accessibility:
+    desc: Run accessibility audit against a live URL
+    summary: |
+      Audits all pages for WCAG 2.1 AA violations using axe-core + Playwright.
+
+      Configuration (environment variables):
+        ACCESSIBILITY_TEST_URL  - URL to audit (required; also accepts SMOKE_TEST_URL / BASE_URL)
+        ACCESSIBILITY_IMPACT    - Minimum impact to flag: critical|serious|moderate|minor (default: serious)
+        ACCESSIBILITY_THRESHOLD - Max allowed violations before failing (default: 0)
+
+      Usage:
+        task reliability:accessibility -- https://your-site.netlify.app
+        ACCESSIBILITY_TEST_URL=https://your-site.netlify.app task reliability:accessibility
+    cmds:
+      - |
+        {{if .CLI_ARGS}}
+          export ACCESSIBILITY_TEST_URL="{{.CLI_ARGS}}"
+        {{end}}
+
+        TARGET="${ACCESSIBILITY_TEST_URL:-${SMOKE_TEST_URL:-}}"
+        if [ -z "$TARGET" ]; then
+          echo "❌ Error: ACCESSIBILITY_TEST_URL is required"
+          echo ""
+          echo "Usage:"
+          echo "  task reliability:accessibility -- https://your-site.netlify.app"
+          echo "  ACCESSIBILITY_TEST_URL=https://example.com task reliability:accessibility"
+          exit 1
+        fi
+
+        echo "♿ Running accessibility audit against: $TARGET"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        ACCESSIBILITY_TEST_URL="$TARGET" npx playwright test tests/accessibility.spec.ts --reporter=list
+    silent: false
+
+  reliability:accessibility:ci:
+    desc: Run accessibility audit in CI mode with retries
+    summary: |
+      Runs accessibility audit with CI-specific configuration (retries, single worker, HTML report).
+      Intended for GitHub Actions and automated testing.
+
+      Usage:
+        ACCESSIBILITY_TEST_URL=https://your-site.netlify.app task reliability:accessibility:ci
+    cmds:
+      - |
+        TARGET="${ACCESSIBILITY_TEST_URL:-${SMOKE_TEST_URL:-}}"
+        if [ -z "$TARGET" ]; then
+          echo "❌ Error: ACCESSIBILITY_TEST_URL environment variable is required"
+          exit 1
+        fi
+
+        echo "♿ Running accessibility audit (CI mode) against: $TARGET"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+        ACCESSIBILITY_TEST_URL="$TARGET" CI=true npx playwright test tests/accessibility.spec.ts --reporter=list,html
+    silent: false
+
+
   hygiene:complexity:
     desc: Analyze code complexity using Lizard
     summary: |
