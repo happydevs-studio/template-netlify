@@ -68,6 +68,13 @@ The custom `server.js` reads security headers from `netlify.toml` so local dev m
 - Categories match project structure: `docs`, `security`, `reliability`, `hygiene`, `deployment`, `tests`, `ci`, `content`
 - Labels sync on PR open, synchronize, and reopen
 
+**Accessibility Monitor** ([.github/workflows/reliability-accessibility-check.yml](../.github/workflows/reliability-accessibility-check.yml)):
+- Audits all pages for WCAG 2.1 AA violations using axe-core + Playwright
+- Runs on PRs (local build), push to main (local build), successful deployments, and daily schedule
+- Configurable impact threshold (`ACCESSIBILITY_IMPACT`) and violation limit (`ACCESSIBILITY_THRESHOLD`)
+- Posts PR comments, creates GitHub issues on main-branch failures, and closes them on recovery
+- See [docs/reliability/ACCESSIBILITY.md](reliability/ACCESSIBILITY.md) for full details
+
 ## Project Conventions
 
 **Dev Dependencies Only**: [package.json](../package.json) has dev dependencies (`@playwright/test`, `markdownlint-cli`, `typescript`) for testing, linting, and TypeScript compilation. The `start` script runs `node server.js`.
