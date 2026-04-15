@@ -89,11 +89,11 @@ Run the workflow manually from the **Actions** tab with optional inputs:
 
 All pages are audited by default in [`tests/accessibility.spec.ts`](../../tests/accessibility.spec.ts):
 
-| Page | Path |
-|---|---|
-| Homepage | `/` |
-| Features | `/features.html` |
-| Tools | `/tools.html` |
+| Page | URL Path | File |
+|---|---|---|
+| Homepage | `/` | `app/index.html` |
+| Features | `/features.html` | `app/features.html` |
+| Tools | `/tools.html` | `app/tools.html` |
 
 To add more pages, update the `pagesToAudit` array in `tests/accessibility.spec.ts`.
 
