@@ -77,7 +77,7 @@ jobs:
             sleep 1
           done
 
-      # ── Determine audit URL ──────────────────────────────────────────────────
+      # ── Determine audit URL and Lighthouse config ────────────────────────────
       - name: Determine audit URL
         id: audit-url
         env:
@@ -95,16 +95,22 @@ jobs:
           }
 
           if [ "$EVENT_NAME" == "pull_request" ] || [ "$EVENT_NAME" == "push" ]; then
+            # Local dev build — CWV-only thresholds, no preset
             echo "url=http://localhost:8080" >> "$GITHUB_OUTPUT"
+            echo "config=.lighthouserc.json" >> "$GITHUB_OUTPUT"
           elif [ "$EVENT_NAME" == "workflow_dispatch" ]; then
             SAFE_URL="$(validate_url "$INPUT_URL")"
             echo "url=$SAFE_URL" >> "$GITHUB_OUTPUT"
+            echo "config=.lighthouserc.json" >> "$GITHUB_OUTPUT"
           elif [ "$EVENT_NAME" == "deployment_status" ]; then
             SAFE_URL="$(validate_url "$DEPLOYMENT_URL")"
             echo "url=$SAFE_URL" >> "$GITHUB_OUTPUT"
+            # Production deployment — use full preset including best-practices/SEO/accessibility
+            echo "config=.lighthouserc.prod.json" >> "$GITHUB_OUTPUT"
           else
-            # Scheduled run — use production URL
+            # Scheduled run — use production URL with full preset
             echo "url=https://magic8bi.com" >> "$GITHUB_OUTPUT"
+            echo "config=.lighthouserc.prod.json" >> "$GITHUB_OUTPUT"
           fi
 
       # ── Run Lighthouse CI ────────────────────────────────────────────────────
@@ -116,9 +122,11 @@ jobs:
           AUDIT_URL="${{ steps.audit-url.outputs.url }}"
           echo "🔍 Auditing: $AUDIT_URL"
           echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          LHCI_CONFIG="${{ steps.audit-url.outputs.config }}"
+          echo "📋 Using config: $LHCI_CONFIG"
           npx lhci autorun \
             --collect.url="$AUDIT_URL" \
-            --config=.lighthouserc.json \
+            --config="$LHCI_CONFIG" \
             2>&1 | tee /tmp/lhci-output.txt
           echo "exit_code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
         continue-on-error: true
@@ -229,7 +237,7 @@ jobs:
       - name: Enforce thresholds
         if: steps.lhci.outputs.exit_code != '0'
         run: |
-          echo "❌ Core Web Vitals thresholds not met. See .lighthouserc.json for configured limits."
+          echo "❌ Core Web Vitals thresholds not met. See ${{ steps.audit-url.outputs.config }} for configured limits."
           echo ""
           echo "Metrics recorded:"
           echo "  Performance : ${{ steps.results.outputs.performance }}/100  (threshold: ≥ 70)"
