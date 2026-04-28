@@ -8,6 +8,7 @@ Overview of security scanning and controls for this project.
 - [DAST — Dynamic Application Security Testing](#dast--dynamic-application-security-testing)
 - [Dependency Vulnerability Scanning](#dependency-vulnerability-scanning)
 - [Secrets Detection](#secrets-detection)
+- [Penetration Testing](#penetration-testing)
 
 ---
 
@@ -421,3 +422,152 @@ task secrets
 ```
 
 Reports are saved to `.secrets-reports/`.
+
+---
+
+# Penetration Testing
+
+Penetration testing (pen testing) is a **manual, adversarial security exercise** in which a tester attempts to exploit your application as a real attacker would. It complements the automated checks (SAST, DAST, dependency scanning, secrets detection) by uncovering logic flaws, misconfigured infrastructure, and chained vulnerabilities that automated tools cannot reason about.
+
+## Quick Start
+
+### When to Run a Pen Test
+
+| Trigger | Recommendation |
+|---------|----------------|
+| Before first production launch | ✅ Strongly recommended |
+| After significant new features | ✅ Recommended |
+| Periodic cadence (quarterly / annually) | ✅ Recommended |
+| After a security incident | ✅ Required |
+| Every pull request | ❌ Not practical — use DAST instead |
+
+### Scope for a Static Netlify Site
+
+| Area | What to Test |
+|------|-------------|
+| HTTP security headers | Verify CSP, HSTS, X-Frame-Options, etc. match policy |
+| Client-side code | XSS, insecure `eval`, prototype pollution, unsafe `postMessage` handlers |
+| Third-party scripts | Integrity of CDN resources (SRI), supply-chain risk |
+| Netlify redirects & rewrites | Unintended open redirects, path-traversal in redirect rules |
+| Authentication (if added) | Session handling, token storage, logout, brute-force protection |
+| DNS & TLS | Certificate validity, DNSSEC, subdomain takeover risk |
+| API integrations | Any serverless functions or external APIs called by the site |
+
+### Severity Reference
+
+| Severity | Status | Action |
+|----------|--------|--------|
+| Critical | 🔴 Immediate | Stop release, fix before any further deployment |
+| High | 🟠 Blocking | Fix before next production release |
+| Medium | 🟡 Planned | Schedule fix within current sprint |
+| Low / Info | 🔵 Non-blocking | Document and address in backlog |
+
+---
+
+## Overview
+
+Pen testing differs from automated scanning in key ways:
+
+| | Automated (SAST / DAST) | Penetration Test |
+|---|---|---|
+| **Who runs it** | CI pipeline (machine) | Security professional (human) |
+| **Frequency** | Every PR / push | Periodic or triggered |
+| **Coverage** | Known patterns and signatures | Novel logic, chained attacks |
+| **Output** | Machine-readable report | Detailed narrative report + proof-of-concept |
+| **Time** | Seconds to minutes | Hours to days |
+
+For this template — a static site hosted on Netlify — the automated checks (DAST baseline scan, SAST, dependency scanning) cover the bulk of continuous risk. A pen test adds depth by:
+
+- Testing for logic-level vulnerabilities automated tools miss
+- Verifying your Netlify configuration matches your security intent
+- Validating that security headers actually prevent the attacks they are designed to prevent
+- Checking for subdomain takeover or DNS misconfiguration
+- Reviewing any third-party integrations or serverless functions you have added
+
+## Process
+
+A lightweight pen test process for this project:
+
+### 1. Define scope and rules of engagement
+
+Document which URLs, Netlify functions, and integrations are in scope. Agree on timing to avoid false alarms in monitoring.
+
+### 2. Recon
+
+```bash
+# Check DNS and TLS
+dig <your-domain> +short
+nmap -sV --script ssl-cert <your-domain>
+
+# Review HTTP response headers
+curl -I https://<your-domain>
+```
+
+### 3. Automated baseline (if not already running in CI)
+
+```bash
+# Full OWASP ZAP active scan (more thorough than the baseline CI scan)
+docker run --rm ghcr.io/zaproxy/zaproxy:stable zap-full-scan.py \
+  -t https://<your-deployed-site> \
+  -r zap-full-report.html
+```
+
+### 4. Manual testing checklist
+
+- [ ] Review `netlify.toml` headers against [OWASP Secure Headers](https://owasp.org/www-project-secure-headers/)
+- [ ] Test all client-side forms and input fields for XSS
+- [ ] Check all redirects for open-redirect potential
+- [ ] Verify SRI hashes on external scripts/stylesheets
+- [ ] Attempt forced browsing to unlisted paths
+- [ ] Check for sensitive information in JavaScript bundles (keys, internal URLs)
+- [ ] Review `robots.txt` and `sitemap.xml` for unintended exposure
+- [ ] Check cookies (if any) for `Secure`, `HttpOnly`, and `SameSite` flags
+- [ ] Verify HTTPS enforcement and HSTS preloading
+
+### 5. Document findings
+
+For each finding record:
+- **Title** — short description
+- **Severity** — Critical / High / Medium / Low
+- **Description** — what the issue is and why it matters
+- **Reproduction steps** — how to trigger the issue
+- **Recommendation** — how to remediate
+- **Evidence** — screenshot or request/response dump
+
+### 6. Remediate and retest
+
+Fix findings in order of severity. After fixing each item, retest the specific scenario to confirm the fix is effective before closing the finding.
+
+## Tools
+
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| [OWASP ZAP](https://www.zaproxy.org/) | Full active scan | Already used for DAST baseline; use `zap-full-scan.py` for pen test depth |
+| [Burp Suite Community](https://portswigger.net/burp/communitydownload) | Manual HTTP interception and testing | Free community edition available |
+| [Nikto](https://github.com/sullo/nikto) | Web server misconfiguration scan | `nikto -h https://<your-site>` |
+| [nuclei](https://github.com/projectdiscovery/nuclei) | Template-based vulnerability scanning | Large community template library |
+| [subfinder](https://github.com/projectdiscovery/subfinder) | Subdomain enumeration | Check for subdomain takeover risk |
+| [SSLyze](https://github.com/nabla-c0d3/sslyze) | TLS/SSL configuration analysis | `sslyze <your-domain>` |
+| [securityheaders.com](https://securityheaders.com/) | HTTP header analysis (online) | Quick header grading |
+| [observatory.mozilla.org](https://observatory.mozilla.org/) | Full site security rating (online) | CSP, HSTS, SRI scoring |
+
+## Third-Party Pen Testing
+
+For regulated environments or before a major public launch, consider engaging a specialist firm to conduct an independent assessment. When scoping an engagement for a static Netlify site:
+
+- Share the public production URL and any staging environments
+- Include any serverless functions (`netlify/functions/`) in scope
+- Provide the repository for white-box review (optional but recommended)
+- Request OWASP Top 10 and OWASP ASVS coverage as a minimum
+
+## Disable / Skip
+
+Pen testing is a manual process — there is no automated workflow to disable. If you add serverless functions or a backend, expand the scope checklist accordingly.
+
+## For More Information
+
+- **OWASP Testing Guide:** https://owasp.org/www-project-web-security-testing-guide/
+- **OWASP ASVS:** https://owasp.org/www-project-application-security-verification-standard/
+- **OWASP Top 10:** https://owasp.org/www-project-top-ten/
+- **Netlify Security:** https://www.netlify.com/security/
+- **OWASP ZAP Full Scan:** https://www.zaproxy.org/docs/docker/full-scan/
